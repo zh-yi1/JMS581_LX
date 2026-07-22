@@ -1,0 +1,22 @@
+# Object files & static libs
+*.o
+*.a
+
+# Build output objects directory
+projects/*/Output/obj/
+
+# Firmware output binaries (top-level bin/ only, not resource subdirs)
+projects/*/Output/bin/*.bin
+projects/*/Output/bin/*.dcf
+projects/*/Output/bin/*.rv32
+projects/*/Output/bin/*.xbf
+projects/*/Output/bin/*.fot
+
+# Linker map
+projects/*/Output/bin/map.txt
+
+# Generated C headers (regenerated from .xm by xmaker)
+projects/*/Output/bin/res.h
+projects/*/Output/bin/ui.h
+projects/*/Output/bin/ui_external.h
+projects/*/Output/bin/xcfg.h
