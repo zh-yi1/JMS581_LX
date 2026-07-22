@@ -1,0 +1,7 @@
+depend(0x01010200);
+setflash(1, 0x800000, 1, 1, 1);
+setspace(0x5000);
+setuserbin(0x200000, 0x300000, ui.bin, 0); #\U00008d77\U000059cb\U00005730\U00005740\U00008981\U00004e0eui.xm\U0000540c\U00006b65
+addkeyn(0xbeac5b78)
+make(dcf_buf, header.bin, app.bin, res.bin, xcfg.bin, updater.bin);
+save(dcf_buf, app.dcf);
