@@ -23,4 +23,16 @@
 #define UI_BUF_ICON_ACTIVITY_BIN                   UI_ADDR_BASE(0x1b4ef)
 #define UI_LEN_ICON_ACTIVITY_BIN                   0x13c3
 
+#define UI_BUF_IMAGE_BIN_BACKUP_MODE_BIN           UI_ADDR_BASE(0x1c8b2)
+#define UI_LEN_IMAGE_BIN_BACKUP_MODE_BIN           0x313
+
+#define UI_BUF_IMAGE_BIN_BACKUP_MODE_1_BIN         UI_ADDR_BASE(0x1cbc5)
+#define UI_LEN_IMAGE_BIN_BACKUP_MODE_1_BIN         0x237
+
+#define UI_BUF_IMAGE_BIN_SET_BIN                   UI_ADDR_BASE(0x1cdfc)
+#define UI_LEN_IMAGE_BIN_SET_BIN                   0x2fc
+
+#define UI_BUF_IMAGE_BIN_SET_1_BIN                 UI_ADDR_BASE(0x1d0f8)
+#define UI_LEN_IMAGE_BIN_SET_1_BIN                 0x220
+
 #endif

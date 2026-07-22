@@ -20,83 +20,85 @@
 #define TICK_IGNORE_KEY            700      //忽略700ms内的部分消息
 
 //task number
-enum {
+enum
+{
     FUNC_NULL = 0,
-    FUNC_MENU,                          //主菜单
-    FUNC_MENUSTYLE,                     //主菜单样式选择
-    FUNC_CLOCK,                         //时钟表盘
-    FUNC_CLOCK_PREVIEW,                 //时钟表盘预览
-    FUNC_SIDEBAR,                       //表盘右滑
-    FUNC_CARD,                          //表盘上拉
-    FUNC_HEARTRATE,                     //心率
-    FUNC_BT,                            //蓝牙播放器(控制手机音乐)
-	FUNC_COMPO_SELECT,                  //组件选择
-    FUNC_COMPO_SELECT_SUB,              //组件选择子界面
-    FUNC_BT_RING,                       //来电界面
-    FUNC_BT_CALL,                       //通话界面
-    FUNC_ALARM_CLOCK,			        //闹钟
-    FUNC_ALARM_CLOCK_SUB_SET,			//闹钟--设置
-    FUNC_ALARM_CLOCK_SUB_REPEAT,		//闹钟--重复
-    FUNC_ALARM_CLOCK_SUB_EDIT,		    //闹钟--编辑
-    FUNC_BLOOD_OXYGEN,			        //血氧
-    FUNC_BLOODSUGAR,                    //血糖
-    FUNC_BLOOD_PRESSURE,                //血压
-    FUNC_BREATHE,				        //呼吸
-    FUNC_CALCULATOR,			        //计算器
-    FUNC_CAMERA,				        //相机
-    FUNC_LIGHT,					        //亮度调节
-    FUNC_TIMER,					        //定时器
-    FUNC_SLEEP,					        //睡眠
-    FUNC_STOPWATCH,				        //秒表
-    FUNC_STOPWATCH_SUB_RECORD,			//秒表--秒表记录
-    FUNC_WEATHER,				        //天气
-    FUNC_GAME,                          //游戏
-    FUNC_STYLE,                         //菜单风格
-    FUNC_ALTITUDE,                      //海拔
-    FUNC_MAP,                           //地图
-    FUNC_MESSAGE,                       //消息
-    FUNC_SCAN,                          //扫一扫
-    FUNC_VOICE,                         //语音助手
+    FUNC_HOME_PAGE,              // 首页
+    FUNC_MENU,                   // 主菜单
+    FUNC_MENUSTYLE,              // 主菜单样式选择
+    FUNC_CLOCK,                  // 时钟表盘
+    FUNC_CLOCK_PREVIEW,          // 时钟表盘预览
+    FUNC_SIDEBAR,                // 表盘右滑
+    FUNC_CARD,                   // 表盘上拉
+    FUNC_HEARTRATE,              // 心率
+    FUNC_BT,                     // 蓝牙播放器(控制手机音乐)
+    FUNC_COMPO_SELECT,           // 组件选择
+    FUNC_COMPO_SELECT_SUB,       // 组件选择子界面
+    FUNC_BT_RING,                // 来电界面
+    FUNC_BT_CALL,                // 通话界面
+    FUNC_ALARM_CLOCK,            // 闹钟
+    FUNC_ALARM_CLOCK_SUB_SET,    // 闹钟--设置
+    FUNC_ALARM_CLOCK_SUB_REPEAT, // 闹钟--重复
+    FUNC_ALARM_CLOCK_SUB_EDIT,   // 闹钟--编辑
+    FUNC_BLOOD_OXYGEN,           // 血氧
+    FUNC_BLOODSUGAR,             // 血糖
+    FUNC_BLOOD_PRESSURE,         // 血压
+    FUNC_BREATHE,                // 呼吸
+    FUNC_CALCULATOR,             // 计算器
+    FUNC_CAMERA,                 // 相机
+    FUNC_LIGHT,                  // 亮度调节
+    FUNC_TIMER,                  // 定时器
+    FUNC_SLEEP,                  // 睡眠
+    FUNC_STOPWATCH,              // 秒表
+    FUNC_STOPWATCH_SUB_RECORD,   // 秒表--秒表记录
+    FUNC_WEATHER,                // 天气
+    FUNC_GAME,                   // 游戏
+    FUNC_STYLE,                  // 菜单风格
+    FUNC_ALTITUDE,               // 海拔
+    FUNC_MAP,                    // 地图
+    FUNC_MESSAGE,                // 消息
+    FUNC_SCAN,                   // 扫一扫
+    FUNC_VOICE,                  // 语音助手
 #if SECURITY_PAY_EN
-    FUNC_ALIPAY,                        //支付宝
+    FUNC_ALIPAY, // 支付宝
 #endif // SECURITY_PAY_EN
-    FUNC_COMPASS,                       //指南针
-    FUNC_ADDRESS_BOOK,                  //电话簿
+    FUNC_COMPASS,      // 指南针
+    FUNC_ADDRESS_BOOK, // 电话簿
     FUNC_CALL_SUB_LINKMAN = FUNC_ADDRESS_BOOK,
-    FUNC_SPORT,				            //运动
-    FUNC_SPORT_CONFIG,                  //运动配置
-    FUNC_SPORT_SUB_RUN,                 //运动--室内跑步
-    FUNC_SPORT_SWITCH,                  //运动开启
-    FUNC_CALL,                          //电话
-    FUNC_CALL_SUB_RECORD,               //电话-最近通话
-    FUNC_CALL_SUB_DIAL,                 //电话-拨打电话
-    FUNC_FINDPHONE,                     //寻找手机
-    FUNC_CALENDAER,                     //日历
-    FUNC_VOLUME,                        //音量
-    FUNC_ACTIVITY,                      //活动记录
-    FUNC_FLASHLIGHT,                    //手电筒
-    FUNC_SETTING,				        //设置
-    FUNC_SET_SUB_DOUSING,               //设置--熄屏
-    FUNC_SET_SUB_WRIST,                 //设置--抬腕
-    FUNC_SET_SUB_DISTURD,               //设置--勿扰
-    FUNC_DISTURD_SUB_SET,               //勿扰--时间设置
-    FUNC_SET_SUB_SAV,                   //设置--声音与振动
-    FUNC_SET_SUB_LANGUAGE,              //设置--语言
+    FUNC_SPORT,            // 运动
+    FUNC_SPORT_CONFIG,     // 运动配置
+    FUNC_SPORT_SUB_RUN,    // 运动--室内跑步
+    FUNC_SPORT_SWITCH,     // 运动开启
+    FUNC_CALL,             // 电话
+    FUNC_CALL_SUB_RECORD,  // 电话-最近通话
+    FUNC_CALL_SUB_DIAL,    // 电话-拨打电话
+    FUNC_FINDPHONE,        // 寻找手机
+    FUNC_CALENDAER,        // 日历
+    FUNC_VOLUME,           // 音量
+    FUNC_ACTIVITY,         // 活动记录
+    FUNC_FLASHLIGHT,       // 手电筒
+    FUNC_SETTING,          // 设置
+    FUNC_SET_SUB_DOUSING,  // 设置--熄屏
+    FUNC_SET_SUB_WRIST,    // 设置--抬腕
+    FUNC_SET_SUB_DISTURD,  // 设置--勿扰
+    FUNC_DISTURD_SUB_SET,  // 勿扰--时间设置
+    FUNC_SET_SUB_SAV,      // 设置--声音与振动
+    FUNC_SET_SUB_LANGUAGE, // 设置--语言
     FUNC_LANGUAGE = FUNC_SET_SUB_LANGUAGE,
-    FUNC_SET_SUB_TIME,                  //设置--时间
-    FUNC_SET_SUB_MENU_NAVIGATION,       //设置--菜单导航样式
-    FUNC_TIME_SUB_CUSTOM,               //调整日期
-    FUNC_SET_SUB_PASSWORD,              //设置--密码锁
-    FUNC_PASSWORD_SUB_DISP,             //新密码锁设置
-    FUNC_PASSWORD_SUB_SELECT,           //确认密码锁
-    FUNC_SET_SUB_ABOUT,                 //设置--关于
-    FUNC_SET_SUB_4G,                    //设置--4G
-    FUNC_SET_SUB_RESTART,               //设置--重启
-    FUNC_RESTART = FUNC_SET_SUB_RESTART,//重启
-    FUNC_SET_SUB_RSTFY,                 //设置--恢复出厂
+    FUNC_SET_SUB_TIME,                   // 设置--时间
+    FUNC_SET_SUB_MENU_NAVIGATION,        // 设置--菜单导航样式
+    FUNC_TIME_SUB_CUSTOM,                // 调整日期
+    FUNC_SET_SUB_PASSWORD,               // 设置--密码锁
+    FUNC_PASSWORD_SUB_DISP,              // 新密码锁设置
+    FUNC_PASSWORD_SUB_SELECT,            // 确认密码锁
+    FUNC_SET_SUB_ABOUT,                  // 设置--关于
+    FUNC_SET_SUB_4G,                     // 设置--4G
+    FUNC_SET_SUB_RESTART,                // 设置--重启
+    FUNC_RESTART = FUNC_SET_SUB_RESTART, // 重启
+    FUNC_SET_SUB_RSTFY,                  // 设置--恢复出厂
     FUNC_RSTFY = FUNC_SET_SUB_RSTFY,
-    FUNC_SET_SUB_OFF,                   //设置--关机
-    FUNC_OFF = FUNC_SET_SUB_OFF,        //关机
+    FUNC_SET_SUB_OFF,            // 设置--关机
+    FUNC_OFF = FUNC_SET_SUB_OFF, // 关机
     FUNC_MUSIC_SRC,
 #if FUNC_MUSIC_EN
     FUNC_MUSIC,
@@ -125,12 +127,12 @@ enum {
     FUNC_SMARTSTACK,
     FUNC_MODEM_CALL,
     FUNC_MODEM_RING,
-    FUNC_MESSAGE_REPLY,                  //消息发送
+    FUNC_MESSAGE_REPLY, // 消息发送
     FUNC_MIC_TEST,
     FUNC_EMIT_LIST,
     FUNC_BIRD,
 #if FUNC_GAME_TETRIS_EN
-    FUNC_GAME_TETRIS,           //俄罗斯方块
+    FUNC_GAME_TETRIS, // 俄罗斯方块
     FUNC_GAME_TETRIS_START,
     FUNC_GAME_TETRIS_OVER,
 #endif // FUNC_GAME_TETRIS_EN
@@ -145,7 +147,7 @@ enum {
 #if LE_AB_FOT_EN
     FUNC_OTA_UI_MODE,
 #endif
-    FUNC_MAX_NUM,           //用于计数
+    FUNC_MAX_NUM, // 用于计数
 
 };
 
