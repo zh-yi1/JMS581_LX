@@ -31,29 +31,29 @@ typedef struct f_menu_list_t_ {
 } f_menu_list_t;
 
 static const compo_listbox_item_t tbl_menu_list[] = {
-    {STR_CLOCK,                  UI_BUF_ICON_CLOCK_BG_BIN,          .func_sta = FUNC_CLOCK},                //时钟
-    {STR_SPORTS,                 UI_BUF_ICON_SPORT_BIN,             .func_sta = FUNC_SPORT},                //运动
-//    {STR_STEP,                   UI_BUF_ICON_STEP_BIN,            .func_sta = FUNC_NULL},                 //计步
-    {STR_SLEEP,                  UI_BUF_ICON_SLEEP_BIN,             .func_sta = FUNC_SLEEP},                //睡眠
-    {STR_ACTIVITY_RECORD,        UI_BUF_ICON_ACTIVITY_BIN,          .func_sta = FUNC_ACTIVITY},             //活动记录
-    {STR_HEART_RATE,             UI_BUF_ICON_HEART_RATE_BIN,        .func_sta = FUNC_HEARTRATE},            //心率
-    {STR_BLOOD_PRESSURE,         UI_BUF_ICON_BLOOD_PRESSURE_BIN,    .func_sta = FUNC_BLOOD_PRESSURE},       //血压
-    {STR_BLOOD_OXYGEN,           UI_BUF_ICON_BLOOD_OXYGEN_BIN,      .func_sta = FUNC_BLOOD_OXYGEN},         //血氧
-    {STR_MESSAGE,                UI_BUF_ICON_MESSAGE_BIN,           .func_sta = FUNC_MESSAGE},              //消息
-    {STR_PHONE,                  UI_BUF_ICON_CALL_BIN,              .func_sta = FUNC_CALL},                 //电话
-    {STR_MUSIC,                  UI_BUF_ICON_MUSIC_BIN,             .func_sta = FUNC_BT},                   //音乐
-    {STR_WEATHER,                UI_BUF_ICON_WEATHER_BIN,           .func_sta = FUNC_WEATHER},              //天气
-    {STR_BREATHE,                UI_BUF_ICON_BREATHE_BIN,           .func_sta = FUNC_BREATHE},              //呼吸
-    {STR_CALCULATOR,             UI_BUF_ICON_CALCULATOR_BIN,        .func_sta = FUNC_CALCULATOR},           //计算器
-    {STR_ALARM_CLOCK,            UI_BUF_ICON_ALARM_CLOCK_BIN,       .func_sta = FUNC_ALARM_CLOCK},          //闹钟
-    {STR_TIMER,                  UI_BUF_ICON_TIMER_BIN,             .func_sta = FUNC_TIMER},                //定时器
-    {STR_STOP_WATCH,             UI_BUF_ICON_STOPWATCH_BIN,         .func_sta = FUNC_STOPWATCH},            //秒表
-    {STR_CAMERA,                 UI_BUF_ICON_CAMERA_BIN,            .func_sta = FUNC_CAMERA},               //相机
-    {STR_VOICE_ASSISTANT,        UI_BUF_ICON_VOICE_BIN,             .func_sta = FUNC_VOICE},                //语音助手
-    {STR_FIND_PHONE,             UI_BUF_ICON_FINDPHONE_BIN,         .func_sta = FUNC_FINDPHONE},            //查找手机
-    {STR_GAME,                   UI_BUF_ICON_GAME_BIN,              .func_sta = FUNC_GAME},                 //游戏
-    {STR_SETTING,                UI_BUF_ICON_SETTING_BIN,           .func_sta = FUNC_SETTING},              //设置
-    {STR_STYLE,                  UI_BUF_ICON_MENU_BIN,              .func_sta = FUNC_STYLE},                //风格
+    {STR_CLOCK,                  UI_BUF_ICON_ACTIVITY_BIN,          .func_sta = FUNC_CLOCK},                //时钟
+    {STR_SPORTS,                 UI_BUF_ICON_ACTIVITY_BIN,             .func_sta = FUNC_NULL},                //运动
+//    {STR_STEP,                   UI_BUF_ICON_ACTIVITY_BIN,            .func_sta = FUNC_NULL},                 //计步
+    {STR_SLEEP,                  UI_BUF_ICON_ACTIVITY_BIN,             .func_sta = FUNC_NULL},                //睡眠
+    {STR_ACTIVITY_RECORD,        UI_BUF_ICON_ACTIVITY_BIN,          .func_sta = FUNC_NULL},             //活动记录
+    {STR_HEART_RATE,             UI_BUF_ICON_ACTIVITY_BIN,        .func_sta = FUNC_NULL},            //心率
+    {STR_BLOOD_PRESSURE,         UI_BUF_ICON_ACTIVITY_BIN,    .func_sta = FUNC_NULL},       //血压
+    {STR_BLOOD_OXYGEN,           UI_BUF_ICON_ACTIVITY_BIN,      .func_sta = FUNC_NULL},         //血氧
+    {STR_MESSAGE,                UI_BUF_ICON_ACTIVITY_BIN,           .func_sta = FUNC_NULL},              //消息
+    {STR_PHONE,                  UI_BUF_ICON_ACTIVITY_BIN,              .func_sta = FUNC_NULL},                 //电话
+    {STR_MUSIC,                  UI_BUF_ICON_ACTIVITY_BIN,             .func_sta = FUNC_NULL},                   //音乐
+    {STR_WEATHER,                UI_BUF_ICON_ACTIVITY_BIN,           .func_sta = FUNC_NULL},              //天气
+    {STR_BREATHE,                UI_BUF_ICON_ACTIVITY_BIN,           .func_sta = FUNC_NULL},              //呼吸
+    {STR_CALCULATOR,             UI_BUF_ICON_ACTIVITY_BIN,        .func_sta = FUNC_NULL},           //计算器
+    {STR_ALARM_CLOCK,            UI_BUF_ICON_ACTIVITY_BIN,       .func_sta = FUNC_NULL},          //闹钟
+    {STR_TIMER,                  UI_BUF_ICON_ACTIVITY_BIN,             .func_sta = FUNC_NULL},                //定时器
+    {STR_STOP_WATCH,             UI_BUF_ICON_ACTIVITY_BIN,         .func_sta = FUNC_NULL},            //秒表
+    {STR_CAMERA,                 UI_BUF_ICON_ACTIVITY_BIN,            .func_sta = FUNC_NULL},               //相机
+    {STR_VOICE_ASSISTANT,        UI_BUF_ICON_ACTIVITY_BIN,             .func_sta = FUNC_NULL},                //语音助手
+    {STR_FIND_PHONE,             UI_BUF_ICON_ACTIVITY_BIN,         .func_sta = FUNC_NULL},            //查找手机
+    {STR_GAME,                   UI_BUF_ICON_ACTIVITY_BIN,              .func_sta = FUNC_NULL},                 //游戏
+    {STR_SETTING,                UI_BUF_ICON_ACTIVITY_BIN,           .func_sta = FUNC_NULL},              //设置
+    {STR_STYLE,                  UI_BUF_ICON_ACTIVITY_BIN,              .func_sta = FUNC_NULL},                //风格
 };
 
 //菜单栏自定义图标更新
@@ -62,6 +62,9 @@ static void func_menu_sub_list_battery_pic_update(void)
     if (func_cb.frm_main == NULL) {
         return;
     }
+    // UI精简：dropdown 电量图标 bin 已删，跳过
+    return;
+#if 0
     switch(sys_cb.vbat_percent){
         case 1 ... 16:
             compo_form_set_title_icon(func_cb.frm_main, UI_BUF_DROPDOWN_POWER1_BIN);
@@ -85,6 +88,7 @@ static void func_menu_sub_list_battery_pic_update(void)
             compo_form_set_title_icon(func_cb.frm_main, UI_BUF_DROPDOWN_POWER6_BIN);
             break;
     }
+#endif
 }
 
 //创建主菜单窗体，创建窗体中不要使用功能结构体 func_cb.f_cb
@@ -119,9 +123,12 @@ compo_form_t *func_menu_sub_list_form_create(void)
     compo_setid(listbox, COMPO_ID_LISTBOX);
     compo_listbox_set_focus_byidx(listbox, menu_idx);
 
-    compo_listbox_add_time(listbox, COMPO_LISTBOX_TIME_TYPE_HOUR, UI_BUF_ICON_CLOCK_H_BIN, 1, 2);
-    compo_listbox_add_time(listbox, COMPO_LISTBOX_TIME_TYPE_MIN, UI_BUF_ICON_CLOCK_M_BIN, 1, 2);
-    compo_listbox_add_time(listbox, COMPO_LISTBOX_TIME_TYPE_SEC, UI_BUF_ICON_CLOCK_S_BIN, 9, 2);
+    // UI精简: clock_h/m/s.bin 已删
+    // compo_listbox_add_time(listbox, COMPO_LISTBOX_TIME_TYPE_HOUR, UI_BUF_ICON_ACTIVITY_BIN, 1, 2);
+    // UI精简: clock_h/m/s.bin 已删
+    // compo_listbox_add_time(listbox, COMPO_LISTBOX_TIME_TYPE_MIN, UI_BUF_ICON_ACTIVITY_BIN, 1, 2);
+    // UI精简: clock_h/m/s.bin 已删
+    // compo_listbox_add_time(listbox, COMPO_LISTBOX_TIME_TYPE_SEC, UI_BUF_ICON_ACTIVITY_BIN, 9, 2);
     compo_listbox_set_start_angle(listbox, 900);
     compo_listbox_set_time_idx(listbox, 0);
 

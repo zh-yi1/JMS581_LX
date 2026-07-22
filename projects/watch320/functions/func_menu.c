@@ -21,8 +21,11 @@ compo_form_t *func_menu_form_create(void)
     case MENU_STYLE_WATERFALL:
         return func_menu_sub_waterfall_form_create();
 
+    // UI精简：icon_football 资源已删，足球菜单禁用，回退蜂窝
+    // case MENU_STYLE_FOOTBALL:
+    //     return func_menu_sub_football_form_create();
     case MENU_STYLE_FOOTBALL:
-        return func_menu_sub_football_form_create();
+        return func_menu_sub_honeycomb_form_create();
 
     case MENU_STYLE_LIST:
     case MENU_STYLE_CUM_FOURGRID:
@@ -140,7 +143,9 @@ void func_menu_sub_message(size_msg_t msg)
             if (func_cb.menu_style == MENU_STYLE_FOOTBALL) {
                 func_switching(FUNC_SWITCH_FADE_OUT | FUNC_SWITCH_AUTO, NULL);
             }
-            func_cb.sta = FUNC_MENUSTYLE;
+            // UI精简：menustyle 已删，返回时钟
+            // func_cb.sta = FUNC_MENUSTYLE;
+            func_cb.sta = FUNC_CLOCK;
             //func_menu_switch_style();
         }
         break;
@@ -188,8 +193,12 @@ void func_menu(void)
             func_menu_sub_waterfall();
             break;
 
+        // UI精简：icon_football 资源已删，足球菜单禁用，回退蜂窝
+        // case MENU_STYLE_FOOTBALL:
+        //     func_menu_sub_football();
+        //     break;
         case MENU_STYLE_FOOTBALL:
-            func_menu_sub_football();
+            func_menu_sub_honeycomb();
             break;
 
         case MENU_STYLE_LIST:

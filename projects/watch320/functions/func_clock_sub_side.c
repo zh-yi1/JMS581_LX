@@ -16,7 +16,7 @@ static void func_clock_sub_side_form_create(void)
     compo_shape_set_alpha(masklayer, 140);
 
     //创建按钮
-    compo_button_t *btn_test = compo_button_create_by_image(frm, UI_BUF_ICON_GAME_BIN);
+    compo_button_t *btn_test = compo_button_create_by_image(frm, UI_BUF_ICON_ACTIVITY_BIN);
     compo_button_set_pos(btn_test, 60, 150);
     compo_button_set_alpha(btn_test, 200);
 

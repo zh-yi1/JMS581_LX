@@ -24,13 +24,14 @@
 
 
 //立方体图标列表(固定6项)
+// UI精简：charge bin 已删，改用 icon 占位（充电窗体已改为字体最小实现）
 static const compo_cube_item_t tbl_menu_cube[] = {
-    {UI_BUF_CHARGE_ICON_BIN,             FUNC_NULL},
-    {UI_BUF_CHARGE_ICON_BIN,             FUNC_NULL},
-    {UI_BUF_CHARGE_ICON_BIN,             FUNC_NULL},
-    {UI_BUF_CHARGE_ICON_BIN,             FUNC_NULL},
-    {UI_BUF_CHARGE_ICON_BIN,             FUNC_NULL},
-    {UI_BUF_CHARGE_ICON_BIN,             FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,             FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,             FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,             FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,             FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,             FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,             FUNC_NULL},
 };
 
 typedef struct f_charge_t_ {
@@ -45,16 +46,25 @@ enum{
 //立方体表盘
 compo_form_t *func_charge_form_create(void)
 {
-    //新建窗体
-    compo_form_t *frm = compo_form_create(true);       //菜单一般创建在底层
-
-    //创建立方体菜单
+    // UI精简：charge/*.bin 已删，改为字体+icon 最小充电页
+    /*
+    compo_form_t *frm = compo_form_create(true);
     compo_cube_t *cube = compo_cube_create(frm, CUBE_RADIUS_MAX, tbl_menu_cube, CUBE_ITEM_CNT);
     compo_cube_set_type(cube, COMPO_CUBE_TYPE_POWER);
     compo_cube_add_element(cube, 0, UI_BUF_CHARGE_LIGHT_BIN, CUBE_ELE_CNT);
-
     compo_cube_set_pos(cube, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y + 20);
     compo_setid(cube, COMPO_ID_CUBE);
+    return frm;
+    */
+
+    compo_form_t *frm = compo_form_create(true);
+    compo_picturebox_t *pic = compo_picturebox_create(frm, UI_BUF_ICON_ACTIVITY_BIN);
+    compo_picturebox_set_pos(pic, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y - 40);
+
+    compo_textbox_t *txt = compo_textbox_create(frm, 8);
+    compo_textbox_set_font(txt, UI_BUF_0FONT_FONT_NUM_38_BIN);
+    compo_textbox_set_location(txt, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y + 40, 200, 50);
+    compo_bonddata(txt, COMPO_BOND_BATTERY);
     return frm;
 }
 
@@ -77,6 +87,9 @@ enum {
 
 void func_charge_process_do(void)
 {
+    // UI精简：原立方体充电动画依赖 charge bin，已改为静态页，跳过动画
+    return;
+#if 0
     f_charge_t *f_charge = (f_charge_t *)func_cb.f_cb;
     compo_cube_t *cube = compo_getobj_byid(COMPO_ID_CUBE);
     compo_cube_move(cube);
@@ -268,6 +281,7 @@ void func_charge_process_do(void)
             }
         }
     }
+#endif
 }
 
 void func_charge_process(void)
@@ -286,6 +300,15 @@ void func_charge_click(void)
 
 void func_charge_message(size_msg_t msg)
 {
+    // UI精简：无立方体组件，仅透传公共消息
+    switch (msg) {
+    default:
+        func_message(msg);
+        break;
+    }
+    return;
+
+#if 0
     compo_cube_t *cube = compo_getobj_byid(COMPO_ID_CUBE);
 
     point_t pt = ctp_get_sxy();
@@ -349,6 +372,7 @@ void func_charge_message(size_msg_t msg)
         func_message(msg);
         break;
     }
+#endif
 }
 
 void func_charge_enter(void)

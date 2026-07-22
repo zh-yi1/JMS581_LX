@@ -48,7 +48,7 @@ void func_clock_sub_process(void);
 void func_clock_sub_message(size_msg_t msg);
 
 //子菜单
-void func_clock_sub_dropdown(void);
+// void func_clock_sub_dropdown(void); // UI精简已删
 void func_clock_sub_pullup(void);
 void func_clock_sub_side(void);
 

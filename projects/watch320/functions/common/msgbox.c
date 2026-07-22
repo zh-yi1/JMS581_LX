@@ -62,7 +62,7 @@ static compo_form_t *msgbox_frm_create(char *msg, char *title, int mode, char ms
     //消息推送弹框使用，根据消息类型创建对应消息图标
     switch(msg_type) {
         case MSG_TYPE_WECHAT:
-            compo_form_add_image(frm, UI_BUF_SETTING_LIGHT_BIN, 160, 100);  //需要更替为微信图标
+           // compo_form_add_image(frm, UI_BUF_SETTING_LIGHT_BIN, 160, 100);  //需要更替为微信图标
             break;
         default:
             break;
@@ -71,34 +71,34 @@ static compo_form_t *msgbox_frm_create(char *msg, char *title, int mode, char ms
     //创建按钮
     switch (mode) {
     case MSGBOX_MODE_BTN_OK:
-        btn = compo_button_create_by_image(frm, UI_BUF_ALARM_CLOCK_YES_BIN);
-        compo_setid(btn, COMPO_ID_BTN_OK);
-        compo_button_set_pos(btn, 160, 300);
+        // btn = compo_button_create_by_image(frm, UI_BUF_ALARM_CLOCK_YES_BIN);
+        // compo_setid(btn, COMPO_ID_BTN_OK);
+        // compo_button_set_pos(btn, 160, 300);
         break;
 
     case MSGBOX_MODE_BTN_OKCANCEL:
-        btn = compo_button_create_by_image(frm, UI_BUF_COMMON_NO_BIN);
-        compo_setid(btn, COMPO_ID_BTN_CANCEL);
-        compo_button_set_pos(btn, 61, 300);
+        // btn = compo_button_create_by_image(frm, UI_BUF_COMMON_NO_BIN);
+        // compo_setid(btn, COMPO_ID_BTN_CANCEL);
+        // compo_button_set_pos(btn, 61, 300);
 
-        btn = compo_button_create_by_image(frm, UI_BUF_ALARM_CLOCK_YES_BIN);
-        compo_setid(btn, COMPO_ID_BTN_OK);
-        compo_button_set_pos(btn, 261, 300);
+        // btn = compo_button_create_by_image(frm, UI_BUF_ALARM_CLOCK_YES_BIN);
+        // compo_setid(btn, COMPO_ID_BTN_OK);
+        // compo_button_set_pos(btn, 261, 300);
         break;
 
     case MSGBOX_MODE_BTN_YESNO:
-        btn = compo_button_create_by_image(frm, UI_BUF_COMMON_NO_BIN);
-        compo_setid(btn, COMPO_ID_BTN_NO);
-        compo_button_set_pos(btn, 61, 300);
+        // btn = compo_button_create_by_image(frm, UI_BUF_COMMON_NO_BIN);
+        // compo_setid(btn, COMPO_ID_BTN_NO);
+        // compo_button_set_pos(btn, 61, 300);
 
-        btn = compo_button_create_by_image(frm, UI_BUF_ALARM_CLOCK_YES_BIN);
-        compo_setid(btn, COMPO_ID_BTN_YES);
-        compo_button_set_pos(btn, 261, 300);
+        // btn = compo_button_create_by_image(frm, UI_BUF_ALARM_CLOCK_YES_BIN);
+        // compo_setid(btn, COMPO_ID_BTN_YES);
+        // compo_button_set_pos(btn, 261, 300);
         break;
     case MSGBOX_MODE_BTN_DELETE:
-        btn = compo_button_create_by_image(frm, UI_BUF_COMMON_NO_BIN);  //需更替为删除图标
-        compo_setid(btn, COMPO_ID_BTN_NO);
-        compo_button_set_pos(btn, 140, 300);
+        // btn = compo_button_create_by_image(frm, UI_BUF_COMMON_NO_BIN);  //需更替为删除图标
+        // compo_setid(btn, COMPO_ID_BTN_NO);
+        // compo_button_set_pos(btn, 140, 300);
         break;
     default:
         halt(HALT_MSGBOX_MODE);

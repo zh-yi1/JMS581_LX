@@ -115,7 +115,7 @@
 /*****************************************************************************
  * Module    : 屏幕驱动配置
  *****************************************************************************/
-#define GUI_SELECT                      GUI_TFT_320_ST77916    		//GUI Display Select
+#define GUI_SELECT                      GUI_OLED_466_ICNA3310B//GUI_TFT_320_ST77916    		//GUI Display Select
 
 #define PORT_TFT_INT                    IO_PA6                      //TE
 #define PORT_TFT_INT_VECTOR             PORT_INT2_VECTOR
@@ -181,7 +181,7 @@
 #define TFT_TE_CYCLE                    16.67                   //屏幕的刷新率TE周期时间 (ms)
 #define TFT_TE_CYCLE_DELAY              (TFT_TE_CYCLE / 3)
 #define DEFAULT_TE_MODE                 1                       //默认1 TE模式, 0为2 TE模式, 3为复杂界面专用模式
-#define GUI_LINES_CNT                   20                      //单次推屏行数
+#define GUI_LINES_CNT                   30                      //单次推屏行数（466 OLED 对齐 watch466）
 
 #define GUI_FONT_W_SPACE                0                       //字的间距
 #define GUI_FONT_H_SPACE                0                       //全局字的行间距,0:不设置, 其他:设置文本行最小间距
@@ -196,7 +196,7 @@
  *****************************************************************************/
 #define GUI_SIDE_MENU_WIDTH             (GUI_SCREEN_WIDTH / 2)  //边菜单的宽度
 
-#define FORM_TITLE_HEIGHT               32                      //窗体标题高度
+#define FORM_TITLE_HEIGHT               50                      //窗体标题高度（466 OLED）
 #define FORM_TITLE_LEFT                 (GUI_SCREEN_WIDTH / 9)
 
 #define UI_BUF_FONT_SYS                 UI_BUF_0FONT_FONT_BIN           //系统字体

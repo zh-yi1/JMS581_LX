@@ -27,7 +27,7 @@ __bram_vma      = 0x10C00;
 __cram_vma      = 0x1AC00;
 __share_vma     = 0x20000;
 __sram_vma      = 0x20400;
-__disp_vma      = 0x78000;
+__disp_vma      = 0x6A000;   // 466 OLED：与 watch466 对齐，扩大 disp（约 152KB）
 __lpram_vma     = 0x90000;
 
 __aram_vma      = 0xE0000;

@@ -57,51 +57,51 @@ typedef struct menu_hc_item_t_ {
 
 //蜂窝图标列表及顺序
 const menu_hc_item_t tbl_menu_honeycomb[] = {
-    {UI_BUF_ICON_CLOCK_BG_BIN,                  FUNC_CLOCK},
+    {UI_BUF_ICON_ACTIVITY_BIN,                  FUNC_CLOCK},
 
-    {UI_BUF_ICON_HEART_RATE_BIN,                FUNC_HEARTRATE},
-    {UI_BUF_ICON_ACTIVITY_BIN,                  FUNC_ACTIVITY},
-    {UI_BUF_ICON_BLOOD_OXYGEN_BIN,              FUNC_BLOOD_OXYGEN},
-    {UI_BUF_ICON_BLOODSUGAR_BIN,                FUNC_BLOODSUGAR},
-    {UI_BUF_ICON_BREATHE_BIN,                   FUNC_BREATHE},
-    {UI_BUF_ICON_MUSIC_BIN,                     FUNC_BT},
+    {UI_BUF_ICON_ACTIVITY_BIN,                FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                  FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,              FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                   FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                     FUNC_NULL},
 
-    {UI_BUF_ICON_CALL_BIN,                      FUNC_CALL},
-    {UI_BUF_ICON_MENU_BIN,                      FUNC_STYLE},
-    {UI_BUF_ICON_FLASHLIGHT_BIN,                FUNC_FLASHLIGHT},
-    {UI_BUF_ICON_FINDPHONE_BIN,                 FUNC_FINDPHONE},
-    {UI_BUF_ICON_GAME_BIN,                      FUNC_GAME},
-    {UI_BUF_ICON_ALTITUDE_BIN,                  FUNC_ALTITUDE},
+    {UI_BUF_ICON_ACTIVITY_BIN,                      FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                      FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                 FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                      FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                  FUNC_NULL},
 
-    {UI_BUF_ICON_ALARM_CLOCK_BIN,               FUNC_ALARM_CLOCK},
-    {UI_BUF_ICON_RESTORE_FACTORY_BIN,           FUNC_RSTFY},
-    {UI_BUF_ICON_LANGUAGE_BIN,                  FUNC_LANGUAGE},
-    {UI_BUF_ICON_LIGHT_BIN,                     FUNC_LIGHT},
-    {UI_BUF_ICON_MAP_BIN,                       FUNC_MAP},
-    {UI_BUF_ICON_MESSAGE_BIN,                   FUNC_MESSAGE},
+    {UI_BUF_ICON_ACTIVITY_BIN,               FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,           FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                  FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                     FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                       FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                   FUNC_NULL},
 
-    {UI_BUF_ICON_CALCULATOR_BIN,                FUNC_CALCULATOR},
-    {UI_BUF_ICON_OFF_BIN,                       FUNC_OFF},
-    {UI_BUF_ICON_RESTART_BIN,                   FUNC_RESTART},
-    {UI_BUF_ICON_CALENDAR_BIN,                  FUNC_CALENDAER},
-    {UI_BUF_ICON_SCAN_BIN,                      FUNC_SCAN},
-    {UI_BUF_ICON_SETTING_BIN,                   FUNC_SETTING},
+    {UI_BUF_ICON_ACTIVITY_BIN,                FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                       FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                   FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                  FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                      FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                   FUNC_NULL},
 
-    {UI_BUF_ICON_SLEEP_BIN,                     FUNC_SLEEP},
-    {UI_BUF_ICON_VOLUME_BIN,                    FUNC_VOLUME},
-    {UI_BUF_ICON_SPORT_BIN,                     FUNC_SPORT},
-    {UI_BUF_ICON_STOPWATCH_BIN,                 FUNC_STOPWATCH},
-    {UI_BUF_ICON_CAMERA_BIN,                    FUNC_CAMERA},
-    {UI_BUF_ICON_TIMER_BIN,                     FUNC_TIMER},
+    {UI_BUF_ICON_ACTIVITY_BIN,                     FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                    FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                     FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                 FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                    FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                     FUNC_NULL},
 
-    {UI_BUF_ICON_ADDRESS_BOOK_BIN,              FUNC_ADDRESS_BOOK},
-    {UI_BUF_ICON_VOICE_BIN,                     FUNC_VOICE},
-    {UI_BUF_ICON_WEATHER_BIN,                   FUNC_WEATHER},
-    {UI_BUF_ICON_BLOOD_PRESSURE_BIN,            FUNC_BLOOD_PRESSURE},
+    {UI_BUF_ICON_ACTIVITY_BIN,              FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                     FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,                   FUNC_NULL},
+    {UI_BUF_ICON_ACTIVITY_BIN,            FUNC_NULL},
 #if SECURITY_PAY_EN
-    {UI_BUF_ICON_ALIPAY_BIN,                    FUNC_ALIPAY},
+    {UI_BUF_ICON_ACTIVITY_BIN,                    FUNC_NULL},
 #endif // SECURITY_PAY_EN
-    {UI_BUF_ICON_COMPASS_BIN,                   FUNC_COMPASS},
+    {UI_BUF_ICON_ACTIVITY_BIN,                   FUNC_NULL},
 };
 
 
@@ -123,9 +123,12 @@ compo_form_t *func_menu_sub_honeycomb_form_create(void)
     for (int i=0; i<MENU_HC_CNT; i++) {
         compo_iconlist_add(iconlist, tbl_menu_honeycomb[i].res_addr);
     }
-    compo_iconlist_add_time(iconlist, COMPO_ICONLIST_TIME_TYPE_HOUR, UI_BUF_ICON_CLOCK_H_BIN, 1, 2);
-    compo_iconlist_add_time(iconlist, COMPO_ICONLIST_TIME_TYPE_MIN, UI_BUF_ICON_CLOCK_M_BIN, 1, 2);
-    compo_iconlist_add_time(iconlist, COMPO_ICONLIST_TIME_TYPE_SEC, UI_BUF_ICON_CLOCK_S_BIN, 9, 2);
+    // UI精简: clock_h/m/s.bin 已删
+    // compo_iconlist_add_time(iconlist, COMPO_ICONLIST_TIME_TYPE_HOUR, UI_BUF_ICON_ACTIVITY_BIN, 1, 2);
+    // UI精简: clock_h/m/s.bin 已删
+    // compo_iconlist_add_time(iconlist, COMPO_ICONLIST_TIME_TYPE_MIN, UI_BUF_ICON_ACTIVITY_BIN, 1, 2);
+    // UI精简: clock_h/m/s.bin 已删
+    // compo_iconlist_add_time(iconlist, COMPO_ICONLIST_TIME_TYPE_SEC, UI_BUF_ICON_ACTIVITY_BIN, 9, 2);
     compo_iconlist_set_start_angle(iconlist, 900);
 
     compo_iconlist_set_focus_byidx(iconlist, func_cb.menu_idx);

@@ -1,0 +1,643 @@
+ENTRY(_start)
+__max_flash_size = (0xEA000 + 0x4000*(1) + 0x3000*(1||(1)*0) + 0x4000*(0) + 0x2000*(1) + 0x7000*(0) + 0x7000*(0) + 0xFA000*(0) + 0x15000*(0) + 0xA5000*(0 * 0));
+__base = 0x10000000;
+__stack_vma = 0x10800;
+__bram_vma = 0x10C00;
+__cram_vma = 0x1AC00;
+__share_vma = 0x20000;
+__sram_vma = 0x20400;
+__disp_vma = 0x6A000;
+__lpram_vma = 0x90000;
+__aram_vma = 0xE0000;
+__eram_vma = 0xE5000;
+__rram_vma = 0xE6000;
+__dram_vma = 0xE8000;
+__gram_vma = 0x3F0000;
+__jram_vma = 0x3F6000;
+__maxram_vma = 0x3F6900;
+__comm_vma = __sram_vma;
+__stack_vma_size = __bram_vma - __stack_vma;
+__bram_vma_size = __cram_vma - __bram_vma;
+__cram_vma_size = __share_vma - __cram_vma;
+__share_vma_size = __sram_vma - __share_vma;
+__sram_vma_size = __disp_vma - __sram_vma;
+__disp_vma_size = __lpram_vma - __disp_vma;
+__lpram_vma_size = 0xA0000 - __lpram_vma;
+__aram_vma_size = __eram_vma - __aram_vma;
+__eram_vma_size = __rram_vma-0x600 - __eram_vma;
+__dram_vma_size = (__gram_vma&0xfffff) - __dram_vma;
+__gam_vma_size = __jram_vma-0x1000 - __gram_vma;
+__jram_vma_size = __maxram_vma - __jram_vma;
+__camera_heap_size = 0x1f000;
+__camera_heap_start = __disp_vma - __camera_heap_size;
+__dnn_vma_size = 9k;
+__dnn_vma = __share_vma - __dnn_vma_size;
+__sleep_vma = __dnn_vma;
+__psram_vma = 0x20000000;
+__psram_size = 0x400000;
+MEMORY
+{
+    init : org = __base, len = 512
+    flash(rx) : org = __base + 512, len = __max_flash_size
+    dnn_comm(rx) : org = __dnn_vma, len = __dnn_vma_size
+    sleep_comm(rx) : org = __sleep_vma, len = 11k
+    stack : org = __stack_vma, len = __stack_vma_size
+    bram : org = __bram_vma, len = __bram_vma_size
+    cram : org = __cram_vma, len = __cram_vma_size
+    share : org = __share_vma, len = __share_vma_size
+    sram : org = __sram_vma, len = __sram_vma_size
+    disp : org = __disp_vma, len = __disp_vma_size
+    lpram : org = __lpram_vma, len = __lpram_vma_size
+    aram : org = __aram_vma, len = __aram_vma_size
+    eram : org = __eram_vma, len = __eram_vma_size
+    dram : org = __dram_vma, len = __dram_vma_size
+    gram : org = __gram_vma, len = __gam_vma_size
+    jram : org = __jram_vma, len = __jram_vma_size
+    psram : org = __psram_vma, len = __psram_size
+}
+SECTIONS
+{
+    .init : {
+        KEEP(*(.reset))
+        . = ALIGN(512);
+    } > init
+    .comm : {
+        __comm_start = .;
+        KEEP(*(.vector))
+        *(.plt)
+        *(.com_text*)
+        *(.com_text.bb.leisr)
+        *(.com_text.stack.handler)
+        *(.com_rodata*)
+        *(.srodata*)
+        *bsp_halt.o(.rodata*)
+        *debug.o(.rodata*)
+        *ele_image.o(.rodata*)
+        *(.data*)
+        *(.sdata*)
+        *\ext_scan.o(.rodata*)
+        *\ble_evt.o(.rodata*)
+        *\hci_transport_h3.o(.rodata*)
+        *gui.o(.rodata*)
+        *(.text.src*)
+        *(.rodata.src*)
+        *(.rodata.dnn.nn)
+        *(.rodata.aiaec.ai)
+        *(.rodata.dmdnn.nn)
+        *(.rodata.dmdnn_aiaec.nn)
+        __comm_end = .;
+        . = ALIGN(512);
+    } > sram AT > flash
+    .dnn_comm : {
+        *(.text.dnn*)
+        *(.text.aiaec*)
+        *(.text.dmdnn*)
+        *(.text.dmdnn_aiaec*)
+        *(.ains_text*)
+        *(.text.ains4*)
+        *(.rodata.ains4*)
+        *(.ains_rodata*)
+        *(.rodata.dnn*)
+        *(.rodata.aiaec*)
+        *(.rodata.dmdnn*)
+        *(.rodata.dmdnn_aiaec*)
+        . = ALIGN(512);
+    } > dnn_comm AT > flash
+    .sleep_comm : {
+        *(.sleep_text*)
+        *(.lp_buf*)
+        . = ALIGN(512);
+    } > sleep_comm AT > flash
+    .flash : {
+        __code_start_stream = .;
+        *(.com_stream.text*)
+        . = ALIGN(512);
+        __code_end_stream = .;
+        __code_start_record = .;
+        *(.com_rec*)
+        . = ALIGN(512);
+        __code_end_record = .;
+        __code_start_btdec_com = .;
+        *(.rodata.btdec*)
+        *(.btdec*)
+        . = ALIGN(512);
+        __code_end_btdec_com = .;
+        __code_start_mp3dec = .;
+        *(.mp3dec*)
+        . = ALIGN(512);
+        __code_end_mp3dec = .;
+        __code_start_sbcdec = .;
+        *(.sbcdec*)
+        *(.sbc_com*)
+        . = ALIGN(512);
+        __code_end_sbcdec = .;
+         __code_start_aacdec = .;
+        *(.aacdec*)
+        . = ALIGN(512);
+        __code_end_aacdec = .;
+        __code_start_sbcenc = .;
+        *(.rodata.sbcenc*)
+        *(.text.sbcenc*)
+        . = ALIGN(512);
+        __code_end_sbcenc = .;
+        __code_start_mp3enc = .;
+        *(.text.mp3enc*)
+        *(.rodata.mp3enc*)
+        . = ALIGN(512);
+        __code_end_mp3enc = .;
+        __code_start_mp2enc = .;
+        *(.text.mp2enc*)
+        *(.rodata.mp2enc*)
+        . = ALIGN(512);
+        __code_end_mp2enc = .;
+        __code_start_wavdec = .;
+        *(.wavdec*)
+        . = ALIGN(512);
+        __code_end_wavdec = .;
+        __code_start_wmadec = .;
+        *(.wmadec.bitstream)
+        *(.wmadec.windows)
+        *(.wmadec*)
+        . = ALIGN(512);
+        __code_end_wmadec = .;
+        __code_start_apedec = .;
+        *(.apedec*)
+        . = ALIGN(512);
+        __code_end_apedec = .;
+        __code_start_flacdec = .;
+        *(.flacdec*)
+        . = ALIGN(512);
+        __code_end_flacdec = .;
+        __code_start_usbdev = .;
+        *(.usbdev*)
+        . = ALIGN(512);
+        __code_end_usbdev = .;
+        __code_start_wma_rlc44q = .;
+        *(.wma_huff_rlc44q_table)
+        . = ALIGN(512);
+        __code_end_wma_rlc44q = .;
+        __code_start_wma_rlc44o = .;
+        *(.wma_huff_rlc44o_table)
+        . = ALIGN(512);
+        __code_end_wma_rlc44o = .;
+        __code_start_wma_rlc16 = .;
+        *(.wma_huff_rlc16_table)
+        . = ALIGN(512);
+        __code_end_wma_rlc16 = .;
+        __code_start_sleep = .;
+        *(.text.sleep.rf*)
+        *(.text.charge_com*)
+        *(.saradc_text*)
+        *(.text.bt_sleep*)
+        *(.text.stack.link_key*)
+        *(.text.stack.util)
+        *(.rodata.bt_sleep*)
+        . = ALIGN(512);
+        __code_end_sleep = .;
+        __code_start_pwrsave = .;
+        *(.text.pwroff*)
+        . = ALIGN(512);
+        __code_end_pwrsave = .;
+        __code_start_bb_test = .;
+        *(.bb_test*)
+        *(.bb_test_rodata*)
+        . = ALIGN(512);
+        __code_end_bb_test = .;
+        __code_start_bt_voice = .;
+        *(.bt_voice*)
+        . = ALIGN(512);
+        __code_end_bt_voice = .;
+        __code_start_bt_aec = .;
+        *(.text.aec.*)
+        . = ALIGN(512);
+        __code_end_bt_aec = .;
+        __code_start_bt_alc = .;
+        *(.text.alc.*)
+        . = ALIGN(512);
+        __code_end_bt_alc = .;
+        __code_start_nr_far = .;
+        *(.text.ains_far.*)
+        *(.rodata.ains_far.*)
+        . = ALIGN(512);
+        __code_end_nr_far = .;
+        __code_start_wsola = .;
+        *(.text.mav.*)
+        *(.rodata.mav.*)
+        . = ALIGN(512);
+        __code_end_wsola = .;
+        __code_start_huart = .;
+        *(.com_huart*)
+        . = ALIGN(512);
+        __code_end_huart = .;
+         __code_start_piano = .;
+        *(.piano_com*)
+        . = ALIGN(512);
+        __code_end_piano = .;
+        __code_start_fota = .;
+        *(.text.fot.cache*)
+        . = ALIGN(512);
+        __code_end_fota = .;
+        __code_start_opus = .;
+        *(.text.opus.asm)
+        *(.text.opus.enc.asm)
+        *(.text.opus.proc)
+        *(.text.opus.enc.proc)
+        *(.text.opus.ec_tell)
+        *(.text.opus.enc.entenc)
+        *(.text.opus.mathops)
+        *(.rodata.opus*)
+        . = ALIGN(512);
+        __code_end_opus = .;
+        __code_start_update = .;
+        *(.text.update*)
+        . = ALIGN(512);
+        __code_end_update = .;
+        __code_start_rf = .;
+        *(.text.rf_init*)
+        . = ALIGN(512);
+        __code_end_rf = .;
+        __code_start_sbr = .;
+        *(.text.sbr*)
+        *(.rodata.sbr*)
+         . = ALIGN(512);
+        __code_end_sbr = .;
+        *(.irq_init.aligned)
+        *(.text*)
+        __code_end_all = .;
+        *(.rodata*)
+        *(.rela*)
+        LONG(0)
+        . = ALIGN(512);
+    } > flash
+    .stack (NOLOAD) : {
+        __irq_stack_start = .;
+        . = 0x400;
+        __irq_stack = .;
+    } > stack
+    __irq_stack_size = __irq_stack - __irq_stack_start;
+    .disp (NOLOAD) : {
+        __disp_start = .;
+        *(.disp.temp_buf2)
+        *(.disp.buf*)
+        __disp_restore_start = .;
+        *(.disp.ele_buf*)
+        *(.disp.wdg_buf*)
+        *(.disp.graphic*)
+        *(.disp.widget*)
+        *(.disp.compo*)
+        __disp_restore_end = .;
+        *(.disp.temp_buf)
+        __disp_end = .;
+    } > disp
+    __disp_stack_size = __disp_end - __disp_start;
+    .share (NOLOAD) : {
+        __share_start = .;
+        KEEP(*(.share.sys))
+        . = 0x40;
+        KEEP(*(.share.gpu))
+        . = 0x100;
+        KEEP(*(.share.*))
+        . = 0x200;
+        KEEP(*(.share_dvp.*))
+        . = 0x280;
+        KEEP(*(.share_video_jpeg.*))
+        . = 0x2C0;
+        KEEP(*(.share_photo_jpeg.*))
+        . = 0x300;
+        KEEP(*(.share_gui.*))
+        . = 0x340;
+        __share_end = .;
+    } > share
+    __share_size = __share_end - __share_start;
+    .bss (NOLOAD) : {
+        __bss_start = .;
+        *(COMMON)
+        *(.bss*)
+        *(.sbss*)
+        *(.buf*)
+        *(.dac_obuf*)
+        *(.sdadc_buf*)
+        *(.mavsco_buf*)
+        *(.src_buf*)
+        *(.heap.os)
+        *(.heap.func)
+        *(.sco_dump*)
+        *(.ttf_buf*)
+        *(.fatfs*)
+        *(.video_play.*)
+        *(.photo_view.*)
+        __bss_end = .;
+        __hr_start = .;
+        __hr_3300_3605_start = .;
+        *algo.o(.bss*)
+        *modle5_13.o(.bss*)
+        *modle5_17.o(.bss*)
+        *modle5_18.o(.bss*)
+        *modle5_2.o(.bss*)
+        *modle5_5.o(.bss*)
+        *modle5_6.o(.bss*)
+        *spo2Algo.o(.bss*)
+        *spo2_cal.o(.bss*)
+        *acPower_add_doublefre.o(.bss*)
+        *(.hrs3300_buf)
+        *(.hr_buf)
+        *(.hr_data*)
+        *hx3605_hrs_agc.o(.bss*)
+        *hx3605_spo2_agc.o(.bss*)
+        __hr_3300_3605_stop = .;
+        __hr_stop = .;
+        . = ALIGN(512);
+        *(.sbr_buf.psinfo)
+        __asr_buf_start = .;
+        __asr_buf_end = .;
+        *(.dynamic_pool.*)
+        __dynamic_pool_start = .;
+    } > sram
+    __bss_size = __bss_end - __bss_start;
+    .gpu_ram __camera_heap_start (NOLOAD) : {
+        *(.gpu_buf.*)
+        . = __camera_heap_size;
+    } > sram
+    .avi_ram __camera_heap_start (NOLOAD) : {
+        *(.avi_play_fifo.*)
+        . = __camera_heap_size;
+    } > sram
+    .photo_ram __camera_heap_start (NOLOAD) : {
+        *(.photo_view_fifo.*)
+        . = __camera_heap_size;
+    } > sram
+    .music_ram __camera_heap_start (NOLOAD) : {
+        *(.music_play.*)
+        . = __camera_heap_size;
+    } > sram
+    .opus_ram __camera_heap_start (NOLOAD) : {
+        *(.opus_buf.dec*)
+        *(.opus_buf.stack)
+        *(.opus.buf.bsp)
+        *(.opus_buf.input)
+        *(.opus_buf.enc*)
+        . = __camera_heap_size;
+    } > sram
+    __dynamic_pool_size = __camera_heap_start - __dynamic_pool_start;
+    __asr_buf_size = __asr_buf_end - __asr_buf_start;
+    .bram __bram_vma (NOLOAD) : {
+        __bram_start = .;
+        *(.rtc_cache)
+        *(.btmem.bthw)
+        *(.btmem*)
+        *(.btstack_hci.buf)
+        *(.ble_buf*)
+        *(.ble_cache*)
+        *(.ancs_client*)
+        *(.ams_client*)
+        __bram_end = .;
+    } > bram
+    __bram_size = __bram_end - __bram_start;
+    .a2dp_cram __cram_vma (NOLOAD) : {
+        *(.aac_buf*)
+        *(.a2dp_play*)
+        *(.a2dp_cache1)
+        *(.bt_id3_buf)
+        . = 0x1A00;
+    } > cram
+    .sco_cram __cram_vma (NOLOAD) : {
+        *(.sco_alg_buf*)
+        *(.nr_buf*)
+        *(.sco_data.pcm.aec*)
+        *(.nr_far_buf.*)
+        . = 0x1A00;
+    } > cram
+    .music_cram __cram_vma (NOLOAD) : {
+        . = 0x1A00;
+        *(.avio_buf)
+        *(.udev_buf*)
+        *(.msc_stm_buf)
+        *(.sbcio_buf.dec)
+        *(.rec_buf.wav)
+        *(.adpcm_buf*)
+        *(.codecs_buf*)
+        . = (0x5400 - __dnn_vma_size);
+    } > cram
+    .sticker_cram __cram_vma (NOLOAD) : {
+        . = 0x1A00;
+        *(.img_sticker_buff.*)
+    } > cram
+    .aec_ram __aram_vma (NOLOAD) : {
+        *(.aec_buf)
+        . = 0x5000;
+    } > aram
+    .aram_sbc __aram_vma (NOLOAD) : {
+        *(.sbc_cache_buf)
+        . = 0x5000;
+    } > aram
+    .aram_ctp __aram_vma (NOLOAD) : {
+        *(.ctp_ota*)
+        . = 0x5000;
+    } > aram
+    .aram_music __aram_vma (NOLOAD) : {
+        *(.mp3buf.dec)
+        *(.mp3_id3_buf)
+        *(.wavres.buf)
+        *(.lrc_buf*)
+        . = 0x5000;
+    } > aram
+    .aram_video_play __aram_vma (NOLOAD) : {
+        . = 0x600;
+        . = 0x5000;
+    } > aram
+    .aram_video_recode __aram_vma (NOLOAD) : {
+        *(.video_recode.*)
+        . = 0x5000;
+    } > aram
+    .aram_take_photo __aram_vma (NOLOAD) : {
+        *(.take_photo.*)
+        . = 0x5000;
+    } > aram
+    .aram_photo_view __aram_vma (NOLOAD) : {
+        . = 0x5000;
+    } > aram
+    .aram_wma __aram_vma (NOLOAD) : {
+        *(.wma_coefs_buf0)
+        *(.wma_coefs_buf)
+    } > aram
+    .aram_flac __aram_vma (NOLOAD) : {
+        *(.flac_decoded_buf)
+    } > aram
+    .aram_m4a __aram_vma (NOLOAD) : {
+        *(.aacio_buf*)
+        *(.m4a_buf*)
+        *(.sbr_buf*)
+    } > aram
+    .aram_mp2enc __aram_vma (NOLOAD) : {
+        *(.mp2enc_buf.*)
+        . = 0x4000;
+    } > aram
+    .aram_mp3enc __aram_vma (NOLOAD) : {
+        *(.mp3enc_buf.*)
+        . = 0x4000;
+    } > aram
+    .aram_fcc __aram_vma (NOLOAD) : {
+        . = 0x1000;
+        *(.fcc_buf.huart)
+        *(.fcc_buf*)
+    } > aram
+    .aram_contacts __aram_vma (NOLOAD) : {
+        *(.kvdb_buf*)
+    } > aram
+    .aram_opus __aram_vma (NOLOAD) : {
+    } > aram
+    .dram_upd __dram_vma (NOLOAD) : {
+        . = 0x2800;
+        *(.upd_buf*)
+        *(.ota_buf*)
+        . = 0x3200;
+    } > dram
+    .dram_mp3 __dram_vma (NOLOAD) : {
+        . = 0x1000;
+        *(.mp3_decram_buf)
+        . = 0x4500;
+    } > dram
+    .dram_ape __dram_vma (NOLOAD) : {
+        *(.apebuf.cb)
+        *(.apebuf.filter)
+        *(.apebuf.decode)
+        *(.apebuf.seektbl)
+        . = 0x4500;
+    } > dram
+    .dram_wma __dram_vma (NOLOAD) : {
+        *(.wmabuf*)
+        *(.wma_ctx_buf)
+        *(.wma_wincb_buf)
+        *(.wma_id3_buf)
+        . = 0x4500;
+    } > dram
+    .dram_flac __dram_vma (NOLOAD) : {
+        *(.flacbuf*)
+        *(.flac_decoded_buf1)
+        *(.wavbuf.dec)
+        . = 0x4500;
+    } > dram
+    .dram_aac __dram_vma (NOLOAD) : {
+        *(.aac_decram_buf)
+        *(.aac_cache*)
+    } > dram
+    .dram_sbc __dram_vma (NOLOAD) : {
+        *(.sbc_decram_buf)
+        . = 0xD38;
+        *(.sbcbuf.dec)
+        *(.tsco_cache)
+        *(.sco_cache*)
+        *(.sco_data*)
+        *(.sco_hci)
+        *(.plc_buf)
+        *(.plc_data*)
+        *(.sbcenc.buf)
+        . = 0x4500;
+     } > dram
+    .dram_rec __dram_vma (NOLOAD) : {
+        *(.wavenc.sco)
+        . = 0xD38;
+        *(.rec_buf.*)
+        . = 0x4500;
+    } > dram
+    .dram_opus_enc __dram_vma (NOLOAD) : {
+    } > dram
+    .dram_opus_dec __dram_vma (NOLOAD) : {
+    } > dram
+    .dram_usb __dram_vma (NOLOAD) : {
+        *(.usb.device.desc.buf)
+        *(.ude.aubuf)
+        . = 0x4500;
+    } > dram
+    .dram_fot __dram_vma (NOLOAD) : {
+        *(.fot_data.*)
+    } > dram
+    .eram_mp3enc __eram_vma (NOLOAD) : {
+        *(.mp3_enc_hwbuf)
+    } > eram
+    .heap_ram __lpram_vma (NOLOAD) : {
+        *(.agc_buf*)
+        *(.ains_buf*)
+        *(.dnn_buf*)
+        *(.aiaec_buf*)
+        *(.dmdnn_data*)
+        *(.dmdnn_aiaec_buf*)
+    } > lpram
+    .sleep_ram __lpram_vma (NOLOAD) : {
+        *(.sleep_backup.*)
+        *(.sensorhub.*)
+    } > lpram
+    .jpeg_ram __lpram_vma (NOLOAD) : {
+        *(.jpeg_buf.*)
+    } > lpram
+    .take_ram __lpram_vma (NOLOAD) : {
+        *(.take_photo_buf.*)
+    } > lpram
+    .play_ram __lpram_vma (NOLOAD) : {
+        *(.video_play_buf.*)
+    } > lpram
+    .photo_ram __lpram_vma (NOLOAD) : {
+        *(.photo_view_buf.*)
+    } > lpram
+    .noise_alg_ram __lpram_vma (NOLOAD) : {
+        *(.dnn_data.*)
+    } > lpram
+    .qr_ram __lpram_vma (NOLOAD) : {
+        *(.qr_buff)
+    } > lpram
+    .qr_exram __lpram_vma (NOLOAD) : {
+        *(.qr_ex_buff)
+    } > lpram
+    .gram_gif __gram_vma (NOLOAD) : {
+        KEEP(*(.gif_buf.*))
+    } > gram
+    .gram_jpg __gram_vma (NOLOAD) : {
+        KEEP(*(.jpg_gbuf.*))
+    } > gram
+    .psram_dvp __psram_vma (NOLOAD) : {
+        *(.psram_imgage_sensor.*)
+        *(.psram_imgage_sensor_disp.*)
+        __psram_dvp_end = .;
+    } > psram
+    .psram_video_play __psram_vma (NOLOAD) : {
+        *(.psram_video_play.*)
+        *(.psram_video_play_disp.*)
+        . = 0x1EB000;
+    } > psram
+    .psram_photo_view __psram_vma (NOLOAD) : {
+        *(.psram_photo_view.*)
+        *(.psram_photo_view_disp.*)
+        . = 0x1EB000;
+    } > psram
+    .psram_video_recode __psram_dvp_end (NOLOAD) : {
+        *(.psram_video_recode.*)
+        *(.psram_video_recode_disp.*)
+        . = 0x1EB000;
+    } > psram
+    .psram_take_photo __psram_dvp_end (NOLOAD) : {
+        *(.psram_take_photo.*)
+        *(.psram_take_photo_disp.*)
+        . = 0x1EB000;
+    } > psram
+    .psram_gif __psram_vma (NOLOAD) : {
+        *(.gif.*)
+        . = 0x1EB000;
+    } > psram
+    .psram_other __psram_vma (NOLOAD) : {
+        . = 0x1EB000;
+        *(.img_test.*)
+        *(.psram_gui.*)
+        *(.psram_buf*)
+        *(.screenshot_buf*)
+        __amap_buf_start = .;
+        __amap_buf_end = .;
+    } > psram
+    __amap_buf_size = __amap_buf_end - __amap_buf_start;
+}
+__bank_size = SIZEOF(.flash);
+__comm_lma = LOADADDR(.comm);
+__comm_size = SIZEOF(.comm);
+__dnn_lma = LOADADDR(.dnn_comm);
+__dnn_size = SIZEOF(.dnn_comm);
+__sleep_lma = LOADADDR(.sleep_comm);
+__sleep_size = SIZEOF(.sleep_comm);
