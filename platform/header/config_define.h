@@ -41,6 +41,7 @@
 #define GUI_TFT_240_ST789_i80           (DISPLAY_TFT | 0x09)                    //彩屏 240*320 I8080
 
 #define GUI_VGS_640                     (DISPLAY_TFT | 0x10)                    //光机640*480
+#define GUI_TFT_JD9853_BOE_2IN0         (DISPLAY_TFT | 0x11)                    //JD9853 BOE 2.0寸 240*320 3WIRE SPI
 
 //LCD 屏幕
 #define GUI_LCD_800_ST7265              (DISPLAY_LCD | 0x01)                    //lcd 800*480

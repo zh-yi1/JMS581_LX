@@ -2,6 +2,8 @@
 
 const char * const i18n_en[] = {
     [STR_HOME]                          = "Home",
+    [STR_BACKUP]                        = "Backup",
+    [STR_SET]                           = "Set",
     [STR_CLOCK]                         = "clock",
     [STR_CLOCK_PREVIEW]                 = "Dial preview",
     [STR_MESSAGE]                       = "Message",

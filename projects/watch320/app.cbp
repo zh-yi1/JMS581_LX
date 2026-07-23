@@ -819,6 +819,9 @@
 		<Unit filename="../../platform/gui/tft/tft_240_st7789_i80.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../../platform/gui/tft/tft_240_jd9853_boe20.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../platform/gui/tft/tft_320_st77916.c">
 			<Option compilerVar="CC" />
 		</Unit>

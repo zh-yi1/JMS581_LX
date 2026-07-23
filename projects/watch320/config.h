@@ -115,7 +115,7 @@
 /*****************************************************************************
  * Module    : 屏幕驱动配置
  *****************************************************************************/
-#define GUI_SELECT                      GUI_OLED_466_ICNA3310B//GUI_TFT_320_ST77916    		//GUI Display Select
+#define GUI_SELECT GUI_TFT_JD9853_BOE_2IN0 // GUI_TFT_320_ST77916    		//GUI Display Select
 
 #define PORT_TFT_INT                    IO_PA6                      //TE
 #define PORT_TFT_INT_VECTOR             PORT_INT2_VECTOR

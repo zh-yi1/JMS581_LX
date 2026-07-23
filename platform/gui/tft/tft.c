@@ -213,6 +213,8 @@ void tft_init(void)
     lcd_drv_register(&lcd_800_st7265_drv);
 #elif (GUI_SELECT == GUI_VGS_640)
     lcd_drv_register(&lcd_vga012a_drv);
+#elif (GUI_SELECT == GUI_TFT_JD9853_BOE_2IN0)
+    lcd_drv_register(&lcd_240_jd9853_boe20_drv);
 #endif
 
     LCDSPIBAUD = 30;      //读ID建议在20M以内

@@ -8,6 +8,8 @@
 
 enum {
     STR_HOME,
+    STR_BACKUP,
+    STR_SET,
     STR_CLOCK,
     STR_CLOCK_PREVIEW,
     STR_MESSAGE,

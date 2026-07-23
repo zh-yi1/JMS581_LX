@@ -4,20 +4,20 @@
 #include "tft_drv.h"
 
 typedef struct {
-    //TE¿ØÖÆÏà¹Ø
-    bool tft_bglight_kick;      //±³¹â¿ØÖÆ
-    u8   tft_bglight_duty;      //±³¹âpwmÕ¼¿Õ±È
-    u8   tft_bglight_last_duty; //±³¹âpwmÉÏÒ»´ÎÕ¼¿Õ±È
+    //TEï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    bool tft_bglight_kick;      //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    u8   tft_bglight_duty;      //ï¿½ï¿½ï¿½ï¿½pwmÕ¼ï¿½Õ±ï¿½
+    u8   tft_bglight_last_duty; //ï¿½ï¿½ï¿½ï¿½pwmï¿½ï¿½Ò»ï¿½ï¿½Õ¼ï¿½Õ±ï¿½
     u8 te_mode;
     u8 te_mode_next;
     bool tft_bglight_first_set;
 
-    u8 te_bglight_cnt;          //ÔÚÊÕµ½ĞèÒª´ò¿ª±³¹â¿ØÖÆÊ±£¬ÍÆÍêµÚÒ»Ö¡Êı¾İºóÑÓÊ±´ò¿ª±³¹â
+    u8 te_bglight_cnt;          //ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½Òªï¿½ò¿ª±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ö¡ï¿½ï¿½ï¿½İºï¿½ï¿½ï¿½Ê±ï¿½ò¿ª±ï¿½ï¿½ï¿½
     u8 despi_baud;
     u8 despi_baud1;
     u8 despi_baud2;
     bool flag_in_frame;
-    bool tft_set_baud_kick;     //ĞèÒªÇĞ»»Ê±ÖÓ£¬µÈTFT_ENDºóÔÙÇĞ
+    bool tft_set_baud_kick;     //ï¿½ï¿½Òªï¿½Ğ»ï¿½Ê±ï¿½Ó£ï¿½ï¿½ï¿½TFT_ENDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 } tft_cb_t;
 
 
@@ -31,7 +31,7 @@ typedef enum {
     LCD_IO_PRGB16,
 }lcd_io_type;
 
-#define GUI_COLOR_DEPTH                 2                     //gui µ×²ãÑÕÉ«Ö§³ÖÉî¶È, ÖĞ¿ÆÕâµÄGUIÑÕÉ«¾ÍÊÇ565É«, ²»¿ÉÒÔ¸Äà¸
+#define GUI_COLOR_DEPTH                 2                     //gui ï¿½×²ï¿½ï¿½ï¿½É«Ö§ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½Ğ¿ï¿½ï¿½ï¿½ï¿½GUIï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½565É«, ï¿½ï¿½ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½
 
 enum {
     LCD_SELECT_XOSC_CLK     = 0,
@@ -43,8 +43,8 @@ enum {
 };
 
 enum {
-    LCD_SELECT_RGB_8BIT = 0,            //SRGBÊ±Ğò: VsyncÎªÖ¡Í¬²½ĞÅºÅ, ±íÊ¾Ö¡¿ªÊ¼. Hsync ÎªĞĞÍ¬²½ĞÅºÅ, ±íÊ¾ĞĞ¿ªÊ¼. DE ÎªÊı¾İÓĞĞ§Ê¹ÄÜ, ±íÊ¾Êı¾İÓĞĞ§, Ã¿Ò»¸öCLKÖÜÆÚ, ²ÉÑùÒ»¸öÏñËØÊı¾İD[7:0], Ã¿3¸öCLKÎªÒ»¸öÏñËØRGB, ÒÔ´ËÍê³ÉÒ»Ö¡Í¼ÏñµÄÊä³öÏÔÊ¾.
-    LCD_SELECT_RGB_16BIT,               //PRGBÊ±Ğò: VsyncÎªÖ¡Í¬²½ĞÅºÅ, ±íÊ¾Ö¡¿ªÊ¼. Hsync ÎªĞĞÍ¬²½ĞÅºÅ, ±íÊ¾ĞĞ¿ªÊ¼. DE ÎªÊı¾İÓĞĞ§Ê¹ÄÜ, ±íÊ¾Êı¾İÓĞĞ§, Ã¿Ò»¸öCLKÖÜÆÚ, ²ÉÑùÒ»¸öÏñËØÊı¾İD[23:0], ÒÔ´ËÍê³ÉÒ»Ö¡Í¼ÏñµÄÊä³öÏÔÊ¾
+    LCD_SELECT_RGB_8BIT = 0,            //SRGBÊ±ï¿½ï¿½: VsyncÎªÖ¡Í¬ï¿½ï¿½ï¿½Åºï¿½, ï¿½ï¿½Ê¾Ö¡ï¿½ï¿½Ê¼. Hsync Îªï¿½ï¿½Í¬ï¿½ï¿½ï¿½Åºï¿½, ï¿½ï¿½Ê¾ï¿½Ğ¿ï¿½Ê¼. DE Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§Ê¹ï¿½ï¿½, ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§, Ã¿Ò»ï¿½ï¿½CLKï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½D[7:0], Ã¿3ï¿½ï¿½CLKÎªÒ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½RGB, ï¿½Ô´ï¿½ï¿½ï¿½ï¿½Ò»Ö¡Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾.
+    LCD_SELECT_RGB_16BIT,               //PRGBÊ±ï¿½ï¿½: VsyncÎªÖ¡Í¬ï¿½ï¿½ï¿½Åºï¿½, ï¿½ï¿½Ê¾Ö¡ï¿½ï¿½Ê¼. Hsync Îªï¿½ï¿½Í¬ï¿½ï¿½ï¿½Åºï¿½, ï¿½ï¿½Ê¾ï¿½Ğ¿ï¿½Ê¼. DE Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§Ê¹ï¿½ï¿½, ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§, Ã¿Ò»ï¿½ï¿½CLKï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½D[23:0], ï¿½Ô´ï¿½ï¿½ï¿½ï¿½Ò»Ö¡Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 };
 
 enum {
@@ -170,8 +170,8 @@ typedef struct _lcd_drv_t {
             u32 hsync_width;
             u32 hfront_porch;
             u32 hback_porch;
-            lcd_color_t *refersh_dma_buf;       //ÕûÆÁÑÕÉ«ÏÔÊ¾ÄÚ´æ
-            u32 refersh_dma_buf_size;           //ÕûÆÁÑÕÉ«ÏÔÊ¾ÄÚ´æ´óĞ¡
+            lcd_color_t *refersh_dma_buf;       //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½Ê¾ï¿½Ú´ï¿½
+            u32 refersh_dma_buf_size;           //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«ï¿½ï¿½Ê¾ï¿½Ú´ï¿½ï¿½Ğ¡
         } rgb_drv_param;
     } param;
     void (*tft_te_isr)(void);
@@ -181,7 +181,7 @@ typedef struct _lcd_drv_t {
     void (*tft_set_brightness)(u8 brightness);
 }lcd_drv_t;
 
-/*ÏµÍ³Ê¹ÓÃ*/
+/*ÏµÍ³Ê¹ï¿½ï¿½*/
 void tft_spi_send(void *buf, uint wid, uint hei);
 void tft_frame_start(void);
 void tft_frame_end(void);
@@ -204,8 +204,8 @@ u32 tft_spi_getbyte(void);
 
 #define TFT_SPI_CS_DIS()      {lcd_drv_cs_out(1);}
 #define TFT_SPI_CS_EN()       {lcd_drv_cs_out(0);}
-#define DC_CMD_EN()           {lcd_drv_dc_out(0);}      // DC À­µÍ
-#define DC_DATA_EN()          {lcd_drv_dc_out(1);}      // DC À­¸ß
+#define DC_CMD_EN()           {lcd_drv_dc_out(0);}      // DC ï¿½ï¿½ï¿½ï¿½
+#define DC_DATA_EN()          {lcd_drv_dc_out(1);}      // DC ï¿½ï¿½ï¿½ï¿½
 
 /*
  * lcd drv extern
@@ -222,50 +222,51 @@ extern lcd_drv_t lcd_240_st7789V3_i80_drv;
 extern lcd_drv_t lcd_vga012a_drv;
 extern lcd_drv_t lcd_480_st7283_drv;
 extern lcd_drv_t lcd_800_st7265_drv;
+extern lcd_drv_t lcd_240_jd9853_boe20_drv;
 
 /**
- * ³õÊ¼»¯LCD
+ * ï¿½ï¿½Ê¼ï¿½ï¿½LCD
  */
 void tft_init(void);
 
 /**
- * ¹Ø±ÕLCD
+ * ï¿½Ø±ï¿½LCD
  */
 void tft_exit(void);
 
 /**
- * ×¢²áLCDÇı¶¯£¬ÇÒ³õÊ¼»¯ÆÁÄ»
+ * ×¢ï¿½ï¿½LCDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò³ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ä»
  */
 void lcd_drv_register(lcd_drv_t *drv);
 
 /**
- * ×¢ÏúLCDÇı¶¯£¬ÇÒ°ÑIO¿ÚÉèÖÃÎªÄ£ÄâÌ¬
+ * ×¢ï¿½ï¿½LCDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò°ï¿½IOï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÄ£ï¿½ï¿½Ì¬
  */
 void lcd_drv_deregister(void);
 
 /**
- * ÖØÖÃLCDÏà¹ØCLK
+ * ï¿½ï¿½ï¿½ï¿½LCDï¿½ï¿½ï¿½CLK
  */
 void lcd_drv_clk_deregister(void);
 
 
 /**
- * ³õÊ¼»¯ÒÑ×¢²áµÄLCDÇı¶¯
+ * ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½LCDï¿½ï¿½ï¿½ï¿½
  */
 void lcd_drv_init(void);
 
 /**
- * ÉèÖÃÒÑ×¢²áLCD´°
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½LCDï¿½ï¿½
  */
 void lcd_drv_set_window(u16 x0, u16 y0, u16 x1, u16 y1);
 
 /**
- * ¶ÁÈ¡ÒÑ×¢²áLCD ID
+ * ï¿½ï¿½È¡ï¿½ï¿½×¢ï¿½ï¿½LCD ID
  */
 uint32_t lcd_drv_read_id(void);
 
 /**
- * OLED ÆÁµ÷±³¹â
+ * OLED ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 void lcd_drv_set_brightness(u8 brightness);
 
@@ -274,45 +275,45 @@ void lcd_drv_cs_out(bool is_high);
 void lcd_drv_dc_out(bool is_high);
 
 /**
- * ÉèÖÃTE Ä£Ê½
+ * ï¿½ï¿½ï¿½ï¿½TE Ä£Ê½
  */
 void tft_set_temode(u8 mode);
 
 /**
- * Ö±½Ó´ò¿ª±³¹â
+ * Ö±ï¿½Ó´ò¿ª±ï¿½ï¿½ï¿½
  */
 void tft_bglight_en(void);
 
 /**
- * ÉèÖÃTE1ºÍTE2Ä£Ê½ÏÂµÄLCD CLKËÙ¶È
+ * ï¿½ï¿½ï¿½ï¿½TE1ï¿½ï¿½TE2Ä£Ê½ï¿½Âµï¿½LCD CLKï¿½Ù¶ï¿½
    TE1Ä£Ê½->lcd_clk = 496Mhz/4/(baud1 + 1);
    TE2Ä£Ê½->lcd_clk = 496Mhz/4/(baud2 + 1);
  */
 void tft_set_baud(u8 baud1, u8 baud2);
 
 /**
- * @brief ÉèÖÃoledÁÁ¶È
- * @param[in] level       ÁÁ¶ÈµÈ¼¶£¬Ê¹ÓÃÎŞ¼«µ÷½ÚÊ±£¬·¶Î§0 ~ 100£¬·ñÔòÎª1~5
- * @param[in] stepless_en ÊÇ·ñÊ¹ÓÃÎŞ¼«µ÷½Ú
+ * @brief ï¿½ï¿½ï¿½ï¿½oledï¿½ï¿½ï¿½ï¿½
+ * @param[in] level       ï¿½ï¿½ï¿½ÈµÈ¼ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½Ş¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Î§0 ~ 100ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª1~5
+ * @param[in] stepless_en ï¿½Ç·ï¿½Ê¹ï¿½ï¿½ï¿½Ş¼ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @return  ÎŞ
+ * @return  ï¿½ï¿½
  **/
 void oled_brightness_set_level(uint8_t level, bool stepless_en);
 
 /**
- * @brief ÉèÖÃ±³¹âÁÁ¶È
- * @param[in] level       ÁÁ¶ÈµÈ¼¶£¬Ê¹ÓÃÎŞ¼«µ÷½ÚÊ±£¬·¶Î§0 ~ 100£¬·ñÔòÎª1~5
- * @param[in] stepless_en ÊÇ·ñÊ¹ÓÃÎŞ¼«µ÷½Ú
+ * @brief ï¿½ï¿½ï¿½Ã±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * @param[in] level       ï¿½ï¿½ï¿½ÈµÈ¼ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½Ş¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Î§0 ~ 100ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª1~5
+ * @param[in] stepless_en ï¿½Ç·ï¿½Ê¹ï¿½ï¿½ï¿½Ş¼ï¿½ï¿½ï¿½ï¿½ï¿½
  *
- * @return  ÎŞ
+ * @return  ï¿½ï¿½
  **/
 void tft_bglight_set_level(uint8_t level, bool stepless_en);
 
 /**
- * @brief Ê×´ÎÉèÖÃÁÁ¶È¼ì²â
- * @param ÎŞ
+ * @brief ï¿½×´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½ï¿½
+ * @param ï¿½ï¿½
  *
- * @return  ÎŞ
+ * @return  ï¿½ï¿½
  **/
 void tft_bglight_frist_set_check(void);
 

@@ -2,6 +2,8 @@
 
 const char * const i18n_zh[] = {
     [STR_HOME]                          = "首页",
+    [STR_BACKUP]                        = "备份",
+    [STR_SET]                           = "设置",
     [STR_CLOCK]                         = "时钟",
     [STR_CLOCK_PREVIEW]                 = "表盘预览",
     [STR_MESSAGE]                       = "消息",
