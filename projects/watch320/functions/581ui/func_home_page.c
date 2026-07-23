@@ -19,12 +19,12 @@ compo_form_t *func_home_page_form_create(void)
     compo_shape_set_location(bg, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y,
                              GUI_SCREEN_WIDTH, GUI_SCREEN_HEIGHT);
 
-    txt = compo_textbox_create(frm, 3);
+    txt = compo_textbox_create(frm, 4);
     compo_textbox_set_location(txt, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y-150, 200, 40);
     compo_textbox_set_align_center(txt, true);
-    compo_textbox_set(txt, "ABC");
+    compo_textbox_set(txt, i18n[STR_HOME]);
 
-        /* 上方: 设置图标 */
+    /* 上方: 设置图标 */
     compo_picturebox_t *pic_set = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_SET_BIN);
     compo_picturebox_set_pos(pic_set, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y - 50);
 

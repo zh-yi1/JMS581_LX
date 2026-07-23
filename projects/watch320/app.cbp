@@ -1163,6 +1163,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="config.h" />
+		<Unit filename="functions/581ui/func_home_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="functions/common/func_bt_update.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -1220,9 +1223,6 @@
 		<Unit filename="functions/func_charge.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="functions/func_ui_stubs.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="functions/func_clock.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -1278,6 +1278,9 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="functions/func_menu_sub_waterfall.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/func_ui_stubs.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="i18n/lang.c">

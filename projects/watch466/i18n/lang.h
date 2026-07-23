@@ -7,6 +7,7 @@
 //};
 
 enum {
+    STR_HOME,
     STR_CLOCK,
     STR_CLOCK_PREVIEW,
     STR_MESSAGE,

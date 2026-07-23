@@ -1,6 +1,7 @@
 #include "include.h"
 
 const char * const i18n_zh[] = {
+    [STR_HOME]                          = "首页",
     [STR_CLOCK]                         = "时钟",
     [STR_CLOCK_PREVIEW]                 = "表盘预览",
     [STR_MESSAGE]                       = "消息",
