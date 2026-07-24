@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
     <appSettings>
-        <add key="lang_id" value="英文" />
+        <add key="lang_id" value="中文" />
         <add key="func_music_en" value="True" />
         <add key="func_aux_en" value="True" />
         <add key="func_fmrx_en" value="True" />

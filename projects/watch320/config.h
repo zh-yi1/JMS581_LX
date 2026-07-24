@@ -199,7 +199,7 @@
 #define FORM_TITLE_HEIGHT               50                      //窗体标题高度（466 OLED）
 #define FORM_TITLE_LEFT                 (GUI_SCREEN_WIDTH / 9)
 
-#define UI_BUF_FONT_SYS                 UI_BUF_0FONT_FONT_BIN           //系统字体
+#define UI_BUF_FONT_SYS UI_BUF_FONT_BIN_FONT_F16_BIN                    // 系统字体
 #define UI_BUF_FONT_FORM_TIME           UI_BUF_0FONT_FONT_ASC_BIN       //窗体标题栏时间字体
 
 #define BOX_GUI_ROTATE_DISP             0
@@ -666,7 +666,7 @@
 #define WARING_MAXVOL_MP3               0                           //最大音量提示音WAV或MP3选择， 播放WAV可以与MUSIC叠加播放。
 #define WARNING_WAVRES_PLAY             0                           //是否支持WAV提示音播放
 #define WARNING_VOLUME                  xcfg_cb.warning_volume      //播放提示音的音量级数
-#define LANG_SELECT                     LANG_EN                     //提示音语言选择
+#define LANG_SELECT                     LANG_ZH                     //提示音语言选择
 
 #define WARNING_POWER_ON                1
 #define WARNING_POWER_OFF               0
