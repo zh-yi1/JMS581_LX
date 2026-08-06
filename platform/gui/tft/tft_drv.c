@@ -335,6 +335,10 @@ void tft_write_data_start(void)
     } else if(lcd_drv_reg->io_type == LCD_IO_QSPI){
         #if MSPI_DDR_MODE_EN
             tft_write_cmd72(0x2C);
+        #elif (GUI_SELECT == GUI_TFT_JD9853_BOE_2IN0)
+            /* 1线 QSPI RAMWR(0x02+0x2C)：避免 4线(0x32) 位序导致缺红/整体偏绿/横纹 */
+            tft_write_cmd(0x2C);
+            LCDSPICON &= ~(BIT(9) | (0x3 << 2));   // 1BIT，勿切 4线
         #else
             tft_write_cmd32(0x2C);      //TFT_RAMWR
         #endif

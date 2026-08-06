@@ -21,9 +21,9 @@ static void tft_240_jd9853_boe20_init(void)
 
     WriteComm(0xCE);
     WriteData(0x6A);
-    WriteData(0x00);    // 00 default SDA IN/OUT; 20=D0 OUT
+    WriteData(0x20);    // 20=D0 OUT（1线像素）；00=SDA IN/OUT
 
-    // Vcom
+    // Vcom（厂商默认）
     WriteComm(0xB2);
     WriteData(0x24);
 
@@ -170,11 +170,7 @@ static void tft_240_jd9853_boe20_init(void)
 
     // MADCTL: portrait (相对原横屏 A0 旋转 90°)
     WriteComm(0x36);
-    WriteData(0x00);    // 00=竖屏; 60=横屏3点; A0=横屏9点
-
-    // Color format: RGB565
-    WriteComm(0x3A);
-    WriteData(0x05);    // 06=RGB666; 05=RGB565
+    WriteData(0x00);    // 00=竖屏; 08=竖屏BGR; 60=横屏3点; A0=横屏9点
 
     // Column address: 0 ~ 239
     WriteComm(0x2A);
@@ -195,10 +191,16 @@ static void tft_240_jd9853_boe20_init(void)
     CommEnd();
     delay_ms(120);
 
+    // COLMOD: Sleep Out 后设 RGB565（上电默认 0x06=RGB666）
+    WriteComm(0x3A);
+    WriteData(0x05);
+
     // Display on
     WriteComm(0x29);
     CommEnd();
     delay_ms(10);
+
+    printf("jd9853_boe20: COLMOD=0x05 VCOM=0x24 1LINE\n");
 
     // Lock password
     WriteComm(0xDF);
