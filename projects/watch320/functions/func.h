@@ -11,11 +11,15 @@
 #include "common/func_lowpwr.h"
 #include "common/func_manage.h"
 #include "common/func_update.h"
+#if FUNC_BT_DUT_EN
 #include "func_bt_dut.h"
+#endif
 #include "func_music.h"
 #include "func_usbdev.h"
 #include "func_recorder.h"
+#if FUNC_FMRX_EN
 #include "func_fmrx.h"
+#endif
 
 #define TICK_IGNORE_KEY            700      //忽略700ms内的部分消息
 
