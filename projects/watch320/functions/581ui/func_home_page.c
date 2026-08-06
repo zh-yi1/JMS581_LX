@@ -16,7 +16,7 @@
 #define HOME_ROW_GAP                4
 
 #define HOME_CHECK_X_OFS            (-90)
-#define HOME_NAME_X_OFS             (-55)
+#define HOME_NAME_X_OFS             (-45)
 #define HOME_STA_X_OFS              (70)
 
 #define HOME_BTN_W                  104
@@ -27,17 +27,31 @@
 #define HOME_COLOR_STA              make_color(0x99, 0x99, 0x99)
 #define HOME_COLOR_DISABLE          make_color(0x66, 0x66, 0x66)
 
+#define HOME_ICON_Y                 31
+#define HOME_SET_X                  (GUI_SCREEN_WIDTH - 20)
+#define HOME_BAT_X                  (GUI_SCREEN_WIDTH - 52)
+
 // 卡槽就绪状态（演示：SD/CFA 已就绪，CFB 未插卡）
 static const u8 s_card_ready[HOME_CARD_CNT] = {1, 1, 0};
-static const u16 s_card_name_id[HOME_CARD_CNT] = {
-    STR_CARD_SD, STR_CARD_CFA, STR_CARD_CFB
+static const char *s_card_name[HOME_CARD_CNT] = {
+    "SD", "CFA", "CFB"
+};
+
+static const u32 s_bat_level_res[] = {
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_1_BIN,
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_2_BIN,
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_3_BIN,
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_4_BIN,
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_5_BIN,
 };
 
 // 首页私有状态
 typedef struct {
     u8 selection;   // 0~2 卡槽选中
     u8 btn_sel;     // 0=整卡, 1=最新7日
+    u8 bat_level;   // 1~5
     compo_picturebox_t *pic_set;
+    compo_picturebox_t *pic_bat;
     compo_picturebox_t *pic_row[HOME_CARD_CNT];
     compo_picturebox_t *pic_check[HOME_CARD_CNT];
     compo_textbox_t *txt_name[HOME_CARD_CNT];
@@ -45,6 +59,40 @@ typedef struct {
     compo_picturebox_t *pic_btn[HOME_BTN_CNT];
     compo_textbox_t *txt_btn[HOME_BTN_CNT];
 } f_home_t;
+
+static u8 home_bat_level_from_percent(u8 percent)
+{
+    if (percent <= 20) {
+        return 1;
+    }
+    if (percent <= 40) {
+        return 2;
+    }
+    if (percent <= 60) {
+        return 3;
+    }
+    if (percent <= 80) {
+        return 4;
+    }
+    return 5;
+}
+
+static void home_update_battery(void)
+{
+    f_home_t *h = (f_home_t *)func_cb.f_cb;
+    u8 level;
+
+    if (h == NULL || h->pic_bat == NULL) {
+        return;
+    }
+
+    level = home_bat_level_from_percent(sys_cb.vbat_percent);
+    if (level == h->bat_level) {
+        return;
+    }
+    h->bat_level = level;
+    compo_picturebox_set(h->pic_bat, s_bat_level_res[level - 1]);
+}
 
 static void home_update_display(void)
 {
@@ -99,26 +147,43 @@ compo_form_t *func_home_page_form_create(void)
     compo_shape_set_location(bg, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y,
                              GUI_SCREEN_WIDTH, GUI_SCREEN_HEIGHT);
 
-    /* 顶部：SSD 剩余 */
-    txt = compo_textbox_create(frm, 16);
-    compo_textbox_set_location(txt, 16, 22, 0, 0);
-    compo_textbox_set_autosize(txt, true);
-    compo_textbox_set_align_center(txt, false);
-    compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_11_BIN);
-    compo_textbox_set_forecolor(txt, HOME_COLOR_STA);
-    compo_textbox_set(txt, i18n[STR_SSD_REMAIN]);
+    /* 顶部：SSD（固定）+ 剩余（多语言） */
+    {
+        compo_textbox_t *txt_ssd;
+        s16 remain_x;
+
+        txt_ssd = compo_textbox_create(frm, 8);
+        compo_textbox_set_location(txt_ssd, 15, 16, 0, 0);
+        compo_textbox_set_autosize(txt_ssd, true);
+        compo_textbox_set_align_center(txt_ssd, false);
+        compo_textbox_set_font(txt_ssd, UI_BUF_FONT_BIN_FONT_SIZE_11_BIN);
+        compo_textbox_set_forecolor(txt_ssd, HOME_COLOR_STA);
+        compo_textbox_set(txt_ssd, "SSD");
+
+        remain_x = 15 + compo_textbox_get_wid(txt_ssd);
+        txt = compo_textbox_create(frm, 16);
+        compo_textbox_set_location(txt, remain_x, 16, 0, 0);
+        compo_textbox_set_autosize(txt, true);
+        compo_textbox_set_align_center(txt, false);
+        compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_11_BIN);
+        compo_textbox_set_forecolor(txt, HOME_COLOR_STA);
+        compo_textbox_set(txt, i18n[STR_REMAIN]);
+    }
 
     txt = compo_textbox_create(frm, 18);
-    compo_textbox_set_location(txt, 16, 52, 0, 0);
+    compo_textbox_set_location(txt, 16, 29, 0, 0);
     compo_textbox_set_autosize(txt, true);
     compo_textbox_set_align_center(txt, false);
     compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_22_BIN);
-    compo_textbox_set(txt, "1.42 TB");
+    compo_textbox_set(txt, "1 .42 TB");
 
-    /* 顶部右侧：设置图标 */
-    h->pic_set = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_SET_1_BIN);
-    compo_picturebox_set_pos(h->pic_set, GUI_SCREEN_WIDTH - 28, 28);
-    compo_picturebox_set_size(h->pic_set, 24, 24);
+    /* 顶部右侧：设置 + 电量 */
+    h->pic_set = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_SETTING_BIN);
+    compo_picturebox_set_pos(h->pic_set, HOME_SET_X, HOME_ICON_Y);
+  
+    h->bat_level = home_bat_level_from_percent(sys_cb.vbat_percent);
+    h->pic_bat = compo_picturebox_create(frm, s_bat_level_res[h->bat_level - 1]);
+    compo_picturebox_set_pos(h->pic_bat, HOME_BAT_X, HOME_ICON_Y);
 
     /* 卡槽列表 */
     for (i = 0; i < HOME_CARD_CNT; i++) {
@@ -137,7 +202,7 @@ compo_form_t *func_home_page_form_create(void)
         compo_textbox_set_autosize(h->txt_name[i], true);
         compo_textbox_set_align_center(h->txt_name[i], true);
         compo_textbox_set_font(h->txt_name[i], UI_BUF_FONT_BIN_FONT_SIZE_17_BIN);
-        compo_textbox_set(h->txt_name[i], i18n[s_card_name_id[i]]);
+        compo_textbox_set(h->txt_name[i], s_card_name[i]);
 
         h->txt_sta[i] = compo_textbox_create(frm, 16);
         compo_textbox_set_location(h->txt_sta[i],
@@ -174,6 +239,7 @@ compo_form_t *func_home_page_form_create(void)
 
 static void func_home_page_process(void)
 {
+    home_update_battery();
     func_process();
 }
 
