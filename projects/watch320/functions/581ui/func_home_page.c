@@ -47,17 +47,20 @@ compo_form_t *func_home_page_form_create(void)
     compo_shape_set_location(bg, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y,
                              GUI_SCREEN_WIDTH, GUI_SCREEN_HEIGHT);
 
-    txt = compo_textbox_create(frm, 4);
-    compo_textbox_set_location(txt, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y - 80, 200, 40);
+    txt = compo_textbox_create(frm, 18);
+    compo_textbox_set_location(txt, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y - 80, 0, 0);
+    compo_textbox_set_autosize(txt, true);
     compo_textbox_set_align_center(txt, true);
+    compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_F18_BIN);
     compo_textbox_set(txt, i18n[STR_HOME]);
 
     /* 上方：备份模式图标 */
     h->pic_backup = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_BACKUP_MODE_1_BIN);
     compo_picturebox_set_pos(h->pic_backup, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y - 24);
 
-    h->txt_backup = compo_textbox_create(frm, 7);
-    compo_textbox_set_location(h->txt_backup, GUI_SCREEN_CENTER_X - 30, GUI_SCREEN_CENTER_Y - 24, 64, 23);
+    h->txt_backup = compo_textbox_create(frm, 16);
+    compo_textbox_set_location(h->txt_backup, GUI_SCREEN_CENTER_X - 60, GUI_SCREEN_CENTER_Y - 24, 0, 0);
+    compo_textbox_set_autosize(h->txt_backup, true);
     compo_textbox_set_align_center(h->txt_backup, true);
     compo_textbox_set(h->txt_backup, i18n[STR_BACKUP]);
 
@@ -65,8 +68,9 @@ compo_form_t *func_home_page_form_create(void)
     h->pic_set = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_SET_BIN);
     compo_picturebox_set_pos(h->pic_set, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y + 24);
 
-    h->txt_set = compo_textbox_create(frm, 7);
-    compo_textbox_set_location(h->txt_set, GUI_SCREEN_CENTER_X - 30, GUI_SCREEN_CENTER_Y + 24, 64, 23);
+    h->txt_set = compo_textbox_create(frm, 16);
+    compo_textbox_set_location(h->txt_set, GUI_SCREEN_CENTER_X - 78, GUI_SCREEN_CENTER_Y + 24, 0, 0);
+    compo_textbox_set_autosize(h->txt_set, true);
     compo_textbox_set_align_center(h->txt_set, true);
     compo_textbox_set(h->txt_set, i18n[STR_SET]);
 
