@@ -168,9 +168,9 @@ static void tft_240_jd9853_boe20_init(void)
     WriteComm(0x35);
     WriteData(0x00);
 
-    // MADCTL: landscape, 9 o'clock (90° counter-clockwise)
+    // MADCTL: portrait (相对原横屏 A0 旋转 90°)
     WriteComm(0x36);
-    WriteData(0xA0);    // 00=竖屏; 60=横屏3点; A0=横屏9点
+    WriteData(0x00);    // 00=竖屏; 60=横屏3点; A0=横屏9点
 
     // Color format: RGB565
     WriteComm(0x3A);
@@ -215,7 +215,7 @@ static void tft_240_jd9853_boe20_set_window(u16 x0, u16 y0, u16 x1, u16 y1)
     y0 += GUI_SCREEN_OFS_Y;
     y1 += GUI_SCREEN_OFS_Y;
 
-    // MADCTL MV=1: hardware swaps X/Y, column range becomes 0..319, row range 0..239
+    // MADCTL MV=0 竖屏: column 0..239, row 0..319
     tft_write_cmd(0x2A);        // TFT_CASET
     tft_write_data(BYTE1(x0));
     tft_write_data(BYTE0(x0));

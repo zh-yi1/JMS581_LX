@@ -88,12 +88,12 @@
  * Module    : FLASH配置
  *****************************************************************************/
 #define FLASH_DISK_EN                   0                                                   //是否支持FLASH DISK 功能
-#define FLASH_SIZE                      FSIZE_8M                                            //根据芯片信息配置实际FLASH SIZE
+#define FLASH_SIZE                      FSIZE_4M                                            //根据芯片信息配置实际FLASH SIZE
 #define FLASH_CODE_BASE_SIZE            0xEA000                                             //基础功能所需FLASH
 #define FLASH_UI_BASE                   0x200000                                            //UI资源起始地址(最小值为FLASH_CODE_SIZE)
-#define FLASH_UI_SIZE                   0x300000                                            //UI资源大小(ui.bin的大小)
-#define FLASH_PKG_START                 0x500000                                            //升级压缩包存放起始地址
-#define FLASH_PKG_SIZE                  0x200000                                            //升级压缩包大小
+#define FLASH_UI_SIZE                   0x1FB000                                            //UI资源大小(4M: 0x200000+0x1FB000=0x3FB000, 末尾留FLASH_CM_SIZE)
+#define FLASH_PKG_START                 0x300000                                            //升级压缩包存放起始地址(须在FLASH内; 当前FOTA关闭)
+#define FLASH_PKG_SIZE                  0xFB000                                             //升级压缩包大小(至参数区前)
 #define FLASH_DISK_START                FLASH_PKG_START                                     //FLASH DISK 功能与OTA升级复用
 #define FLASH_DISK_LEN                  FLASH_PKG_SIZE                                      //FLASH DISK 功能与OTA升级复用, 0为关闭此功能
 #define FLASH_CM_SIZE                   0x5000
