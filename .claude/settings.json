@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gcc -Wall -Wextra -DKEY_SM_HOLD_MS=200 -o t2 test_sm.c)",
+      "Bash(sed -i 's/#define KEY_SM_HOLD_MS    0/#define KEY_SM_HOLD_MS    200/' test_sm.c)",
+      "Bash(gcc -Wall -Wextra -o t2 test_sm.c)",
+      "Bash(./t2)",
+      "Bash(git checkout *)"
+    ]
+  }
+}
