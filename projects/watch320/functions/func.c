@@ -11,7 +11,6 @@
 bool func_music_is_play(void);
 void func_music_play(bool sta);
 void func_call_mgr_process(void);
-u8 func_menu_sub_skyrer_get_first_idx(void);
 compo_form_t *func_clock_form_create_by_screenshoot(void);
 
 func_cb_t func_cb AT(.buf.func_cb);
@@ -406,135 +405,16 @@ void func_switch_to_clock(void)
 }
 
 
-//退回到主菜单
+//退回到首页（原主菜单入口已废弃）
 void func_switch_to_menu(void)
 {
-#if VIDEO_PLAY_EN
-    compo_video_t *video = compo_getobj_bytype(COMPO_TYPE_VIDEO);
-    compo_video_exit_lock(video);
-#endif // VIDEO_PLAY_EN
-    u16 switch_mode;
-    bool flag_frm_menu;                                                         //是否需要创建菜单窗体
-    flag_frm_menu = true;
-    if (func_cb.menu_style == MENU_STYLE_FOOTBALL) {
-        switch_mode = FUNC_SWITCH_FADE_OUT | FUNC_SWITCH_AUTO;;
-        flag_frm_menu = false;
-    } else if (func_cb.sta != FUNC_CLOCK || func_cb.menu_style == MENU_STYLE_HONEYCOMB) {
-        switch_mode = FUNC_SWITCH_ZOOM_EXIT | FUNC_SWITCH_AUTO;
-    } else if (func_cb.menu_style == MENU_STYLE_WATERFALL) {
-        switch_mode = FUNC_SWITCH_FADE_OUT | FUNC_SWITCH_AUTO;
-        func_cb.flag_animation = true;                                          //淡出后进入入场动画
-        flag_frm_menu = false;
-    } else {
-        switch_mode = FUNC_SWITCH_ZOOM_FADE_EXIT | FUNC_SWITCH_AUTO;
-    }
-    if (flag_frm_menu) {
-        widget_icon_t *icon;
-        compo_form_t *frm = func_create_form(FUNC_MENU);                        //创建下一个任务的窗体
-#if (ASR_SELECT && ASR_VOICE_BALL_ANIM)
-        component_t *compo = compo_get_next((component_t *)frm->anim);
-#else
-        component_t *compo = compo_get_next((component_t *)frm->title);
-#endif
-
-        if (compo->type == COMPO_TYPE_ICONLIST) {
-            compo_iconlist_t *iconlist = (compo_iconlist_t *)compo;
-            icon = compo_iconlist_select_byidx(iconlist, func_cb.menu_idx);
-        } else if (compo->type == COMPO_TYPE_LISTBOX) {
-            compo_listbox_t *listbox = (compo_listbox_t *)compo;
-            icon = compo_listbox_select_byidx(listbox, func_cb.menu_idx);
-        } else if (compo->type == COMPO_TYPE_DISKLIST) {
-            compo_disklist_t *disklist = (compo_disklist_t *)compo;
-            icon = compo_disklist_select_byidx(disklist, func_cb.menu_idx);
-        } else if (compo->type == COMPO_TYPE_KALEIDOSCOPE) {
-            compo_kaleidoscope_t *kale = (compo_kaleidoscope_t *)compo;
-            icon = compo_kale_select_byidx(kale, func_cb.menu_idx);
-        } else if (compo->type == COMPO_TYPE_RINGS) {
-            compo_rings_t *rings = (compo_rings_t *)compo;
-            icon = compo_rings_select_byidx(rings, func_cb.menu_idx);
-            if (icon == NULL) {
-                func_cb.menu_idx = func_menu_sub_skyrer_get_first_idx();
-                icon = compo_rings_select_byidx(rings, func_cb.menu_idx);
-            }
-        } else {
-//            printf("%s\n", __func__);
-//            halt(HALT_GUI_COMPO_ICONLIST_TYPE);
-//            return;
-            icon = NULL;
-        }
-        if (icon == NULL) {
-            switch_mode = FUNC_SWITCH_FADE_OUT;
-        }
-        func_switching(switch_mode, icon);                                      //退出动画
-        compo_form_destroy(frm);                                                //切换完成或取消，销毁窗体
-    } else {
-        func_switching(switch_mode, NULL);                                      //退出动画
-    }
-    func_cb.sta = FUNC_MENU;
-#if VIDEO_PLAY_EN
-    compo_video_exit_unlock(video);
-#endif // VIDEO_PLAY_EN
+    func_switch_to(FUNC_HOME_PAGE, FUNC_SWITCH_FADE_OUT | FUNC_SWITCH_AUTO);
 }
 
-//手动退回到主菜单
+//手动退回到首页
 void func_switching_to_menu(void)
 {
-#if VIDEO_PLAY_EN
-    compo_video_t *video = compo_getobj_bytype(COMPO_TYPE_VIDEO);
-    compo_video_exit_lock(video);
-#endif // VIDEO_PLAY_EN
-
-    widget_icon_t *icon;
-    u16 switch_mode;
-    compo_form_t *frm = func_create_form(FUNC_MENU);                            //创建下一个任务的窗体
-#if (ASR_SELECT && ASR_VOICE_BALL_ANIM)
-        component_t *compo = compo_get_next((component_t *)frm->anim);
-#else
-        component_t *compo = compo_get_next((component_t *)frm->title);
-#endif
-    if (compo->type == COMPO_TYPE_ICONLIST) {
-        compo_iconlist_t *iconlist = (compo_iconlist_t *)compo;
-        icon = compo_iconlist_select_byidx(iconlist, func_cb.menu_idx);
-    } else if (compo->type == COMPO_TYPE_LISTBOX) {
-        compo_listbox_t *listbox = (compo_listbox_t *)compo;
-        icon = compo_listbox_select_byidx(listbox, func_cb.menu_idx);
-    } else if (compo->type == COMPO_TYPE_DISKLIST) {
-        compo_disklist_t *disklist = (compo_disklist_t *)compo;
-        icon = compo_disklist_select_byidx(disklist, func_cb.menu_idx);
-    } else if (compo->type == COMPO_TYPE_KALEIDOSCOPE) {
-        compo_kaleidoscope_t *kale = (compo_kaleidoscope_t *)compo;
-        icon = compo_kale_select_byidx(kale, func_cb.menu_idx);
-    } else if (compo->type == COMPO_TYPE_RINGS) {
-            compo_rings_t *rings = (compo_rings_t *)compo;
-            icon = compo_rings_select_byidx(rings, func_cb.menu_idx);
-            if (icon == NULL) {
-                func_cb.menu_idx = func_menu_sub_skyrer_get_first_idx();
-                icon = compo_rings_select_byidx(rings, func_cb.menu_idx);
-            }
-    } else {
-//            printf("%s\n", __func__);
-//            halt(HALT_GUI_COMPO_ICONLIST_TYPE);
-//            return;
-            icon = NULL;
-    }
-    if (func_cb.sta != FUNC_CLOCK || func_cb.menu_style == MENU_STYLE_HONEYCOMB) {
-        switch_mode = FUNC_SWITCH_ZOOM_EXIT;
-    } else {
-        switch_mode = FUNC_SWITCH_ZOOM_FADE_EXIT;
-    }
-
-    if (icon == NULL) {
-        switch_mode = FUNC_SWITCH_FADE_OUT;
-    }
-
-    bool res = func_switching(switch_mode, icon);                               //退出动画
-    compo_form_destroy(frm);                                                    //切换完成或取消，销毁窗体
-    if (res) {
-        func_cb.sta = FUNC_MENU;
-    }
-#if VIDEO_PLAY_EN
-    compo_video_exit_unlock(video);
-#endif // VIDEO_PLAY_EN
+    func_switch_to(FUNC_HOME_PAGE, FUNC_SWITCH_FADE_OUT);
 }
 
 
@@ -556,9 +436,8 @@ void func_backing_to(void)
         stack_top = FUNC_CLOCK;                                 //异常返回表盘
     }
 
-    if (stack_top == FUNC_MENU
-    ) {
-        func_switching_to_menu();                               //右滑缓慢退出任务
+    if (stack_top == FUNC_MENU || stack_top == FUNC_HOME_PAGE) {
+        func_switching_to_menu();                               //右滑缓慢退出到首页
     } else if (stack_top == FUNC_SMARTSTACK
     ) {
         func_switch_to(stack_top, FUNC_SWITCH_LR_ZOOM_RIGHT);   //返回上一个界面
@@ -590,9 +469,8 @@ void func_back_to(void)
         stack_top = FUNC_CLOCK;                                 //异常返回表盘
     }
 
-    if (stack_top == FUNC_MENU
-    ) {
-        func_switch_to_menu();                                  //返回主菜单
+    if (stack_top == FUNC_MENU || stack_top == FUNC_HOME_PAGE) {
+        func_switch_to_menu();                                  //返回首页
     } else if (stack_top == FUNC_SMARTSTACK
     ) {
         func_switch_to(stack_top, FUNC_SWITCH_LR_ZOOM_RIGHT | FUNC_SWITCH_AUTO);  //返回上一个界面

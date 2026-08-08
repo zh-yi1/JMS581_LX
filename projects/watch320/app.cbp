@@ -1222,10 +1222,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="functions/func.h" />
-		<Unit filename="functions/func_bt_dut.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_bt_dut.h" />
 		<Unit filename="functions/func_charge.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -1236,56 +1232,10 @@
 		<Unit filename="functions/func_clock_sub_side.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="functions/func_compass.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_debug_info.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_fmrx.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_fmrx.h" />
-		<Unit filename="functions/func_gif.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="functions/func_menu.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="functions/func_menu.h" />
-		<Unit filename="functions/func_menu_sub_cum_sudoku.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_disk.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_grid.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_hexagon.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_honeycomb.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_kaleidoscope.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_list.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_ring.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_skyrer.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_sudoku.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="functions/func_menu_sub_waterfall.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="functions/func_ui_stubs.c">
 			<Option compilerVar="CC" />
 		</Unit>

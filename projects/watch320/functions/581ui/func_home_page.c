@@ -7,31 +7,130 @@
 #define TRACE(...)
 #endif
 
+#define HOME_CARD_CNT               3
+#define HOME_BTN_CNT                2
+
+#define HOME_ROW_W                  216
+#define HOME_ROW_H                  48
+#define HOME_ROW0_Y                 108
+#define HOME_ROW_GAP                4
+
+#define HOME_CHECK_X_OFS            (-90)
+#define HOME_NAME_X_OFS             (-45)
+#define HOME_STA_X_OFS              (70)
+
+#define HOME_BTN_W                  104
+#define HOME_BTN_H                  48
+#define HOME_BTN_Y                  (GUI_SCREEN_HEIGHT - 36)
+#define HOME_BTN_X_OFS              56
+
+#define HOME_COLOR_STA              make_color(0x99, 0x99, 0x99)
+#define HOME_COLOR_DISABLE          make_color(0x66, 0x66, 0x66)
+
+#define HOME_ICON_Y                 31
+#define HOME_SET_X                  (GUI_SCREEN_WIDTH - 20)
+#define HOME_BAT_X                  (GUI_SCREEN_WIDTH - 52)
+
+// 卡槽就绪状态（演示：SD/CFA 已就绪，CFB 未插卡）
+static const u8 s_card_ready[HOME_CARD_CNT] = {1, 1, 0};
+static const char *s_card_name[HOME_CARD_CNT] = {
+    "SD", "CFA", "CFB"
+};
+
+static const u32 s_bat_level_res[] = {
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_1_BIN,
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_2_BIN,
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_3_BIN,
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_4_BIN,
+    UI_BUF_IMAGE_BIN_BATTERY_LEVEL_5_BIN,
+};
+
 // 首页私有状态
 typedef struct {
-    u8 selection;  // 0 = 备份模式, 1 = 设置
-    compo_picturebox_t *pic_backup;
+    u8 selection;   // 0~2 卡槽选中
+    u8 btn_sel;     // 0=整卡, 1=最新7日
+    u8 bat_level;   // 1~5
     compo_picturebox_t *pic_set;
-    compo_textbox_t *txt_backup;
-    compo_textbox_t *txt_set;
+    compo_picturebox_t *pic_bat;
+    compo_picturebox_t *pic_row[HOME_CARD_CNT];
+    compo_picturebox_t *pic_check[HOME_CARD_CNT];
+    compo_textbox_t *txt_name[HOME_CARD_CNT];
+    compo_textbox_t *txt_sta[HOME_CARD_CNT];
+    compo_picturebox_t *pic_btn[HOME_BTN_CNT];
+    compo_textbox_t *txt_btn[HOME_BTN_CNT];
 } f_home_t;
+
+static u8 home_bat_level_from_percent(u8 percent)
+{
+    if (percent <= 20) {
+        return 1;
+    }
+    if (percent <= 40) {
+        return 2;
+    }
+    if (percent <= 60) {
+        return 3;
+    }
+    if (percent <= 80) {
+        return 4;
+    }
+    return 5;
+}
+
+static void home_update_battery(void)
+{
+    f_home_t *h = (f_home_t *)func_cb.f_cb;
+    u8 level;
+
+    if (h == NULL || h->pic_bat == NULL) {
+        return;
+    }
+
+    level = home_bat_level_from_percent(sys_cb.vbat_percent);
+    if (level == h->bat_level) {
+        return;
+    }
+    h->bat_level = level;
+    compo_picturebox_set(h->pic_bat, s_bat_level_res[level - 1]);
+}
 
 static void home_update_display(void)
 {
     f_home_t *h = (f_home_t *)func_cb.f_cb;
-    bool is_backup = (h->selection == 0);
+    u8 i;
 
-    // 备份模式：选中态 vs 普通态
-    compo_picturebox_set(h->pic_backup, is_backup
-        ? UI_BUF_IMAGE_BIN_BACKUP_MODE_1_BIN
-        : UI_BUF_IMAGE_BIN_BACKUP_MODE_BIN);
-    compo_textbox_set_forecolor(h->txt_backup, is_backup ? COLOR_BLACK : COLOR_WHITE);
+    for (i = 0; i < HOME_CARD_CNT; i++) {
+        bool selected = (h->selection == i);
+        bool ready = s_card_ready[i];
 
-    // 设置：选中态 vs 普通态
-    compo_picturebox_set(h->pic_set, is_backup
-        ? UI_BUF_IMAGE_BIN_SET_BIN
-        : UI_BUF_IMAGE_BIN_SET_1_BIN);
-    compo_textbox_set_forecolor(h->txt_set, is_backup ? COLOR_WHITE : COLOR_BLACK);
+        // 行背景：选中 / 未选中
+        compo_picturebox_set(h->pic_row[i], selected
+            ? UI_BUF_IMAGE_BIN_CLICK_BJ_BIN
+            : UI_BUF_IMAGE_BIN_DIVIDER_UNCLICK_BIN);
+
+        // 勾选框：已就绪 / 未插卡
+        compo_picturebox_set(h->pic_check[i], ready
+            ? UI_BUF_IMAGE_BIN_CLICK_BIN
+            : UI_BUF_IMAGE_BIN_UNCLICK_BIN);
+
+        if (ready) {
+            compo_textbox_set_forecolor(h->txt_name[i], COLOR_WHITE);
+            compo_textbox_set_forecolor(h->txt_sta[i], HOME_COLOR_STA);
+            compo_textbox_set(h->txt_sta[i], i18n[STR_CARD_READY]);
+        } else {
+            compo_textbox_set_forecolor(h->txt_name[i], HOME_COLOR_DISABLE);
+            compo_textbox_set_forecolor(h->txt_sta[i], HOME_COLOR_DISABLE);
+            compo_textbox_set(h->txt_sta[i], i18n[STR_CARD_ABSENT]);
+        }
+    }
+
+    // 底部按钮：选中态 vs 未选中态
+    for (i = 0; i < HOME_BTN_CNT; i++) {
+        bool selected = (h->btn_sel == i);
+        compo_picturebox_set(h->pic_btn[i], selected
+            ? UI_BUF_IMAGE_BIN_BOTTON_CLICK_BIN
+            : UI_BUF_IMAGE_BIN_BOTTON_UNCLICK_BIN);
+    }
 }
 
 compo_form_t *func_home_page_form_create(void)
@@ -39,6 +138,7 @@ compo_form_t *func_home_page_form_create(void)
     f_home_t *h = (f_home_t *)func_cb.f_cb;
     compo_form_t *frm = compo_form_create(true);
     compo_textbox_t *txt;
+    u8 i;
 
     /* 黑色背景，避免 GPU 误读 UI 头当图解码 */
     widget_set_visible(frm->icon, false);
@@ -47,43 +147,115 @@ compo_form_t *func_home_page_form_create(void)
     compo_shape_set_location(bg, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y,
                              GUI_SCREEN_WIDTH, GUI_SCREEN_HEIGHT);
 
+    /* 顶部：SSD（固定）+ 剩余（多语言） */
+    {
+        compo_textbox_t *txt_ssd;
+        s16 remain_x;
+
+        txt_ssd = compo_textbox_create(frm, 8);
+        compo_textbox_set_location(txt_ssd, 15, 16, 0, 0);
+        compo_textbox_set_autosize(txt_ssd, true);
+        compo_textbox_set_align_center(txt_ssd, false);
+        compo_textbox_set_font(txt_ssd, UI_BUF_FONT_BIN_FONT_SIZE_11_BIN);
+        compo_textbox_set_forecolor(txt_ssd, HOME_COLOR_STA);
+        compo_textbox_set(txt_ssd, "SSD");
+
+        remain_x = 15 + compo_textbox_get_wid(txt_ssd);
+        txt = compo_textbox_create(frm, 16);
+        compo_textbox_set_location(txt, remain_x, 16, 0, 0);
+        compo_textbox_set_autosize(txt, true);
+        compo_textbox_set_align_center(txt, false);
+        compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_11_BIN);
+        compo_textbox_set_forecolor(txt, HOME_COLOR_STA);
+        compo_textbox_set(txt, i18n[STR_REMAIN]);
+    }
+
     txt = compo_textbox_create(frm, 18);
-    compo_textbox_set_location(txt, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y - 80, 0, 0);
+    compo_textbox_set_location(txt, 16, 29, 0, 0);
     compo_textbox_set_autosize(txt, true);
-    compo_textbox_set_align_center(txt, true);
-    compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_F18_BIN);
-    compo_textbox_set(txt, i18n[STR_HOME]);
+    compo_textbox_set_align_center(txt, false);
+    compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_22_BIN);
+    compo_textbox_set(txt, "1 .42 TB");
 
-    /* 上方：备份模式图标 */
-    h->pic_backup = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_BACKUP_MODE_1_BIN);
-    compo_picturebox_set_pos(h->pic_backup, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y - 24);
+    /* 顶部右侧：设置 + 电量 */
+    h->pic_set = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_SETTING_BIN);
+    compo_picturebox_set_pos(h->pic_set, HOME_SET_X, HOME_ICON_Y);
+  
+    h->bat_level = home_bat_level_from_percent(sys_cb.vbat_percent);
+    h->pic_bat = compo_picturebox_create(frm, s_bat_level_res[h->bat_level - 1]);
+    compo_picturebox_set_pos(h->pic_bat, HOME_BAT_X, HOME_ICON_Y);
 
-    h->txt_backup = compo_textbox_create(frm, 16);
-    compo_textbox_set_location(h->txt_backup, GUI_SCREEN_CENTER_X - 60, GUI_SCREEN_CENTER_Y - 24, 0, 0);
-    compo_textbox_set_autosize(h->txt_backup, true);
-    compo_textbox_set_align_center(h->txt_backup, true);
-    compo_textbox_set(h->txt_backup, i18n[STR_BACKUP]);
+    /* 卡槽列表 */
+    for (i = 0; i < HOME_CARD_CNT; i++) {
+        s16 y = HOME_ROW0_Y + i * (HOME_ROW_H + HOME_ROW_GAP);
 
-    /* 下方：设置图标 */
-    h->pic_set = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_SET_BIN);
-    compo_picturebox_set_pos(h->pic_set, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y + 24);
+        h->pic_row[i] = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_DIVIDER_UNCLICK_BIN);
+        compo_picturebox_set_pos(h->pic_row[i], GUI_SCREEN_CENTER_X, y);
 
-    h->txt_set = compo_textbox_create(frm, 16);
-    compo_textbox_set_location(h->txt_set, GUI_SCREEN_CENTER_X - 78, GUI_SCREEN_CENTER_Y + 24, 0, 0);
-    compo_textbox_set_autosize(h->txt_set, true);
-    compo_textbox_set_align_center(h->txt_set, true);
-    compo_textbox_set(h->txt_set, i18n[STR_SET]);
+        h->pic_check[i] = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_CLICK_BIN);
+        compo_picturebox_set_pos(h->pic_check[i],
+                                 GUI_SCREEN_CENTER_X + HOME_CHECK_X_OFS, y);
 
-    /* 初始选中备份模式 */
-    compo_textbox_set_forecolor(h->txt_backup, COLOR_BLACK);
-    compo_textbox_set_forecolor(h->txt_set, COLOR_WHITE);
+        h->txt_name[i] = compo_textbox_create(frm, 16);
+        compo_textbox_set_location(h->txt_name[i],
+                                   GUI_SCREEN_CENTER_X + HOME_NAME_X_OFS, y, 0, 0);
+        compo_textbox_set_autosize(h->txt_name[i], true);
+        compo_textbox_set_align_center(h->txt_name[i], true);
+        compo_textbox_set_font(h->txt_name[i], UI_BUF_FONT_BIN_FONT_SIZE_17_BIN);
+        compo_textbox_set(h->txt_name[i], s_card_name[i]);
+
+        h->txt_sta[i] = compo_textbox_create(frm, 16);
+        compo_textbox_set_location(h->txt_sta[i],
+                                   GUI_SCREEN_CENTER_X + HOME_STA_X_OFS, y, 0, 0);
+        compo_textbox_set_autosize(h->txt_sta[i], true);
+        compo_textbox_set_align_center(h->txt_sta[i], true);
+        compo_textbox_set_forecolor(h->txt_sta[i], HOME_COLOR_STA);
+        compo_textbox_set_font(h->txt_sta[i], UI_BUF_FONT_BIN_FONT_SIZE_11_BIN);
+        compo_textbox_set(h->txt_sta[i], i18n[STR_CARD_READY]);
+    }
+
+    /* 底部按钮：整卡 / 最新 7 日 */
+    for (i = 0; i < HOME_BTN_CNT; i++) {
+        s16 x = GUI_SCREEN_CENTER_X + (i == 0 ? -HOME_BTN_X_OFS : HOME_BTN_X_OFS);
+
+        h->pic_btn[i] = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_BOTTON_CLICK_BIN);
+        compo_picturebox_set_pos(h->pic_btn[i], x, HOME_BTN_Y);
+
+        h->txt_btn[i] = compo_textbox_create(frm, 16);
+        compo_textbox_set_location(h->txt_btn[i], x, HOME_BTN_Y, 0, 0);
+        compo_textbox_set_autosize(h->txt_btn[i], true);
+        compo_textbox_set_align_center(h->txt_btn[i], true);
+        compo_textbox_set_font(h->txt_btn[i], UI_BUF_FONT_BIN_FONT_SIZE_15_BIN);
+        compo_textbox_set(h->txt_btn[i],
+                          i18n[i == 0 ? STR_FULL_CARD : STR_LATEST_7D]);
+    }
+
+    h->selection = 0;
+    h->btn_sel = 0;
+    home_update_display();
 
     return frm;
 }
 
 static void func_home_page_process(void)
 {
+    home_update_battery();
     func_process();
+}
+
+static void home_select_next(f_home_t *h, s8 dir)
+{
+    u8 next = h->selection;
+    u8 try_cnt = HOME_CARD_CNT;
+
+    while (try_cnt--) {
+        next = (next + dir + HOME_CARD_CNT) % HOME_CARD_CNT;
+        if (s_card_ready[next]) {
+            h->selection = next;
+            home_update_display();
+            return;
+        }
+    }
 }
 
 static void func_home_page_message(size_msg_t msg)
@@ -94,16 +266,24 @@ static void func_home_page_message(size_msg_t msg)
     {
     case MSG_QDEC_FORWARD:
     case MSG_CTP_SHORT_DOWN:
-        if (h->selection != 1) {
-            h->selection = 1;
-            home_update_display();
-        }
+        home_select_next(h, 1);
         break;
 
     case MSG_QDEC_BACKWARD:
     case MSG_CTP_SHORT_UP:
-        if (h->selection != 0) {
-            h->selection = 0;
+        home_select_next(h, -1);
+        break;
+
+    case MSG_CTP_SHORT_LEFT:
+        if (h->btn_sel != 0) {
+            h->btn_sel = 0;
+            home_update_display();
+        }
+        break;
+
+    case MSG_CTP_SHORT_RIGHT:
+        if (h->btn_sel != 1) {
+            h->btn_sel = 1;
             home_update_display();
         }
         break;
