@@ -52,6 +52,10 @@ void func_process(void)
 {
     WDT_CLR();
 
+#if BSP_UART1_EN
+    bsp_uart1_process();
+#endif
+
 #if CPU_USAGE_MONITOT_EN
     cpu_trace_monitor();
 #endif
