@@ -15,6 +15,8 @@ const char * const i18n_zh[] = {
     [STR_SKIP_DUP_FILES]                = "重复文件自动跳过",
     [STR_NO_MODIFY_SRC]                 = "不会修改源卡内容",
     [STR_START_BACKUP]                  = "开始备份",
+    [STR_SELECT]                        = "选择",
+    [STR_TARGET_DIR]                    = "目标目录",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

@@ -231,6 +231,8 @@ static void func_confirm_the_whole_card_page_message(size_msg_t msg)
         /* 点击返回：左上角区域 */
         if (pt.x < 48 && pt.y < 48) {
             func_cb.sta = FUNC_HOME_PAGE;
+        } else if (pt.y > (CONFIRM_CARD_Y - 30) && pt.y < (CONFIRM_CARD_Y + 30)) {
+            func_cb.sta = FUNC_CONTENTS_PAGE;
         } else if (pt.y > (CONFIRM_BTN_Y - 30)) {
             f->btn_press = 1;
             confirm_update_display();

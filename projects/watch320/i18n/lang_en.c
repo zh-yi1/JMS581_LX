@@ -15,6 +15,8 @@ const char * const i18n_en[] = {
     [STR_SKIP_DUP_FILES]                = "Skip duplicate files",
     [STR_NO_MODIFY_SRC]                 = "Source card unchanged",
     [STR_START_BACKUP]                  = "Start Backup",
+    [STR_SELECT]                        = "Select",
+    [STR_TARGET_DIR]                    = "Folder",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

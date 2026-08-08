@@ -17,6 +17,8 @@ enum {
     STR_SKIP_DUP_FILES,
     STR_NO_MODIFY_SRC,
     STR_START_BACKUP,
+    STR_SELECT,
+    STR_TARGET_DIR,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
