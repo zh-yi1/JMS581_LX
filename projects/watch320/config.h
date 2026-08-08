@@ -479,11 +479,12 @@
 /*****************************************************************************
  * Module    : User按键配置 (可以同时选择多组按键)
  *****************************************************************************/
-#define USER_PWRKEY                     1           //PWRKEY的使用，0为不使用
+#define USER_PWRKEY                     0          //PWRKEY的使用，0为不使用(仅用于开关机流程判断按键按住没有)
 #define USER_ADKEY                      0           //ADKEY的使用， 0为不使用
 #define USER_IOKEY                      0           //IOKEY的使用， 0为不使用
+#define USER_KEY_ON                     1           //KEY_ON单按键的使用，0为不使用(按键事件由自己的状态机识别)
 
-#define USER_KEY_QDEC_EN                1           //旋钮, 硬件正交解码, A,B输出分别接一个IO
+#define USER_KEY_QDEC_EN                0           //旋钮, 硬件正交解码, A,B输出分别接一个IO
 #define USER_QDEC_MAPPING               QDEC_MAP_G4 //选择硬件正交解码的mapping, 每组map的IO固定，详见define处说明
 
 #define USER_ADKEY_QDEC_EN              0           //旋钮, A,B串不同电阻接到同一个IO口上，软件ADC采集并解码
@@ -497,6 +498,18 @@
 #define PWROFF_PRESS_TIME               18          //长按PWRKEY多长时间关机 3: 1.5秒, 6: 2秒, 9: 2.5秒, 12: 3秒, 15: 3.5秒, 18: 4秒, 24: 5秒
 #define ADKEY_CH                        ADCCH_PE7   //ADKEY的ADC通路选择
 #define IS_PWRKEY_PRESS()			    (0 == (RTCCON & BIT(19)))
+
+/*****************************************************************************
+ * Module    : KEY_ON按键配置 (USER_KEY_ON, 状态机在port/port_key_on.c)
+ * 硬件      : KEY_ON --R5(1K)--> WKO脚, R7(10K)上拉到VDDIO, 按下接地为低电平
+ * 事件      : 单击 / 双击 / 长按, 回调实现在port_key_on.c
+ *****************************************************************************/
+#define KEY_ON_USAGE_ID                 KEY_BACK    //KEY_ON对应的按键编号
+#define KEY_ON_TICK_MS                  5           //状态机扫描周期(ms), 跟随5ms定时中断
+#define KEY_ON_FILTER_MS                30          //按下/抬起消抖时间(ms)
+#define KEY_ON_MULTI_MS                 400         //双击判定窗口(ms), 窗口内无新按下则上报单击
+#define KEY_ON_LONG_MS                  3000        //长按判定时间(ms), 按满即上报, 不等抬起
+#define KEY_ON_IS_PRESS()               IS_PWRKEY_PRESS()   //WKO脚电平, 低为按下
 
 /*****************************************************************************
  * Module    : 电量检测及低电

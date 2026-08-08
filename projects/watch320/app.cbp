@@ -1272,6 +1272,10 @@
 		<Unit filename="port/port_key.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="port/port_key_on.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="port/port_key_on.h" />
 		<Unit filename="port/port_mute.c">
 			<Option compilerVar="CC" />
 		</Unit>
