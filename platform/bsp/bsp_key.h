@@ -189,6 +189,11 @@ extern const u8 key_config_table[];
 
 void io_key_init(void);
 u8 get_iokey(void);
+
+#if USER_KEY_ON
+void key_on_init(void);                     //KEY_ON按键初始化, 实现在port_key_on.c
+void key_on_process(void);                  //KEY_ON按键扫描, 5ms调用一次
+#endif // USER_KEY_ON
 void key_var_init(void);
 void key_init(void);
 u8 bsp_key_scan(void);

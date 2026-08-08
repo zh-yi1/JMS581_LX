@@ -343,6 +343,10 @@ void key_init(void)
     io_key_init();
 #endif
 
+#if USER_KEY_ON
+    key_on_init();
+#endif
+
 #if USER_ADKEY
     saradc_set_channel(BIT(ADKEY_CH));
 //    adcch_io_pu10k_enable(ADKEY_CH);          //开内部10K上拉
@@ -431,6 +435,11 @@ u8 bsp_key_scan(void)
 #if VUSB_DETECT_EN
     sys_cb.vusb = bsp_vusb_get_voltage();
 #endif
+
+#if USER_KEY_ON
+    key_on_process();                       //KEY_ON按键: 状态和事件自管理, 不走下面的按键流程
+    return NO_KEY;
+#endif // USER_KEY_ON
 
 #if USER_ADKEY
     if (key_val == NO_KEY) {

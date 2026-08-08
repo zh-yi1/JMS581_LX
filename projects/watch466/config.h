@@ -19,7 +19,7 @@
 
 #define FUNC_BT_EN                      1   //是否打开蓝牙功能
 #define FUNC_BT_DUT_EN                  0   //是否打开蓝牙的独立DUT测试模式
-#define FUNC_MUSIC_EN                   1   //是否打开MUSIC功能
+#define FUNC_MUSIC_EN                   0   //是否打开MUSIC功能
 #define FUNC_FMRX_EN                    0   //是否打开FM收音功能
 #define FUNC_RECORDER_EN                0   //是否打开录音机功能
 #define FUNC_USBDEV_EN                  0   //是否打开USB DEVICE功能
@@ -40,11 +40,11 @@
 #define BUCK_MODE_EN                    1                           //是否BUCK MODE
 #define SYS_CLK_SEL                     SYS_48M                    //选择系统时钟
 #define POWKEY_10S_RESET                xcfg_cb.powkey_10s_reset
-#define SOFT_POWER_ON_OFF               1                           //是否使用软开关机功能
+#define SOFT_POWER_ON_OFF               0                           //是否使用软开关机功能
 #define SOFT_POWER_VDDIO_EN             0                           //是否软关机开启VDDIO
 #define PWRKEY_2_HW_PWRON               0                           //用PWRKEY模拟硬开关
 #define LP_XOSC_CLOCK_EN                0                           //是否使能低功耗晶振用于RTC CLOCK，支持关机时钟功能。(单脚晶振不支持低功耗晶振)
-#define RTC_CLOCK_PDN_EN                1                           //是否使能关机时钟功能, 使能后关机时会保持sniffrc，关机电流变大到9u左右。
+#define RTC_CLOCK_PDN_EN                0                           //是否使能关机时钟功能, 使能后关机时会保持sniffrc，关机电流变大到9u左右。
 #define GUI_AUTO_POWER_EN               1                           //是否使能刷图动态调节时钟，打开后系统时钟默认设置为SYS_CLK_SEL，刷图时调节为192M
 #define VUSB4S_RESET_EN                 0                           //VUSB4s硬件复位使能
 
@@ -269,7 +269,7 @@
 /*****************************************************************************
  * Module    : BLE功能配置
  *****************************************************************************/
-#define LE_EN                           1   //是否打开BLE功能
+#define LE_EN                           0   //是否打开BLE功能
 #define LE_PAIR_EN                      1   //是否使能BLE的加密配对
 #define LE_SM_SC_EN                     1   //是否使能BLE的加密连接，需同时打开LE_PAIR_EN。一键双联需要打开此配置。
 #define LE_ADV_POWERON_EN               1   //是否上电默认打开BLE广播
@@ -479,11 +479,12 @@
 /*****************************************************************************
  * Module    : User按键配置 (可以同时选择多组按键)
  *****************************************************************************/
-#define USER_PWRKEY                     1           //PWRKEY的使用，0为不使用
+#define USER_PWRKEY                     0           //PWRKEY的使用，0为不使用
 #define USER_ADKEY                      0           //ADKEY的使用， 0为不使用
 #define USER_IOKEY                      0           //IOKEY的使用， 0为不使用
+#define USER_KEY_ON                     1           //KEY_ON单按键的使用，0为不使用(与上面三种按键模式互斥)
 
-#define USER_KEY_QDEC_EN                1           //旋钮, 硬件正交解码, A,B输出分别接一个IO
+#define USER_KEY_QDEC_EN                0           //旋钮, 硬件正交解码, A,B输出分别接一个IO
 #define USER_QDEC_MAPPING               QDEC_MAP_G4 //选择硬件正交解码的mapping, 每组map的IO固定，详见define处说明
 
 #define USER_ADKEY_QDEC_EN              0           //旋钮, A,B串不同电阻接到同一个IO口上，软件ADC采集并解码
@@ -499,9 +500,21 @@
 #define IS_PWRKEY_PRESS()			    (0 == (RTCCON & BIT(19)))
 
 /*****************************************************************************
+ * Module    : KEY_ON按键配置 (USER_KEY_ON, 状态机在port/port_key_on.c)
+ * 硬件      : KEY_ON --R5(1K)--> WKO脚, R7(10K)上拉到VDDIO, 按下接地为低电平
+ * 事件      : 单击 / 双击 / 长按, 回调实现在port_key_on.c
+ *****************************************************************************/
+#define KEY_ON_USAGE_ID                 KEY_BACK    //KEY_ON对应的按键编号
+#define KEY_ON_TICK_MS                  5           //状态机扫描周期(ms), 跟随5ms定时中断
+#define KEY_ON_FILTER_MS                30          //按下/抬起消抖时间(ms)
+#define KEY_ON_MULTI_MS                 400         //双击判定窗口(ms), 窗口内无新按下则上报单击
+#define KEY_ON_LONG_MS                  3000        //长按判定时间(ms), 按满即上报, 不等抬起
+#define KEY_ON_IS_PRESS()               IS_PWRKEY_PRESS()   //WKO脚电平, 低为按下
+
+/*****************************************************************************
  * Module    : 电量检测及低电
  *****************************************************************************/
-#define VBAT_DETECT_EN                  1           //电池电量检测功能
+#define VBAT_DETECT_EN                  0           //电池电量检测功能
 #define VUSB_DETECT_EN                  0           //充电电压检测功能
 #define VBAT2_ADCCH                     ADCCH_VBAT  //ADCCH_VBAT为内部1/2电压通路，带升压应用需要外部ADC通路检测1/2电池电压
 #define VBAT_FILTER_USE_PEAK            0           //电池检测滤波选则://0 取平均值.//1 取峰值(适用于播放音乐时,电池波动比较大的音箱方案).
@@ -592,7 +605,7 @@
 /*****************************************************************************
  * Module    : Loudspeaker mute检测配置
  *****************************************************************************/
-#define LOUDSPEAKER_MUTE_EN             1           //是否使能功放MUTE
+#define LOUDSPEAKER_MUTE_EN             0           //是否使能功放MUTE
 #define LOUDSPEAKER_MUTE_INIT()         loudspeaker_mute_init()
 #define LOUDSPEAKER_MUTE_DIS()          loudspeaker_disable()
 #define LOUDSPEAKER_MUTE()              loudspeaker_mute()
@@ -662,7 +675,7 @@
 /*****************************************************************************
  * Module    : 提示音 功能选择
  *****************************************************************************/
-#define WARNING_TONE_EN                 1            //是否打开提示音功能, 总开关
+#define WARNING_TONE_EN                 0            //是否打开提示音功能, 总开关
 #define WARING_MAXVOL_MP3               0            //最大音量提示音WAV或MP3选择， 播放WAV可以与MUSIC叠加播放。
 #define WARNING_WAVRES_PLAY             0            //是否支持WAV提示音播放
 #define WARNING_VOLUME                  xcfg_cb.warning_volume   //播放提示音的音量级数
