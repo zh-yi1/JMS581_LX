@@ -9,6 +9,12 @@ const char * const i18n_zh[] = {
     [STR_CARD_ABSENT]                   = "未插卡",
     [STR_FULL_CARD]                     = "整卡",
     [STR_LATEST_7D]                     = "最新7日",
+    [STR_FULL_CARD_BACKUP]              = "整卡备份",
+    [STR_SAVE_TO]                       = "保存到",
+    [STR_KEEP_DIR_STRUCT]               = "保留卡内原目录结构",
+    [STR_SKIP_DUP_FILES]                = "重复文件自动跳过",
+    [STR_NO_MODIFY_SRC]                 = "不会修改源卡内容",
+    [STR_START_BACKUP]                  = "开始备份",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

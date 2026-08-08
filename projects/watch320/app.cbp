@@ -1172,6 +1172,9 @@
 		<Unit filename="functions/581ui/func_home_page.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="functions/581ui/func_confirm_the_whole_card_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="functions/common/func_bt_update.c">
 			<Option compilerVar="CC" />
 		</Unit>

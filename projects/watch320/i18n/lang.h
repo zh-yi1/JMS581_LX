@@ -11,6 +11,12 @@ enum {
     STR_CARD_ABSENT,
     STR_FULL_CARD,
     STR_LATEST_7D,
+    STR_FULL_CARD_BACKUP,
+    STR_SAVE_TO,
+    STR_KEEP_DIR_STRUCT,
+    STR_SKIP_DUP_FILES,
+    STR_NO_MODIFY_SRC,
+    STR_START_BACKUP,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,

@@ -261,6 +261,7 @@ static void home_select_next(f_home_t *h, s8 dir)
 static void func_home_page_message(size_msg_t msg)
 {
     f_home_t *h = (f_home_t *)func_cb.f_cb;
+    point_t pt;
 
     switch (msg)
     {
@@ -285,6 +286,13 @@ static void func_home_page_message(size_msg_t msg)
         if (h->btn_sel != 1) {
             h->btn_sel = 1;
             home_update_display();
+        }
+        break;
+
+    case MSG_CTP_CLICK:
+        pt = ctp_get_sxy();
+        if (pt.y > (HOME_BTN_Y - 30) && h->btn_sel == 0) {
+            func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
         }
         break;
 

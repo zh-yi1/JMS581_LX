@@ -9,6 +9,12 @@ const char * const i18n_en[] = {
     [STR_CARD_ABSENT]                   = "No Card",
     [STR_FULL_CARD]                     = "Full",
     [STR_LATEST_7D]                     = "Last7Days",
+    [STR_FULL_CARD_BACKUP]              = "Full Backup",
+    [STR_SAVE_TO]                       = "Save to",
+    [STR_KEEP_DIR_STRUCT]               = "Keep original folders",
+    [STR_SKIP_DUP_FILES]                = "Skip duplicate files",
+    [STR_NO_MODIFY_SRC]                 = "Source card unchanged",
+    [STR_START_BACKUP]                  = "Start Backup",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",
