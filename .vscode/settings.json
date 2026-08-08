@@ -1,11 +1,11 @@
 {
   "files.exclude": {
-    "projects/watch320": false
+    "projects/watch466": true
   },
   "search.exclude": {
-    "projects/watch320": false
+    "projects/watch466": true
   },
   "files.watcherExclude": {
-    "**/projects/watch320/**": false
+    "**/projects/watch466/**": true
   }
 }
