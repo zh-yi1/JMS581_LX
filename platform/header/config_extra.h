@@ -109,8 +109,8 @@
     #define GUI_SCREEN_OFS_Y                0
     #define GUI_USE_TFT
 #elif (GUI_SELECT == GUI_TFT_JD9853_BOE_2IN0)
-    #define GUI_SCREEN_WIDTH                320
-    #define GUI_SCREEN_HEIGHT               240
+    #define GUI_SCREEN_WIDTH                240
+    #define GUI_SCREEN_HEIGHT               320
     #define GUI_SCREEN_OFS_X                0
     #define GUI_SCREEN_OFS_Y                0
     #define GUI_USE_TFT
