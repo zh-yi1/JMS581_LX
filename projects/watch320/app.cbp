@@ -790,6 +790,9 @@
 		<Unit filename="../../platform/gui/ctp/ctp_chsc6x.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../../platform/gui/ctp/ctp_cst7x.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../platform/gui/ctp/ctp_cst8x.c">
 			<Option compilerVar="CC" />
 		</Unit>

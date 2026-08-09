@@ -161,7 +161,7 @@
 /*****************************************************************************
  * Module    : 触摸驱动配置
  *****************************************************************************/
-#define CTP_SELECT                      CTP_CST8X                   //CTP Select
+#define CTP_SELECT                      CTP_CST7X                   //CTP Select
 #define PORT_CTP_SCL                    IO_PA8
 #define PORT_CTP_SDA                    IO_PA9
 #define PORT_CTP_MAP_GPIO               2
