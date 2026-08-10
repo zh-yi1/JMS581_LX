@@ -238,7 +238,11 @@ static void func_contents_page_message(size_msg_t msg)
     case MSG_CTP_CLICK:
         pt = ctp_get_sxy();
         if (pt.x < 48 && pt.y < 48) {
-            func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
+            if (func_cb.last == FUNC_LATEST_N_DAY_BACKUP) {
+                func_cb.sta = FUNC_LATEST_N_DAY_BACKUP;
+            } else {
+                func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
+            }
             break;
         }
         if (pt.y > (CONTENTS_FOOTER_Y - 24)) {
@@ -252,8 +256,12 @@ static void func_contents_page_message(size_msg_t msg)
                 if (idx < CONTENTS_ITEM_CNT) {
                     f->selection = idx;
                     contents_update_display();
-                    /* 选中目录后返回确认页 */
-                    func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
+                    /* 选中目录后返回来源页 */
+                    if (func_cb.last == FUNC_LATEST_N_DAY_BACKUP) {
+                        func_cb.sta = FUNC_LATEST_N_DAY_BACKUP;
+                    } else {
+                        func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
+                    }
                 }
                 break;
             }
@@ -261,7 +269,11 @@ static void func_contents_page_message(size_msg_t msg)
         break;
 
     case KU_BACK:
-        func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
+        if (func_cb.last == FUNC_LATEST_N_DAY_BACKUP) {
+            func_cb.sta = FUNC_LATEST_N_DAY_BACKUP;
+        } else {
+            func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
+        }
         break;
 
     default:
@@ -278,7 +290,10 @@ void func_contents_page_enter(void)
 
 void func_contents_page_exit(void)
 {
-    func_cb.last = FUNC_CONFIRM_WHOLE_CARD;
+    if (func_cb.sta != FUNC_LATEST_N_DAY_BACKUP &&
+        func_cb.sta != FUNC_CONFIRM_WHOLE_CARD) {
+        func_cb.last = FUNC_CONFIRM_WHOLE_CARD;
+    }
 }
 
 void func_contents_page(void)

@@ -291,8 +291,12 @@ static void func_home_page_message(size_msg_t msg)
 
     case MSG_CTP_CLICK:
         pt = ctp_get_sxy();
-        if (pt.y > (HOME_BTN_Y - 30) && h->btn_sel == 0) {
-            func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
+        if (pt.y > (HOME_BTN_Y - 30)) {
+            if (h->btn_sel == 0) {
+                func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
+            } else {
+                func_cb.sta = FUNC_LATEST_N_DAY_BACKUP;
+            }
         }
         break;
 

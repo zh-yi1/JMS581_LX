@@ -30,6 +30,7 @@ enum
     FUNC_HOME_PAGE,              // 首页
     FUNC_CONFIRM_WHOLE_CARD,     // 整卡备份确认
     FUNC_CONTENTS_PAGE,          // SSD 目标目录选择
+    FUNC_LATEST_N_DAY_BACKUP,    // 最新N日备份
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘
