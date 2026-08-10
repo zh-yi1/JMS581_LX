@@ -25,6 +25,11 @@ const char * const i18n_zh[] = {
     [STR_NATURAL_DAYS]                  = "个自然日（含当天）",
     [STR_EXAMPLE_LATEST]                = "例：最新",
     [STR_EXAMPLE_RANGE]                 = "，范围",
+    [STR_CARD_NO]                       = "第",
+    [STR_CARD_SHEET]                    = "张",
+    [STR_MOUNTING]                      = "正在挂载",
+    [STR_MOUNT_THEN_CHECK]              = "挂载后将检查待备份内容",
+    [STR_DO_NOT_REMOVE_MEDIA]           = "请勿移除存储卡或 SSD",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

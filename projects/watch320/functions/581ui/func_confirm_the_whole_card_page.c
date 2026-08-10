@@ -263,7 +263,9 @@ static void func_confirm_the_whole_card_page_message(size_msg_t msg)
             func_cb.last = FUNC_CONFIRM_WHOLE_CARD;
             func_cb.sta = FUNC_CONTENTS_PAGE;
         } else if (pt.y > (CONFIRM_BTN_Y - 30)) {
-            /* 开始备份：后续接业务 */
+            f->btn_press = 0;
+            confirm_update_display();
+            func_cb.sta = FUNC_LOADING_1_PAGE;
         }
         break;
 

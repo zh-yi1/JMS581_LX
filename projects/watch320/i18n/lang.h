@@ -27,6 +27,11 @@ enum {
     STR_NATURAL_DAYS,
     STR_EXAMPLE_LATEST,
     STR_EXAMPLE_RANGE,
+    STR_CARD_NO,
+    STR_CARD_SHEET,
+    STR_MOUNTING,
+    STR_MOUNT_THEN_CHECK,
+    STR_DO_NOT_REMOVE_MEDIA,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,

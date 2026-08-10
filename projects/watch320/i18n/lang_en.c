@@ -25,6 +25,11 @@ const char * const i18n_en[] = {
     [STR_NATURAL_DAYS]                  = "calendar days (incl. today)",
     [STR_EXAMPLE_LATEST]                = "e.g. latest",
     [STR_EXAMPLE_RANGE]                 = ", range",
+    [STR_CARD_NO]                       = "",
+    [STR_CARD_SHEET]                    = "",
+    [STR_MOUNTING]                      = "Mounting",
+    [STR_MOUNT_THEN_CHECK]              = "Will check contents after mount",
+    [STR_DO_NOT_REMOVE_MEDIA]           = "Do not remove card or SSD",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

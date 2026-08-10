@@ -19,6 +19,7 @@ compo_form_t *func_home_page_form_create(void);
 compo_form_t *func_confirm_the_whole_card_page_form_create(void);
 compo_form_t *func_contents_page_form_create(void);
 compo_form_t *func_latest_n_day_backup_page_form_create(void);
+compo_form_t *func_loading_1_page_form_create(void);
 
 const func_t tbl_func_create[] = {
     {FUNC_MENU,                         func_menu_form_create},
@@ -29,6 +30,7 @@ const func_t tbl_func_create[] = {
     {FUNC_CONFIRM_WHOLE_CARD,           func_confirm_the_whole_card_page_form_create},
     {FUNC_CONTENTS_PAGE,                func_contents_page_form_create},
     {FUNC_LATEST_N_DAY_BACKUP,          func_latest_n_day_backup_page_form_create},
+    {FUNC_LOADING_1_PAGE,               func_loading_1_page_form_create},
 };
 
 extern void func_menu(void);
@@ -39,6 +41,7 @@ extern void func_home_page(void);
 extern void func_confirm_the_whole_card_page(void);
 extern void func_contents_page(void);
 extern void func_latest_n_day_backup_page(void);
+extern void func_loading_1_page(void);
 
 extern void func_idle(void);
 extern void func_ota_ui(void);
@@ -52,6 +55,7 @@ const func_t tbl_func_entry[] = {
     {FUNC_CONFIRM_WHOLE_CARD,           func_confirm_the_whole_card_page},
     {FUNC_CONTENTS_PAGE,                func_contents_page},
     {FUNC_LATEST_N_DAY_BACKUP,          func_latest_n_day_backup_page},
+    {FUNC_LOADING_1_PAGE,               func_loading_1_page},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle},
 #endif
@@ -68,6 +72,7 @@ void func_home_page_enter(void);
 void func_confirm_the_whole_card_page_enter(void);
 void func_contents_page_enter(void);
 void func_latest_n_day_backup_page_enter(void);
+void func_loading_1_page_enter(void);
 #if FUNC_IDLE_EN
 void func_idle_enter(void);
 #endif
@@ -84,6 +89,7 @@ const func_t tbl_func_enter[] = {
     {FUNC_CONFIRM_WHOLE_CARD,           func_confirm_the_whole_card_page_enter},
     {FUNC_CONTENTS_PAGE,                func_contents_page_enter},
     {FUNC_LATEST_N_DAY_BACKUP,          func_latest_n_day_backup_page_enter},
+    {FUNC_LOADING_1_PAGE,               func_loading_1_page_enter},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle_enter},
 #endif
@@ -101,6 +107,7 @@ void func_home_page_exit(void);
 void func_confirm_the_whole_card_page_exit(void);
 void func_contents_page_exit(void);
 void func_latest_n_day_backup_page_exit(void);
+void func_loading_1_page_exit(void);
 #if FUNC_IDLE_EN
 void func_idle_exit(void);
 #endif
@@ -117,6 +124,7 @@ const func_t tbl_func_exit[] = {
     {FUNC_CONFIRM_WHOLE_CARD,           func_confirm_the_whole_card_page_exit},
     {FUNC_CONTENTS_PAGE,                func_contents_page_exit},
     {FUNC_LATEST_N_DAY_BACKUP,          func_latest_n_day_backup_page_exit},
+    {FUNC_LOADING_1_PAGE,               func_loading_1_page_exit},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle_exit},
 #endif
