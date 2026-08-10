@@ -30,12 +30,34 @@
 static bool hwtest_on;                              //true: 开机状态
 static bool hwtest_key_req;                         //长按请求, 中断置位, 主循环清
 static u8   hwtest_bl_duty;                         //关机前保存的背光占空比
+static bool hwtest_off_printed;                     //关机后只打一次诊断, 防止刷屏
 
-//背光走PWM(PORT_TFT_BL = PG_BL_TMR4), LCD_BL_EN()/LCD_BL_DIS()这套power gate接口
-//在PWM模式下是失效的, 只能通过lcd_drv_set_brightness()改占空比
+/*
+ * 背光两条通路都要压住:
+ *   LCD_BL_EN()/LCD_BL_DIS() = led_pg_on()/led_pg_off(), 控LED power gate通断
+ *   lcd_drv_set_brightness() 控PWM占空比(PORT_TFT_BL = PG_BL_TMR4)
+ * 另外GUI每刷一帧, TE中断会置 tft_bglight_kick / te_bglight_cnt / tft_bglight_first_set,
+ * 主循环的 tft_bglight_frist_set_check() 看到 tft_bglight_duty==0 就当成"还没初始化",
+ * 直接改成 GUI_DEFAULT_BK 再点亮(tft.c:157)。所以只压占空比会被它一直点回来,
+ * 必须把这几个恢复标志一起清掉。
+ */
 AT(.text.hwtest)
-static void hwtest_bl_set(u8 duty)
+static void hwtest_bl_off(void)
 {
+    tft_cb_t *tft_get_tft_cb(void);
+    tft_cb_t *cb = tft_get_tft_cb();
+
+    cb->tft_bglight_first_set = false;                              //堵住GUI刷新后的背光恢复
+    cb->tft_bglight_kick      = false;
+    cb->te_bglight_cnt        = 0;
+    LCD_BL_DIS();                                                   //关power gate
+    lcd_drv_set_brightness(0);                                      //PWM占空比压到0
+}
+
+AT(.text.hwtest)
+static void hwtest_bl_on(u8 duty)
+{
+    LCD_BL_EN();
     lcd_drv_set_brightness(duty);
 }
 
@@ -81,17 +103,18 @@ AT(.text.hwtest)
 static void hwtest_power_off(void)
 {
     hwtest_bl_duty = hwtest_bl_get();                               //保存当前亮度, 开机时恢复
-    hwtest_bl_set(0);                                               //关屏幕背光
+    hwtest_bl_off();                                                //关屏幕背光
     port_gpio_out_level(HWTEST_VBUS_OUT_IO, 0);                     //拉低VBUS_OUT
     port_gpio_out_level(HWTEST_SUB_PWR_IO, 0);                      //拉低副芯片供电
     hwtest_on = false;
+    hwtest_off_printed = false;
     printf("hwtest: power off, save bl duty=%d\n", hwtest_bl_duty);
 }
 
 AT(.text.hwtest)
 static void hwtest_power_on(void)
 {
-    hwtest_bl_set(hwtest_bl_duty ? hwtest_bl_duty : GUI_DEFAULT_BK);//开屏幕背光
+    hwtest_bl_on(hwtest_bl_duty ? hwtest_bl_duty : GUI_DEFAULT_BK); //开屏幕背光
     port_gpio_out_level(HWTEST_VBUS_OUT_IO, bsp_gpio_get_sta(HWTEST_VBUS_DET_IO));
     delay_ms(HWTEST_SUB_PWR_DELAY_MS);
     port_gpio_out_level(HWTEST_SUB_PWR_IO, 1);                      //拉高副芯片供电
@@ -115,9 +138,13 @@ void hwtest_process(void)
     if (hwtest_on) {                                                //开机状态下VBUS_OUT实时跟随VBUS_DET
         port_gpio_out_level(HWTEST_VBUS_OUT_IO, bsp_gpio_get_sta(HWTEST_VBUS_DET_IO));
     } else {
-        //GUI刷新会置tft_bglight_first_set把背光重新点亮, 关机态每轮压回0。
+        //关机态每轮都压一次: TE中断会重新置起恢复标志, 这里一并清掉。
         //lcd_drv_set_brightness()内部有last_duty判断, 占空比没变不会重复写PWM
-        hwtest_bl_set(0);
+        hwtest_bl_off();
+        if (!hwtest_off_printed) {
+            hwtest_off_printed = true;
+            printf("hwtest: bl off in process\n");                  //确认关机后主循环还在跑到这里
+        }
     }
 }
 
