@@ -13,8 +13,8 @@
  *
  * 时序:
  *   1. 首次开机(USB供电): 拉高PB12 -> 读VBUS_DET同步输出VBUS_OUT -> 等30ms -> 拉高PB11
- *   2. 长按关机: 关背光 -> 拉低VBUS_OUT -> 拉低PB11
- *   3. 长按开机: 开背光 -> VBUS_OUT同步VBUS_DET -> 等30ms -> 拉高PB11
+ *   2. 长按关机: 关屏幕供电VDDLCD -> 拉低VBUS_OUT -> 拉低PB11
+ *   3. 长按开机: 开屏幕供电VDDLCD -> VBUS_OUT同步VBUS_DET -> 等30ms -> 拉高PB11
  *****************************************************************************/
 #include "include.h"
 #include "port_hwtest.h"
@@ -27,61 +27,8 @@
 #define HWTEST_VBUS_OUT_IO          IO_PE4          //VBUS_OUT输出
 #define HWTEST_SUB_PWR_DELAY_MS     30              //VBUS_OUT稳定到拉高副芯片供电的间隔
 
-//背光控制方式: HWTEST_BL_IO 填实际背光IO则直接用GPIO开关, 填IO_NONE则用
-//config.h那套 power gate + PWM(PORT_TFT_BL = PG_BL_TMR4)
-#define HWTEST_BL_IO                IO_NONE         //背光IO, 按原理图填, 例: IO_PA14
-#define HWTEST_BL_IO_ON_LEVEL       1               //背光IO点亮电平, 0低有效 1高有效
-
 static bool hwtest_on;                              //true: 开机状态
 static bool hwtest_key_req;                         //长按请求, 中断置位, 主循环清
-static u8   hwtest_bl_duty;                         //关机前保存的背光占空比
-
-//GUI每刷一帧, TE中断会置 tft_bglight_kick / te_bglight_cnt / tft_bglight_first_set,
-//主循环的 tft_bglight_frist_set_check() 看到 tft_bglight_duty==0 就当成"还没初始化",
-//直接改成 GUI_DEFAULT_BK 再点亮(tft.c:157), 所以这几个恢复标志要一起清掉
-AT(.text.hwtest)
-static void hwtest_bl_off(void)
-{
-    tft_cb_t *tft_get_tft_cb(void);
-    tft_cb_t *cb = tft_get_tft_cb();
-
-    cb->tft_bglight_first_set = false;                              //堵住GUI刷新后的背光恢复
-    cb->tft_bglight_kick      = false;
-    cb->te_bglight_cnt        = 0;
-
-#if (HWTEST_BL_IO != IO_NONE)
-    port_gpio_set_out(HWTEST_BL_IO, !HWTEST_BL_IO_ON_LEVEL);        //背光IO直接关
-#else
-    LCD_BL_DIS();                                                   //关power gate
-    lcd_drv_set_brightness(0);                                      //走驱动层压占空比
-    bsp_pwm_duty_set(PORT_TFT_BL, 0, false);                        //绕过last_duty判断直接写PWM寄存器
-#endif
-}
-
-AT(.text.hwtest)
-static void hwtest_bl_on(u8 duty)
-{
-#if (HWTEST_BL_IO != IO_NONE)
-    port_gpio_set_out(HWTEST_BL_IO, HWTEST_BL_IO_ON_LEVEL);
-    (void)duty;
-#else
-    tft_cb_t *tft_get_tft_cb(void);
-
-    LCD_BL_EN();
-    tft_get_tft_cb()->tft_bglight_last_duty = 0;                    //强制下一次真正写PWM
-    lcd_drv_set_brightness(duty);
-    bsp_pwm_duty_set(PORT_TFT_BL, duty, false);
-#endif
-}
-
-AT(.text.hwtest)
-static u8 hwtest_bl_get(void)
-{
-    tft_cb_t *tft_get_tft_cb(void);
-    u8 duty = tft_get_tft_cb()->tft_bglight_duty;
-
-    return duty ? duty : GUI_DEFAULT_BK;
-}
 
 //最早期初始化, 只做系统供电, main()第一行调用
 AT(.text.hwtest)
@@ -115,18 +62,17 @@ void hwtest_key_long_req(void)
 AT(.text.hwtest)
 static void hwtest_power_off(void)
 {
-    hwtest_bl_duty = hwtest_bl_get();                               //保存当前亮度, 开机时恢复
-    hwtest_bl_off();                                                //关屏幕背光
+    LCD_POWER_DIS();                                                //关屏幕供电VDDLCD
     port_gpio_out_level(HWTEST_VBUS_OUT_IO, 0);                     //拉低VBUS_OUT
     port_gpio_out_level(HWTEST_SUB_PWR_IO, 0);                      //拉低副芯片供电
     hwtest_on = false;
-    printf("hwtest: power off, save bl duty=%d\n", hwtest_bl_duty);
+    printf("hwtest: power off\n");
 }
 
 AT(.text.hwtest)
 static void hwtest_power_on(void)
 {
-    hwtest_bl_on(hwtest_bl_duty ? hwtest_bl_duty : GUI_DEFAULT_BK); //开屏幕背光
+    LCD_POWER_EN();                                                 //开屏幕供电VDDLCD
     port_gpio_out_level(HWTEST_VBUS_OUT_IO, bsp_gpio_get_sta(HWTEST_VBUS_DET_IO));
     delay_ms(HWTEST_SUB_PWR_DELAY_MS);
     port_gpio_out_level(HWTEST_SUB_PWR_IO, 1);                      //拉高副芯片供电
@@ -149,8 +95,6 @@ void hwtest_process(void)
 
     if (hwtest_on) {                                                //开机状态下VBUS_OUT实时跟随VBUS_DET
         port_gpio_out_level(HWTEST_VBUS_OUT_IO, bsp_gpio_get_sta(HWTEST_VBUS_DET_IO));
-    } else {
-        hwtest_bl_off();                                            //TE中断会重新置起恢复标志, 关机态每轮都压一次
     }
 }
 
