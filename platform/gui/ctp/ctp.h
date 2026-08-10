@@ -19,6 +19,10 @@ bool ctp_cst8x_init(void);
 void ctp_cst8x_readkick(void);
 bool ctp_cst8x_get_point(s32 *x, s32 *y);
 
+bool ctp_cst7x_init(void);
+void ctp_cst7x_readkick(void);
+bool ctp_cst7x_get_point(s32 *x, s32 *y);
+
 bool ctp_chsc6x_init(void);
 void ctp_chsc6x_readkick(void);
 bool ctp_chsc6x_get_point(s32 *x, s32 *y);

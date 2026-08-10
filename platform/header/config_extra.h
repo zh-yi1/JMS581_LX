@@ -149,6 +149,9 @@
 #if (CTP_SELECT == CTP_CST8X)
     #define TP_IIC_ADDR                     0x15
     #define TP_IIC_UPDATE_ADDR              0x6A
+#elif (CTP_SELECT == CTP_CST7X)
+    #define TP_IIC_ADDR                     0x15
+    #define TP_IIC_UPDATE_ADDR              0x6A
 #elif (CTP_SELECT == CTP_CHSC6X)
     #define TP_IIC_ADDR                     0x2E
 

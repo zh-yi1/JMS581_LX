@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "d:/C_Code/cunchu/AB579X/platform/gui/tft",
-      "program": "d:/C_Code/cunchu/AB579X/platform/gui/tft/build/Debug/outDebug",
+      "cwd": "d:/C_Code/cunchu/AB579X/projects/watch320/functions/581ui",
+      "program": "d:/C_Code/cunchu/AB579X/projects/watch320/functions/581ui/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

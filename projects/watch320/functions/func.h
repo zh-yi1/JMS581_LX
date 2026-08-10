@@ -28,6 +28,10 @@ enum
 {
     FUNC_NULL = 0,
     FUNC_HOME_PAGE,              // 首页
+    FUNC_CONFIRM_WHOLE_CARD,     // 整卡备份确认
+    FUNC_CONTENTS_PAGE,          // SSD 目标目录选择
+    FUNC_LATEST_N_DAY_BACKUP,    // 最新N日备份
+    FUNC_LOADING_1_PAGE,         // 整卡备份挂载 loading
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘
@@ -175,6 +179,18 @@ typedef struct {
     void (*mp3_res_play)(u32 addr, u32 len);        //各任务的语音播报函数接口
     void (*set_vol_callback)(u8 dir);               //设置音量的回调函数，用于各任务的音量事件处理。
 } func_cb_t;
+
+// 备份业务跨页面共享参数（首页勾选卡槽 -> 整卡/最新N日确认页）
+#define BACKUP_CARD_CNT     3       //卡槽数量，与首页 HOME_CARD_CNT 一致
+typedef struct {
+    char card_sel[16];                              //首页勾选的卡槽名称，如 " SD" / " SD CFA"
+    u8 latest_days;                                 //最新N日备份页选择的天数，0=未设置
+    u8 card_checked[BACKUP_CARD_CNT];               //首页卡槽勾选状态，跨页面保持
+    u8 card_checked_set;                            //勾选状态是否已设置（区分首次进入）
+    char dir_sel[16];                               //目录页选中的目标目录名，如 "CARD_011"
+} backup_param_t;
+
+extern backup_param_t backup_param;
 
 
 extern func_cb_t func_cb;

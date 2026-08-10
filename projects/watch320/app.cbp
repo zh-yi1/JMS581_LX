@@ -790,6 +790,9 @@
 		<Unit filename="../../platform/gui/ctp/ctp_chsc6x.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../../platform/gui/ctp/ctp_cst7x.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../platform/gui/ctp/ctp_cst8x.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -1170,6 +1173,18 @@
 		</Unit>
 		<Unit filename="config.h" />
 		<Unit filename="functions/581ui/func_home_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_confirm_the_whole_card_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_contents_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_latest_n_day_backup_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_loading_1_page.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="functions/common/func_bt_update.c">

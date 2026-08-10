@@ -15,6 +15,8 @@ compo_form_t *func_clock_form_create_by_screenshoot(void);
 
 func_cb_t func_cb AT(.buf.func_cb);
 
+backup_param_t backup_param AT(.buf.func_cb);
+
 #if BT_BACKSTAGE_EN
 AT(.text.func.process)
 void func_watch_bt_process(void)
