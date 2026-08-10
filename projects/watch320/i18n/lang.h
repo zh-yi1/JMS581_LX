@@ -46,6 +46,11 @@ enum {
     STR_DUP_SKIPPED,
     STR_CHECKED,
     STR_BACK_HOME,
+    STR_SSD_SPACE_LOW,
+    STR_SHORT_OF,
+    STR_AVAIL,
+    STR_NEED,
+    STR_FREE_SPACE_RETRY,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,

@@ -44,6 +44,11 @@ const char * const i18n_en[] = {
     [STR_DUP_SKIPPED]                   = "Duplicates skipped",
     [STR_CHECKED]                       = "Checked",
     [STR_BACK_HOME]                     = "Back Home",
+    [STR_SSD_SPACE_LOW]                 = "SSD Space Low",
+    [STR_SHORT_OF]                      = "Short",
+    [STR_AVAIL]                         = "Free",
+    [STR_NEED]                          = "Need",
+    [STR_FREE_SPACE_RETRY]              = "Free space and retry",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

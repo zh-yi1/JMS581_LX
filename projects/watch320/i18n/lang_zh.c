@@ -44,6 +44,11 @@ const char * const i18n_zh[] = {
     [STR_DUP_SKIPPED]                   = "相同文件已自动跳过",
     [STR_CHECKED]                       = "已检查",
     [STR_BACK_HOME]                     = "返回首页",
+    [STR_SSD_SPACE_LOW]                 = "SSD 空间不足",
+    [STR_SHORT_OF]                      = "还差",
+    [STR_AVAIL]                         = "可用",
+    [STR_NEED]                          = "需要",
+    [STR_FREE_SPACE_RETRY]              = "请释放空间后重试",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",
