@@ -33,6 +33,10 @@ const char * const i18n_en[] = {
     [STR_CURRENT_CARD]                  = "Current Card",
     [STR_BACKUP_DONE]                   = "Backup Done",
     [STR_SAFE_UNMOUNT_NEXT]             = "Safely unmounting, then next card",
+    [STR_BACKED_UP]                     = "Backed up",
+    [STR_FILE_UNIT]                     = "files",
+    [STR_CARD_UNIT]                     = "cards",
+    [STR_DONE]                          = "Done",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

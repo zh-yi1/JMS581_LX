@@ -35,6 +35,10 @@ enum {
     STR_CURRENT_CARD,
     STR_BACKUP_DONE,
     STR_SAFE_UNMOUNT_NEXT,
+    STR_BACKED_UP,
+    STR_FILE_UNIT,
+    STR_CARD_UNIT,
+    STR_DONE,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,

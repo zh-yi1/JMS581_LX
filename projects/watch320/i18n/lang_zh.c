@@ -33,6 +33,10 @@ const char * const i18n_zh[] = {
     [STR_CURRENT_CARD]                  = "当前卡",
     [STR_BACKUP_DONE]                   = "备份完成",
     [STR_SAFE_UNMOUNT_NEXT]             = "正在安全卸载，随后处理下一张",
+    [STR_BACKED_UP]                     = "已备份",
+    [STR_FILE_UNIT]                     = "个文件",
+    [STR_CARD_UNIT]                     = "张卡",
+    [STR_DONE]                          = "完成",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",
