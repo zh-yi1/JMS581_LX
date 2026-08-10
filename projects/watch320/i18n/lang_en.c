@@ -37,6 +37,8 @@ const char * const i18n_en[] = {
     [STR_FILE_UNIT]                     = "files",
     [STR_CARD_UNIT]                     = "cards",
     [STR_DONE]                          = "Done",
+    [STR_CHECKING_FILES]                = "Checking files",
+    [STR_CALC_BACKUP_SIZE]              = "Calculating backup size for this card",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

@@ -39,6 +39,8 @@ enum {
     STR_FILE_UNIT,
     STR_CARD_UNIT,
     STR_DONE,
+    STR_CHECKING_FILES,
+    STR_CALC_BACKUP_SIZE,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,

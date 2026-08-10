@@ -35,6 +35,7 @@ enum
     FUNC_BACKING_UP_1_PAGE,      // 整卡备份进度
     FUNC_CHECK_OUT_PAGE,         // 整卡备份完成/卸载
     FUNC_WHOLE_CARD_DONE_PAGE,   // 整卡备份全部完成
+    FUNC_LOADING_2_PAGE,         // 最新N日备份 loading
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘

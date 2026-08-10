@@ -37,6 +37,8 @@ const char * const i18n_zh[] = {
     [STR_FILE_UNIT]                     = "个文件",
     [STR_CARD_UNIT]                     = "张卡",
     [STR_DONE]                          = "完成",
+    [STR_CHECKING_FILES]                = "正在检查文件",
+    [STR_CALC_BACKUP_SIZE]              = "正在计算本张卡的备份容量",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",
