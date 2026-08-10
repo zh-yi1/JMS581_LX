@@ -1287,6 +1287,10 @@
 		<Unit filename="port/port_key.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="port/port_hwtest.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="port/port_hwtest.h" />
 		<Unit filename="port/port_key_on.c">
 			<Option compilerVar="CC" />
 		</Unit>

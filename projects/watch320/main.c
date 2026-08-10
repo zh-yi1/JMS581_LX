@@ -1,4 +1,5 @@
 #include "include.h"
+#include "port_hwtest.h"
 
 const uint8_t *bt_rf_get_inq_param(void)
 {
@@ -68,6 +69,10 @@ int main(void)
 {
     u32 rst_reason, rtccon10;
 
+#if HWTEST_EN
+    hwtest_early_init();                //硬件测试: 芯片启动就拉高系统供电PB12
+#endif
+
     rst_reason = LVDCON;
     rtccon10 = RTCCON10;
     printf("Hello AB5790: %08x, CPUID: %d\n", rst_reason, CPUID);
@@ -102,6 +107,9 @@ int main(void)
 #endif //ASR_STACK_EN
 
     bsp_sys_init();
+#if HWTEST_EN
+    hwtest_init();                      //硬件测试: 首次开机时序
+#endif
 #if	DONGLE_AUTH_EN
     if (check_uid_entryption() == false) {
         printf("Dongle authorization verification failed!\n");

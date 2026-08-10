@@ -20,6 +20,7 @@
  *       上电时按键还按着的话先等抬起, 不会被当成一次新按键。
  *****************************************************************************/
 #include "include.h"
+#include "port_hwtest.h"
 
 #if USER_KEY_ON
 
@@ -51,6 +52,9 @@ AT(.com_text.port.key)
 static void key_on_long_cb(void)                   //长按
 {
     key_on_printf("key_on: long\n");
+#if HWTEST_EN
+    hwtest_key_long_req();                         //硬件测试: 长按开关机, 时序在主循环做
+#endif
 }
 
 /*--------------------------------------------------------------------------*/

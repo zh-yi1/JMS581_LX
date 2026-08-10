@@ -1,6 +1,7 @@
 #include "include.h"
 #include "func_menu.h"
 #include "func_tbl.h"
+#include "port_hwtest.h"
 
 #if TRACE_EN
 #define TRACE(...)              printf(__VA_ARGS__)
@@ -53,6 +54,10 @@ AT(.text.func.process)
 void func_process(void)
 {
     WDT_CLR();
+
+#if HWTEST_EN
+    hwtest_process();                                       //硬件测试: VBUS_OUT跟随 + 长按开关机
+#endif
 
 #if BSP_UART1_EN
     bsp_uart1_process();
