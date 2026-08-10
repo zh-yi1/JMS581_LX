@@ -30,6 +30,7 @@ const char * const i18n_en[] = {
     [STR_MOUNTING]                      = "Mounting",
     [STR_MOUNT_THEN_CHECK]              = "Will check contents after mount",
     [STR_DO_NOT_REMOVE_MEDIA]           = "Do not remove card or SSD",
+    [STR_CURRENT_CARD]                  = "Current Card",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

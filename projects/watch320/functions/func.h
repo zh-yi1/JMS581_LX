@@ -32,6 +32,7 @@ enum
     FUNC_CONTENTS_PAGE,          // SSD 目标目录选择
     FUNC_LATEST_N_DAY_BACKUP,    // 最新N日备份
     FUNC_LOADING_1_PAGE,         // 整卡备份挂载 loading
+    FUNC_BACKING_UP_1_PAGE,      // 整卡备份进度
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘

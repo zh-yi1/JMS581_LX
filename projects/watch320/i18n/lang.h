@@ -32,6 +32,7 @@ enum {
     STR_MOUNTING,
     STR_MOUNT_THEN_CHECK,
     STR_DO_NOT_REMOVE_MEDIA,
+    STR_CURRENT_CARD,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
