@@ -39,6 +39,11 @@ const char * const i18n_en[] = {
     [STR_DONE]                          = "Done",
     [STR_CHECKING_FILES]                = "Checking files",
     [STR_CALC_BACKUP_SIZE]              = "Calculating backup size for this card",
+    [STR_NO_NEW_CONTENT]                = "No New Content",
+    [STR_NO_NEW_FILES]                  = "No new files to copy",
+    [STR_DUP_SKIPPED]                   = "Duplicates skipped",
+    [STR_CHECKED]                       = "Checked",
+    [STR_BACK_HOME]                     = "Back Home",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

@@ -39,6 +39,11 @@ const char * const i18n_zh[] = {
     [STR_DONE]                          = "完成",
     [STR_CHECKING_FILES]                = "正在检查文件",
     [STR_CALC_BACKUP_SIZE]              = "正在计算本张卡的备份容量",
+    [STR_NO_NEW_CONTENT]                = "没有新内容",
+    [STR_NO_NEW_FILES]                  = "没有可复制的新文件",
+    [STR_DUP_SKIPPED]                   = "相同文件已自动跳过",
+    [STR_CHECKED]                       = "已检查",
+    [STR_BACK_HOME]                     = "返回首页",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

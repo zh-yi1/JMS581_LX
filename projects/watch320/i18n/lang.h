@@ -41,6 +41,11 @@ enum {
     STR_DONE,
     STR_CHECKING_FILES,
     STR_CALC_BACKUP_SIZE,
+    STR_NO_NEW_CONTENT,
+    STR_NO_NEW_FILES,
+    STR_DUP_SKIPPED,
+    STR_CHECKED,
+    STR_BACK_HOME,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,

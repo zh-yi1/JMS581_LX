@@ -1205,6 +1205,9 @@
 		<Unit filename="functions/581ui/func_latest_n_day_done_page.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="functions/581ui/func_whole_card_no_new_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="functions/common/func_bt_update.c">
 			<Option compilerVar="CC" />
 		</Unit>
