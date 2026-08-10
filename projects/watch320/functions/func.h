@@ -39,6 +39,7 @@ enum
     FUNC_BACKING_UP_2_PAGE,      // 最新N日备份进度
     FUNC_LATEST_N_DAY_DONE_PAGE, // 最新N日备份全部完成
     FUNC_WHOLE_CARD_NO_NEW_PAGE, // 整卡备份无新内容
+    FUNC_LATEST_N_DAY_NO_NEW_PAGE, // 最新N日备份无新内容
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘
