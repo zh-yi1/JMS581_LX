@@ -215,6 +215,13 @@ compo_form_t *func_confirm_the_whole_card_page_form_create(void)
 
 static void func_confirm_the_whole_card_page_process(void)
 {
+    f_confirm_t *f = (f_confirm_t *)func_cb.f_cb;
+
+    /* 触摸抬起或滑动移开时，恢复按钮未按下状态 */
+    if (f->btn_press && !ctp_is_touch()) {
+        f->btn_press = 0;
+        confirm_update_display();
+    }
     confirm_update_battery();
     func_process();
 }
@@ -226,6 +233,27 @@ static void func_confirm_the_whole_card_page_message(size_msg_t msg)
 
     switch (msg)
     {
+    case MSG_CTP_TOUCH:
+        pt = ctp_get_sxy();
+        /* 按下底部按钮：切换为按下图 */
+        if (pt.y > (CONFIRM_BTN_Y - 30)) {
+            f->btn_press = 1;
+            confirm_update_display();
+        }
+        break;
+
+    case MSG_CTP_SHORT_LEFT:
+    case MSG_CTP_SHORT_RIGHT:
+    case MSG_CTP_SHORT_UP:
+    case MSG_CTP_SHORT_DOWN:
+    case MSG_CTP_LONG_LIFT:
+        /* 滑动移开或抬起：恢复未按下图 */
+        if (f->btn_press) {
+            f->btn_press = 0;
+            confirm_update_display();
+        }
+        break;
+
     case MSG_CTP_CLICK:
         pt = ctp_get_sxy();
         /* 点击返回：左上角区域 */
@@ -235,8 +263,6 @@ static void func_confirm_the_whole_card_page_message(size_msg_t msg)
             func_cb.last = FUNC_CONFIRM_WHOLE_CARD;
             func_cb.sta = FUNC_CONTENTS_PAGE;
         } else if (pt.y > (CONFIRM_BTN_Y - 30)) {
-            f->btn_press = 1;
-            confirm_update_display();
             /* 开始备份：后续接业务 */
         }
         break;

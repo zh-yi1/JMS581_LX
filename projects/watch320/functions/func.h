@@ -180,8 +180,12 @@ typedef struct {
 } func_cb_t;
 
 // 备份业务跨页面共享参数（首页勾选卡槽 -> 整卡/最新N日确认页）
+#define BACKUP_CARD_CNT     3       //卡槽数量，与首页 HOME_CARD_CNT 一致
 typedef struct {
     char card_sel[16];                              //首页勾选的卡槽名称，如 " SD" / " SD CFA"
+    u8 latest_days;                                 //最新N日备份页选择的天数，0=未设置
+    u8 card_checked[BACKUP_CARD_CNT];               //首页卡槽勾选状态，跨页面保持
+    u8 card_checked_set;                            //勾选状态是否已设置（区分首次进入）
 } backup_param_t;
 
 extern backup_param_t backup_param;

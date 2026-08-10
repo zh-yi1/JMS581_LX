@@ -27,7 +27,7 @@
 #define LATEST_BTN_Y                (GUI_SCREEN_HEIGHT - 36)
 
 #define LATEST_DAYS_MIN             1
-#define LATEST_DAYS_MAX             30
+#define LATEST_DAYS_MAX             9
 #define LATEST_DAYS_DEFAULT         6
 
 #define LATEST_COLOR_LABEL          make_color(0x99, 0x99, 0x99)
@@ -156,6 +156,7 @@ static void latest_change_days(s8 delta)
         return;
     }
     f->days = (u8)next;
+    backup_param.latest_days = f->days;
     latest_update_days_text();
 }
 
@@ -171,7 +172,7 @@ compo_form_t *func_latest_n_day_backup_page_form_create(void)
     compo_shape_set_location(bg, GUI_SCREEN_CENTER_X, GUI_SCREEN_CENTER_Y,
                              GUI_SCREEN_WIDTH, GUI_SCREEN_HEIGHT);
 
-    f->days = LATEST_DAYS_DEFAULT;
+    f->days = backup_param.latest_days ? backup_param.latest_days : LATEST_DAYS_DEFAULT;
 
     /* 顶部：divider + 返回 + 标题(最新 N 日备份) + 电量 */
     f->pic_divider = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_DIVIDER_UNCLICK_BIN);
@@ -345,6 +346,13 @@ compo_form_t *func_latest_n_day_backup_page_form_create(void)
 
 static void func_latest_n_day_backup_page_process(void)
 {
+    f_latest_t *f = (f_latest_t *)func_cb.f_cb;
+
+    /* 触摸抬起或滑动移开时，恢复按钮未按下状态 */
+    if (f->btn_press && !ctp_is_touch()) {
+        f->btn_press = 0;
+        latest_update_display();
+    }
     latest_update_battery();
     func_process();
 }
@@ -364,6 +372,27 @@ static void func_latest_n_day_backup_page_message(size_msg_t msg)
         latest_change_days(-1);
         break;
 
+    case MSG_CTP_TOUCH:
+        pt = ctp_get_sxy();
+        /* 按下底部按钮：切换为按下图 */
+        if (pt.y > (LATEST_BTN_Y - 30)) {
+            f->btn_press = 1;
+            latest_update_display();
+        }
+        break;
+
+    case MSG_CTP_SHORT_LEFT:
+    case MSG_CTP_SHORT_RIGHT:
+    case MSG_CTP_SHORT_UP:
+    case MSG_CTP_SHORT_DOWN:
+    case MSG_CTP_LONG_LIFT:
+        /* 滑动移开或抬起：恢复未按下图 */
+        if (f->btn_press) {
+            f->btn_press = 0;
+            latest_update_display();
+        }
+        break;
+
     case MSG_CTP_CLICK:
         pt = ctp_get_sxy();
         if (pt.x < 48 && pt.y < 48) {
@@ -378,8 +407,6 @@ static void func_latest_n_day_backup_page_message(size_msg_t msg)
                 latest_change_days(1);
             }
         } else if (pt.y > (LATEST_BTN_Y - 30)) {
-            f->btn_press = 1;
-            latest_update_display();
             /* 开始备份：后续接业务 */
         }
         break;

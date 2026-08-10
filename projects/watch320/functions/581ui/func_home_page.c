@@ -281,15 +281,33 @@ compo_form_t *func_home_page_form_create(void)
         compo_textbox_set_autosize(h->txt_btn[i], true);
         compo_textbox_set_align_center(h->txt_btn[i], true);
         compo_textbox_set_font(h->txt_btn[i], UI_BUF_FONT_BIN_FONT_SIZE_15_BIN);
-        compo_textbox_set(h->txt_btn[i],
-                          i18n[i == 0 ? STR_FULL_CARD : STR_LATEST_7D]);
+        if (i == 0) {
+            compo_textbox_set(h->txt_btn[i], i18n[STR_FULL_CARD]);
+        } else if (backup_param.latest_days != 0) {
+            /* 显示上次在最新N日页选择的天数，如「最新6日」 */
+            char buf[24];
+            sprintf(buf, "%s%u%s", i18n[STR_LATEST], backup_param.latest_days, i18n[STR_DAY]);
+            compo_textbox_set(h->txt_btn[i], buf);
+        } else {
+            compo_textbox_set(h->txt_btn[i], i18n[STR_LATEST_7D]);
+        }
     }
 
     h->selection = 0;
     h->press_idx = 0xFF;
     h->btn_press = 0xFF;
-    for (i = 0; i < HOME_CARD_CNT; i++) {
-        h->checked[i] = s_card_checked_init[i];
+    if (backup_param.card_checked_set) {
+        /* 跨页面返回：恢复上次的勾选状态 */
+        for (i = 0; i < HOME_CARD_CNT; i++) {
+            h->checked[i] = backup_param.card_checked[i];
+        }
+    } else {
+        /* 首次进入：使用默认勾选，并保存到共享结构体 */
+        for (i = 0; i < HOME_CARD_CNT; i++) {
+            h->checked[i] = s_card_checked_init[i];
+            backup_param.card_checked[i] = s_card_checked_init[i];
+        }
+        backup_param.card_checked_set = 1;
     }
     home_update_display();
 
@@ -372,6 +390,19 @@ static void func_home_page_message(size_msg_t msg)
             u8 i;
 
             p[0] = 0;
+            /* 一个都没勾选时，默认选中 SD 卡槽 */
+            for (i = 0; i < HOME_CARD_CNT; i++) {
+                if (h->checked[i]) {
+                    break;
+                }
+            }
+            if (i == HOME_CARD_CNT) {
+                h->checked[0] = 1;
+                h->selection = 0;
+                backup_param.card_checked[0] = 1;
+                home_update_display();
+            }
+
             for (i = 0; i < HOME_CARD_CNT; i++) {
                 if (h->checked[i]) {
                     p += sprintf(p, " %s", s_card_name[i]);
@@ -389,6 +420,7 @@ static void func_home_page_message(size_msg_t msg)
         idx = home_hit_card(pt);
         if (idx != 0xFF && s_card_ready[idx]) {
             h->checked[idx] = !h->checked[idx];
+            backup_param.card_checked[idx] = h->checked[idx];
             h->selection = idx;
             home_update_display();
         }
