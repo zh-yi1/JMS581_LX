@@ -16,13 +16,13 @@
 #define LATEST_CARD_LABEL_Y         62
 #define LATEST_CARD_NAME_Y          88
 
-#define LATEST_STEP_Y               152
+#define LATEST_STEP_Y               154
 #define LATEST_MINUS_X              40
 #define LATEST_PLUS_X               (GUI_SCREEN_WIDTH - 40)
 
-#define LATEST_TIP0_Y               190
+#define LATEST_TIP0_Y               194
 #define LATEST_TIP_GAP              20
-#define LATEST_TIP_X                24
+#define LATEST_TIP_X                16
 
 #define LATEST_BTN_Y                (GUI_SCREEN_HEIGHT - 36)
 
