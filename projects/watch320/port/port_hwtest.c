@@ -14,7 +14,8 @@
  * 时序:
  *   1. 首次开机(USB供电): 拉高PB12 -> 读VBUS_DET同步输出VBUS_OUT -> 等30ms -> 拉高PB11
  *   2. 长按关机: 关屏幕供电VDDLCD -> 拉低VBUS_OUT -> 拉低PB11
- *   3. 长按开机: 开屏幕供电VDDLCD -> VBUS_OUT同步VBUS_DET -> 等30ms -> 拉高PB11
+ *   3. 长按开机: 开屏幕供电VDDLCD -> 重新初始化屏 -> VBUS_OUT同步VBUS_DET
+ *               -> 等30ms -> 拉高PB11
  *****************************************************************************/
 #include "include.h"
 #include "port_hwtest.h"
@@ -73,6 +74,8 @@ AT(.text.hwtest)
 static void hwtest_power_on(void)
 {
     LCD_POWER_EN();                                                 //开屏幕供电VDDLCD
+    delay_ms(20);                                                   //等VDDLCD稳定
+    tft_init();                                                     //断电后屏寄存器全丢, 重跑复位+初始化序列
     port_gpio_out_level(HWTEST_VBUS_OUT_IO, bsp_gpio_get_sta(HWTEST_VBUS_DET_IO));
     delay_ms(HWTEST_SUB_PWR_DELAY_MS);
     port_gpio_out_level(HWTEST_SUB_PWR_IO, 1);                      //拉高副芯片供电
