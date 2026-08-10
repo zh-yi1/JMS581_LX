@@ -29,6 +29,24 @@
 
 static bool hwtest_on;                              //true: 开机状态
 static bool hwtest_key_req;                         //长按请求, 中断置位, 主循环清
+static u8   hwtest_bl_duty;                         //关机前保存的背光占空比
+
+//背光走PWM(PORT_TFT_BL = PG_BL_TMR4), LCD_BL_EN()/LCD_BL_DIS()这套power gate接口
+//在PWM模式下是失效的, 只能通过lcd_drv_set_brightness()改占空比
+AT(.text.hwtest)
+static void hwtest_bl_set(u8 duty)
+{
+    lcd_drv_set_brightness(duty);
+}
+
+AT(.text.hwtest)
+static u8 hwtest_bl_get(void)
+{
+    tft_cb_t *tft_get_tft_cb(void);
+    u8 duty = tft_get_tft_cb()->tft_bglight_duty;
+
+    return duty ? duty : GUI_DEFAULT_BK;
+}
 
 //最早期初始化, 只做系统供电, main()第一行调用
 AT(.text.hwtest)
@@ -62,17 +80,18 @@ void hwtest_key_long_req(void)
 AT(.text.hwtest)
 static void hwtest_power_off(void)
 {
-    LCD_BL_DIS();                                                   //关屏幕背光
+    hwtest_bl_duty = hwtest_bl_get();                               //保存当前亮度, 开机时恢复
+    hwtest_bl_set(0);                                               //关屏幕背光
     port_gpio_out_level(HWTEST_VBUS_OUT_IO, 0);                     //拉低VBUS_OUT
     port_gpio_out_level(HWTEST_SUB_PWR_IO, 0);                      //拉低副芯片供电
     hwtest_on = false;
-    printf("hwtest: power off\n");
+    printf("hwtest: power off, save bl duty=%d\n", hwtest_bl_duty);
 }
 
 AT(.text.hwtest)
 static void hwtest_power_on(void)
 {
-    LCD_BL_EN();                                                    //开屏幕背光
+    hwtest_bl_set(hwtest_bl_duty ? hwtest_bl_duty : GUI_DEFAULT_BK);//开屏幕背光
     port_gpio_out_level(HWTEST_VBUS_OUT_IO, bsp_gpio_get_sta(HWTEST_VBUS_DET_IO));
     delay_ms(HWTEST_SUB_PWR_DELAY_MS);
     port_gpio_out_level(HWTEST_SUB_PWR_IO, 1);                      //拉高副芯片供电
@@ -95,6 +114,10 @@ void hwtest_process(void)
 
     if (hwtest_on) {                                                //开机状态下VBUS_OUT实时跟随VBUS_DET
         port_gpio_out_level(HWTEST_VBUS_OUT_IO, bsp_gpio_get_sta(HWTEST_VBUS_DET_IO));
+    } else {
+        //GUI刷新会置tft_bglight_first_set把背光重新点亮, 关机态每轮压回0。
+        //lcd_drv_set_brightness()内部有last_duty判断, 占空比没变不会重复写PWM
+        hwtest_bl_set(0);
     }
 }
 

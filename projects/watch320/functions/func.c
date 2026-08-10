@@ -55,10 +55,6 @@ void func_process(void)
 {
     WDT_CLR();
 
-#if HWTEST_EN
-    hwtest_process();                                       //硬件测试: VBUS_OUT跟随 + 长按开关机
-#endif
-
 #if BSP_UART1_EN
     bsp_uart1_process();
 #endif
@@ -72,6 +68,10 @@ void func_process(void)
 #endif
 
     tft_bglight_frist_set_check();
+
+#if HWTEST_EN
+    hwtest_process();                                       //硬件测试: 放在背光设置之后, 关机态才压得住背光
+#endif
 
     // gui 没有休眠才更新
 	#if FOTA_UI_EN
