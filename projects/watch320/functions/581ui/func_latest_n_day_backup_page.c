@@ -249,7 +249,7 @@ compo_form_t *func_latest_n_day_backup_page_form_create(void)
     compo_textbox_set_autosize(txt, true);
     compo_textbox_set_align_center(txt, false);
     compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_15_BIN);
-    compo_textbox_set(txt, "RECENT_004");
+    compo_textbox_set(txt, backup_param.dir_sel[0] ? backup_param.dir_sel : "RECENT_004");
 
     /* 天数步进：Group_2 + 减/加 + 数字日 */
     f->pic_step = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_GROUP_2_BIN);

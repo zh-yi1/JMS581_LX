@@ -186,6 +186,7 @@ typedef struct {
     u8 latest_days;                                 //最新N日备份页选择的天数，0=未设置
     u8 card_checked[BACKUP_CARD_CNT];               //首页卡槽勾选状态，跨页面保持
     u8 card_checked_set;                            //勾选状态是否已设置（区分首次进入）
+    char dir_sel[16];                               //目录页选中的目标目录名，如 "CARD_011"
 } backup_param_t;
 
 extern backup_param_t backup_param;

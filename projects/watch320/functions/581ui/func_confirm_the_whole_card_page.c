@@ -161,7 +161,7 @@ compo_form_t *func_confirm_the_whole_card_page_form_create(void)
     compo_textbox_set_autosize(txt, true);
     compo_textbox_set_align_center(txt, false);
     compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_15_BIN);
-    compo_textbox_set(txt, "CARD_011");
+    compo_textbox_set(txt, backup_param.dir_sel[0] ? backup_param.dir_sel : "CARD_011");
 
     /* 特性说明 */
     for (i = 0; i < CONFIRM_TIP_CNT; i++) {

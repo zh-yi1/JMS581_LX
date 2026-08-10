@@ -44,6 +44,7 @@ static const char *s_dir_name[CONTENTS_ITEM_CNT] = {
 typedef struct {
     u8 top_idx;     // 列表窗口起始下标
     u8 selection;   // 当前选中（相对全表）
+    u8 press_idx;   // 按下中的行（相对全表），0xFF=无
     compo_picturebox_t *pic_divider;
     compo_picturebox_t *pic_back;
     compo_picturebox_t *pic_up;
@@ -67,9 +68,10 @@ static void contents_update_display(void)
     for (i = 0; i < CONTENTS_VISIBLE; i++) {
         u8 idx = f->top_idx + i;
         bool selected = (idx == f->selection);
+        bool pressed  = (idx == f->press_idx);
 
         if (idx < CONTENTS_ITEM_CNT) {
-            compo_picturebox_set(f->pic_row[i], selected
+            compo_picturebox_set(f->pic_row[i], (selected || pressed)
                 ? UI_BUF_IMAGE_BIN_CONTENTS_CLICK_BIN
                 : UI_BUF_IMAGE_BIN_DIVIDER_UNCLICK_BIN);
             compo_textbox_set(f->txt_name[i], s_dir_name[idx]);
@@ -94,21 +96,38 @@ static void contents_update_display(void)
         : UI_BUF_IMAGE_BIN_DOWN_BIN);
 }
 
+static u8 contents_hit_row(point_t pt)
+{
+    f_contents_t *f = (f_contents_t *)func_cb.f_cb;
+    u8 i;
+
+    for (i = 0; i < CONTENTS_VISIBLE; i++) {
+        s16 y = CONTENTS_ROW0_Y + i * (CONTENTS_ROW_H + CONTENTS_ROW_GAP);
+        if (pt.y > (y - CONTENTS_ROW_H / 2) && pt.y < (y + CONTENTS_ROW_H / 2)) {
+            u8 idx = f->top_idx + i;
+            return (idx < CONTENTS_ITEM_CNT) ? idx : 0xFF;
+        }
+    }
+    return 0xFF;
+}
+
 static void contents_scroll(s8 dir)
 {
     f_contents_t *f = (f_contents_t *)func_cb.f_cb;
-    s8 next = (s8)f->selection + dir;
+    s16 next_top = (s16)f->top_idx + dir * CONTENTS_VISIBLE;
 
-    if (next < 0 || next >= CONTENTS_ITEM_CNT) {
-        return;
+    if (next_top < 0) {
+        next_top = 0;
+    } else if (next_top >= CONTENTS_ITEM_CNT) {
+        return;     /* 已到最后一页，不可再向下翻 */
+    }
+    if ((s16)f->top_idx == next_top) {
+        return;     /* 已是第一页，不可再向上翻 */
     }
 
-    f->selection = (u8)next;
-    if (f->selection < f->top_idx) {
-        f->top_idx = f->selection;
-    } else if (f->selection >= f->top_idx + CONTENTS_VISIBLE) {
-        f->top_idx = f->selection - CONTENTS_VISIBLE + 1;
-    }
+    f->top_idx = (u8)next_top;
+    f->selection = f->top_idx;
+    f->press_idx = 0xFF;
     contents_update_display();
 }
 
@@ -207,6 +226,23 @@ compo_form_t *func_contents_page_form_create(void)
 
     f->top_idx = 0;
     f->selection = 0;
+    f->press_idx = 0xFF;
+
+    /* 再次进入：恢复上次选中的目录 */
+    if (backup_param.dir_sel[0]) {
+        for (i = 0; i < CONTENTS_ITEM_CNT; i++) {
+            if (strcmp(s_dir_name[i], backup_param.dir_sel) == 0) {
+                f->selection = i;
+                break;
+            }
+        }
+    }
+    /* 让选中项出现在可视窗口内 */
+    if (f->selection < f->top_idx) {
+        f->top_idx = f->selection;
+    } else if (f->selection >= f->top_idx + CONTENTS_VISIBLE) {
+        f->top_idx = f->selection - CONTENTS_VISIBLE + 1;
+    }
     contents_update_display();
 
     return frm;
@@ -214,6 +250,13 @@ compo_form_t *func_contents_page_form_create(void)
 
 static void func_contents_page_process(void)
 {
+    f_contents_t *f = (f_contents_t *)func_cb.f_cb;
+
+    /* 触摸抬起或滑动移开时，恢复行按下状态 */
+    if (f->press_idx != 0xFF && !ctp_is_touch()) {
+        f->press_idx = 0xFF;
+        contents_update_display();
+    }
     func_process();
 }
 
@@ -221,18 +264,38 @@ static void func_contents_page_message(size_msg_t msg)
 {
     f_contents_t *f = (f_contents_t *)func_cb.f_cb;
     point_t pt;
-    u8 i;
+    u8 idx;
 
     switch (msg)
     {
     case MSG_QDEC_FORWARD:
-    case MSG_CTP_SHORT_DOWN:
         contents_scroll(1);
         break;
 
     case MSG_QDEC_BACKWARD:
-    case MSG_CTP_SHORT_UP:
         contents_scroll(-1);
+        break;
+
+    case MSG_CTP_SHORT_DOWN:
+    case MSG_CTP_SHORT_UP:
+        break;
+
+    case MSG_CTP_TOUCH:
+        pt = ctp_get_sxy();
+        idx = contents_hit_row(pt);
+        if (idx != 0xFF) {
+            f->press_idx = idx;
+            contents_update_display();
+        }
+        break;
+
+    case MSG_CTP_SHORT_LEFT:
+    case MSG_CTP_SHORT_RIGHT:
+    case MSG_CTP_LONG_LIFT:
+        if (f->press_idx != 0xFF) {
+            f->press_idx = 0xFF;
+            contents_update_display();
+        }
         break;
 
     case MSG_CTP_CLICK:
@@ -245,25 +308,32 @@ static void func_contents_page_message(size_msg_t msg)
             }
             break;
         }
+        /* 点击上箭头：向前翻一页 */
+        if (pt.y < 48 && pt.x > (GUI_SCREEN_WIDTH - 48)) {
+            contents_scroll(-1);
+            break;
+        }
+        /* 点击下箭头：向后翻一页 */
+        if (pt.y > (CONTENTS_FOOTER_Y - 24) && pt.x > (GUI_SCREEN_WIDTH - 48)) {
+            contents_scroll(1);
+            break;
+        }
         if (pt.y > (CONTENTS_FOOTER_Y - 24)) {
             /* 点击新建：后续接业务 */
             break;
         }
-        for (i = 0; i < CONTENTS_VISIBLE; i++) {
-            s16 y = CONTENTS_ROW0_Y + i * (CONTENTS_ROW_H + CONTENTS_ROW_GAP);
-            if (pt.y > (y - CONTENTS_ROW_H / 2) && pt.y < (y + CONTENTS_ROW_H / 2)) {
-                u8 idx = f->top_idx + i;
-                if (idx < CONTENTS_ITEM_CNT) {
-                    f->selection = idx;
-                    contents_update_display();
-                    /* 选中目录后返回来源页 */
-                    if (func_cb.last == FUNC_LATEST_N_DAY_BACKUP) {
-                        func_cb.sta = FUNC_LATEST_N_DAY_BACKUP;
-                    } else {
-                        func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
-                    }
-                }
-                break;
+        idx = contents_hit_row(pt);
+        if (idx != 0xFF) {
+            f->selection = idx;
+            f->press_idx = 0xFF;
+            /* 保存选中的目录名，返回后目标路径卡片显示 */
+            strcpy(backup_param.dir_sel, s_dir_name[idx]);
+            contents_update_display();
+            /* 选中目录后返回来源页 */
+            if (func_cb.last == FUNC_LATEST_N_DAY_BACKUP) {
+                func_cb.sta = FUNC_LATEST_N_DAY_BACKUP;
+            } else {
+                func_cb.sta = FUNC_CONFIRM_WHOLE_CARD;
             }
         }
         break;
