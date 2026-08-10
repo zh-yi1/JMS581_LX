@@ -329,7 +329,7 @@ compo_form_t *func_latest_n_day_backup_page_form_create(void)
         compo_textbox_set_autosize(txt_cards, true);
         compo_textbox_set_align_center(txt_cards, false);
         compo_textbox_set_font(txt_cards, UI_BUF_FONT_BIN_FONT_SIZE_15_BIN);
-        compo_textbox_set(txt_cards, " SD CFA");
+        compo_textbox_set(txt_cards, backup_param.card_sel[0] ? backup_param.card_sel : " SD");
         w2 = compo_textbox_get_wid(txt_cards);
 
         start_x = GUI_SCREEN_CENTER_X - (w1 + w2) / 2;

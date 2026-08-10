@@ -179,6 +179,13 @@ typedef struct {
     void (*set_vol_callback)(u8 dir);               //设置音量的回调函数，用于各任务的音量事件处理。
 } func_cb_t;
 
+// 备份业务跨页面共享参数（首页勾选卡槽 -> 整卡/最新N日确认页）
+typedef struct {
+    char card_sel[16];                              //首页勾选的卡槽名称，如 " SD" / " SD CFA"
+} backup_param_t;
+
+extern backup_param_t backup_param;
+
 
 extern func_cb_t func_cb;
 extern const u8 func_sort_table[];     //任务切换排序table
