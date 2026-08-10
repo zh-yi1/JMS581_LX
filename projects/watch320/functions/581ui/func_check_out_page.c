@@ -16,7 +16,6 @@
 #define CHECKOUT_CARD_X             (GUI_SCREEN_WIDTH - 16)
 
 #define CHECKOUT_ICON_Y             118
-#define CHECKOUT_ICON_SIZE          80
 
 #define CHECKOUT_STA_Y              168
 #define CHECKOUT_TIP_Y              188
@@ -160,7 +159,7 @@ compo_form_t *func_check_out_page_form_create(void)
     /* 中间：完成勾选图标 */
     f->pic_ok = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_CHECK_OUT_CORRECT_BIN);
     compo_picturebox_set_pos(f->pic_ok, GUI_SCREEN_CENTER_X, CHECKOUT_ICON_Y);
-    compo_picturebox_set_size(f->pic_ok, CHECKOUT_ICON_SIZE, CHECKOUT_ICON_SIZE);
+
 
     /* 状态文案 */
     f->txt_sta = compo_textbox_create(frm, 24);

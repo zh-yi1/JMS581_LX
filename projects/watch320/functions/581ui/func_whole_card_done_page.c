@@ -12,7 +12,6 @@
 #define DONE_BAT_X                  (GUI_SCREEN_WIDTH - 22)
 
 #define DONE_ICON_Y                 100
-#define DONE_ICON_SIZE              80
 
 #define DONE_STA_Y                  150
 #define DONE_SIZE_Y                 180
@@ -152,7 +151,6 @@ compo_form_t *func_whole_card_done_page_form_create(void)
     /* 中间：完成勾选图标 */
     f->pic_ok = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_CHECK_OUT_CORRECT_BIN);
     compo_picturebox_set_pos(f->pic_ok, GUI_SCREEN_CENTER_X, DONE_ICON_Y);
-    compo_picturebox_set_size(f->pic_ok, DONE_ICON_SIZE, DONE_ICON_SIZE);
 
     /* 备份完成 */
     txt = compo_textbox_create(frm, 16);
@@ -187,7 +185,7 @@ compo_form_t *func_whole_card_done_page_form_create(void)
     compo_picturebox_set_pos(f->pic_btn, GUI_SCREEN_CENTER_X, DONE_BTN_Y);
 
     txt = compo_textbox_create(frm, 8);
-    compo_textbox_set_location(txt, GUI_SCREEN_CENTER_X, DONE_BTN_Y - 10, 0, 0);
+    compo_textbox_set_location(txt, GUI_SCREEN_CENTER_X, DONE_BTN_Y, 0, 0);
     compo_textbox_set_autosize(txt, true);
     compo_textbox_set_align_center(txt, true);
     compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_15_BIN);
