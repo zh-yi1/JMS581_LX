@@ -384,7 +384,7 @@ static void func_backing_up_1_page_message(size_msg_t msg)
         break;
 
     default:
-        func_message(msg);
+        //func_message(msg);
         break;
     }
 }

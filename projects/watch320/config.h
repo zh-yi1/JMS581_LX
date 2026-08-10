@@ -49,8 +49,8 @@
 #define VUSB4S_RESET_EN                 0                           //VUSB4s硬件复位使能
 
 #define CHIP_PACKAGE_SELECT             CHIP_5790T                  //芯片封装选择 5790T
-#define CHIP_PACKAGE_SUPPORT_PSRAM      1                           //芯片支持psram
-#define CHIP_PACKAGE_SUPPORT_HFP        1                           //芯片支持HFP
+#define CHIP_PACKAGE_SUPPORT_PSRAM      0                           //芯片支持psram
+#define CHIP_PACKAGE_SUPPORT_HFP        0                           //芯片支持HFP
 
 #define UART0_PRINTF_SEL                PRINTF_PB3                  //选择UART打印信息输出IO，或关闭打印信息输出
 #define SYS_INIT_VOLUME                 xcfg_cb.sys_init_vol        //系统默认音量
@@ -189,7 +189,7 @@
 #define GUI_USE_SCREENSHOOT             1*CHIP_PACKAGE_SUPPORT_PSRAM //是否使用截图转场, 需要使用psram
 #define GUI_USE_BLUR                    1*CHIP_PACKAGE_SUPPORT_PSRAM //是否使用高斯模糊, 需要使用psram,开启后下拉界面使用高斯模糊效果
 #define GUI_SPU_PSRAM                   0                       //使用PSRAM推屏
-#define DEFAULE_START_FUNC              FUNC_BACKING_UP_1_PAGE       //默认开始任务
+#define DEFAULE_START_FUNC              FUNC_HOME_PAGE       //默认开始任务
 
 /*****************************************************************************
  * Module    : UI场景相关配置

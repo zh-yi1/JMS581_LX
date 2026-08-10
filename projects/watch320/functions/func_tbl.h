@@ -21,6 +21,7 @@ compo_form_t *func_contents_page_form_create(void);
 compo_form_t *func_latest_n_day_backup_page_form_create(void);
 compo_form_t *func_loading_1_page_form_create(void);
 compo_form_t *func_backing_up_1_page_form_create(void);
+compo_form_t *func_check_out_page_form_create(void);
 
 const func_t tbl_func_create[] = {
     {FUNC_MENU,                         func_menu_form_create},
@@ -33,6 +34,7 @@ const func_t tbl_func_create[] = {
     {FUNC_LATEST_N_DAY_BACKUP,          func_latest_n_day_backup_page_form_create},
     {FUNC_LOADING_1_PAGE,               func_loading_1_page_form_create},
     {FUNC_BACKING_UP_1_PAGE,            func_backing_up_1_page_form_create},
+    {FUNC_CHECK_OUT_PAGE,               func_check_out_page_form_create},
 };
 
 extern void func_menu(void);
@@ -45,6 +47,7 @@ extern void func_contents_page(void);
 extern void func_latest_n_day_backup_page(void);
 extern void func_loading_1_page(void);
 extern void func_backing_up_1_page(void);
+extern void func_check_out_page(void);
 
 extern void func_idle(void);
 extern void func_ota_ui(void);
@@ -60,6 +63,7 @@ const func_t tbl_func_entry[] = {
     {FUNC_LATEST_N_DAY_BACKUP,          func_latest_n_day_backup_page},
     {FUNC_LOADING_1_PAGE,               func_loading_1_page},
     {FUNC_BACKING_UP_1_PAGE,            func_backing_up_1_page},
+    {FUNC_CHECK_OUT_PAGE,               func_check_out_page},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle},
 #endif
@@ -78,6 +82,7 @@ void func_contents_page_enter(void);
 void func_latest_n_day_backup_page_enter(void);
 void func_loading_1_page_enter(void);
 void func_backing_up_1_page_enter(void);
+void func_check_out_page_enter(void);
 #if FUNC_IDLE_EN
 void func_idle_enter(void);
 #endif
@@ -96,6 +101,7 @@ const func_t tbl_func_enter[] = {
     {FUNC_LATEST_N_DAY_BACKUP,          func_latest_n_day_backup_page_enter},
     {FUNC_LOADING_1_PAGE,               func_loading_1_page_enter},
     {FUNC_BACKING_UP_1_PAGE,            func_backing_up_1_page_enter},
+    {FUNC_CHECK_OUT_PAGE,               func_check_out_page_enter},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle_enter},
 #endif
@@ -115,6 +121,7 @@ void func_contents_page_exit(void);
 void func_latest_n_day_backup_page_exit(void);
 void func_loading_1_page_exit(void);
 void func_backing_up_1_page_exit(void);
+void func_check_out_page_exit(void);
 #if FUNC_IDLE_EN
 void func_idle_exit(void);
 #endif
@@ -133,6 +140,7 @@ const func_t tbl_func_exit[] = {
     {FUNC_LATEST_N_DAY_BACKUP,          func_latest_n_day_backup_page_exit},
     {FUNC_LOADING_1_PAGE,               func_loading_1_page_exit},
     {FUNC_BACKING_UP_1_PAGE,            func_backing_up_1_page_exit},
+    {FUNC_CHECK_OUT_PAGE,               func_check_out_page_exit},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle_exit},
 #endif

@@ -31,6 +31,8 @@ const char * const i18n_zh[] = {
     [STR_MOUNT_THEN_CHECK]              = "挂载后将检查待备份内容",
     [STR_DO_NOT_REMOVE_MEDIA]           = "请勿移除存储卡或 SSD",
     [STR_CURRENT_CARD]                  = "当前卡",
+    [STR_BACKUP_DONE]                   = "备份完成",
+    [STR_SAFE_UNMOUNT_NEXT]             = "正在安全卸载，随后处理下一张",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",
