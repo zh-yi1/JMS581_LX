@@ -32,6 +32,7 @@ compo_form_t *func_whole_card_not_enough_space_page_form_create(void);
 compo_form_t *func_latest_n_day_not_enough_space_page_form_create(void);
 compo_form_t *func_setup_page_form_create(void);
 compo_form_t *func_language_page_form_create(void);
+compo_form_t *func_format_page_form_create(void);
 
 const func_t tbl_func_create[] = {
     {FUNC_MENU,                         func_menu_form_create},
@@ -55,6 +56,7 @@ const func_t tbl_func_create[] = {
     {FUNC_LATEST_N_DAY_NOT_ENOUGH_SPACE_PAGE, func_latest_n_day_not_enough_space_page_form_create},
     {FUNC_SETUP_PAGE,                   func_setup_page_form_create},
     {FUNC_LANGUAGE_PAGE,                func_language_page_form_create},
+    {FUNC_FORMAT_PAGE,                  func_format_page_form_create},
 };
 
 extern void func_menu(void);
@@ -78,6 +80,7 @@ extern void func_whole_card_not_enough_space_page(void);
 extern void func_latest_n_day_not_enough_space_page(void);
 extern void func_setup_page(void);
 extern void func_language_page(void);
+extern void func_format_page(void);
 
 extern void func_idle(void);
 extern void func_ota_ui(void);
@@ -104,6 +107,7 @@ const func_t tbl_func_entry[] = {
     {FUNC_LATEST_N_DAY_NOT_ENOUGH_SPACE_PAGE, func_latest_n_day_not_enough_space_page},
     {FUNC_SETUP_PAGE,                   func_setup_page},
     {FUNC_LANGUAGE_PAGE,                func_language_page},
+    {FUNC_FORMAT_PAGE,                  func_format_page},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle},
 #endif
@@ -133,6 +137,7 @@ void func_whole_card_not_enough_space_page_enter(void);
 void func_latest_n_day_not_enough_space_page_enter(void);
 void func_setup_page_enter(void);
 void func_language_page_enter(void);
+void func_format_page_enter(void);
 #if FUNC_IDLE_EN
 void func_idle_enter(void);
 #endif
@@ -162,6 +167,7 @@ const func_t tbl_func_enter[] = {
     {FUNC_LATEST_N_DAY_NOT_ENOUGH_SPACE_PAGE, func_latest_n_day_not_enough_space_page_enter},
     {FUNC_SETUP_PAGE,                   func_setup_page_enter},
     {FUNC_LANGUAGE_PAGE,                func_language_page_enter},
+    {FUNC_FORMAT_PAGE,                  func_format_page_enter},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle_enter},
 #endif
@@ -192,6 +198,7 @@ void func_whole_card_not_enough_space_page_exit(void);
 void func_latest_n_day_not_enough_space_page_exit(void);
 void func_setup_page_exit(void);
 void func_language_page_exit(void);
+void func_format_page_exit(void);
 #if FUNC_IDLE_EN
 void func_idle_exit(void);
 #endif
@@ -221,6 +228,7 @@ const func_t tbl_func_exit[] = {
     {FUNC_LATEST_N_DAY_NOT_ENOUGH_SPACE_PAGE, func_latest_n_day_not_enough_space_page_exit},
     {FUNC_SETUP_PAGE,                   func_setup_page_exit},
     {FUNC_LANGUAGE_PAGE,                func_language_page_exit},
+    {FUNC_FORMAT_PAGE,                  func_format_page_exit},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle_exit},
 #endif

@@ -44,6 +44,7 @@ enum
     FUNC_LATEST_N_DAY_NOT_ENOUGH_SPACE_PAGE, // 最新N日备份SSD空间不足
     FUNC_SETUP_PAGE,             // 设置页
     FUNC_LANGUAGE_PAGE,          // 语言选择
+    FUNC_FORMAT_PAGE,            // 格式化 SSD
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘

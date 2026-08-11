@@ -284,6 +284,8 @@ static void func_setup_page_message(size_msg_t msg)
         idx = setup_hit_row(pt);
         if (idx == 0) {
             func_cb.sta = FUNC_LANGUAGE_PAGE;
+        } else if (idx == 1) {
+            func_cb.sta = FUNC_FORMAT_PAGE;
         } else if (idx != 0xFF) {
             TRACE("setup item %u\n", idx);
         }
@@ -307,7 +309,8 @@ void func_setup_page_enter(void)
 
 void func_setup_page_exit(void)
 {
-    if (func_cb.sta != FUNC_LANGUAGE_PAGE) {
+    if (func_cb.sta != FUNC_LANGUAGE_PAGE &&
+        func_cb.sta != FUNC_FORMAT_PAGE) {
         func_cb.last = FUNC_HOME_PAGE;
     }
 }

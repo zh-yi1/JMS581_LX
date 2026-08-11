@@ -58,6 +58,12 @@ const char * const i18n_en[] = {
     [STR_SYS_UPGRADE_TIP]               = "Update firmware",
     [STR_DEVICE_INFO]                   = "Device Info",
     [STR_DEVICE_INFO_TIP]               = "Model, SN and capacity",
+    [STR_CLEAR_SSD_ALL]                 = "Erase All SSD Data",
+    [STR_FORMAT_WARN_FILES]             = "Backups and folders will be deleted",
+    [STR_FORMAT_WARN_UNDO]              = "This cannot be undone",
+    [STR_SSD_CAPACITY]                  = "SSD Capacity",
+    [STR_CUR_AVAIL]                     = "Available",
+    [STR_CONFIRM_FORMAT]                = "Confirm Format",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

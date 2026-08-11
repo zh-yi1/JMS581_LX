@@ -58,6 +58,12 @@ const char * const i18n_zh[] = {
     [STR_SYS_UPGRADE_TIP]               = "更新设备固件",
     [STR_DEVICE_INFO]                   = "设备信息",
     [STR_DEVICE_INFO_TIP]               = "型号、序列号与容量",
+    [STR_CLEAR_SSD_ALL]                 = "清除 SSD 全部内容",
+    [STR_FORMAT_WARN_FILES]             = "备份文件和自建目录都将被删除",
+    [STR_FORMAT_WARN_UNDO]              = "此操作无法撤销",
+    [STR_SSD_CAPACITY]                  = "SSD 容量",
+    [STR_CUR_AVAIL]                     = "当前可用",
+    [STR_CONFIRM_FORMAT]                = "确认格式化",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",
