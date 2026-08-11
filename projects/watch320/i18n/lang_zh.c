@@ -71,6 +71,12 @@ const char * const i18n_zh[] = {
     [STR_SSD_READY]                     = "SSD 已可以正常使用",
     [STR_FREE_SPACE]                    = "可用空间",
     [STR_BACK_SETUP]                    = "返回设置",
+    [STR_NEW_VERSION_FOUND]             = "发现新版本",
+    [STR_UPDATE_VERIFIED]               = "升级文件已通过校验",
+    [STR_CUR_VERSION]                   = "当前版本",
+    [STR_NEW_VERSION]                   = "新版本",
+    [STR_UPDATE_FILE]                   = "升级文件",
+    [STR_START_UPGRADE]                 = "开始升级",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

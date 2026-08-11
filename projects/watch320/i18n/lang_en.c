@@ -71,6 +71,12 @@ const char * const i18n_en[] = {
     [STR_SSD_READY]                     = "SSD is ready to use",
     [STR_FREE_SPACE]                    = "Free Space",
     [STR_BACK_SETUP]                    = "Back to Settings",
+    [STR_NEW_VERSION_FOUND]             = "New Version Found",
+    [STR_UPDATE_VERIFIED]               = "Update file verified",
+    [STR_CUR_VERSION]                   = "Current",
+    [STR_NEW_VERSION]                   = "New",
+    [STR_UPDATE_FILE]                   = "Package",
+    [STR_START_UPGRADE]                 = "Start Upgrade",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

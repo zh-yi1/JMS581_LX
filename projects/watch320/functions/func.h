@@ -47,6 +47,7 @@ enum
     FUNC_FORMAT_PAGE,            // 格式化 SSD
     FUNC_FORMATING_PAGE,         // 正在格式化 SSD
     FUNC_FORMATED_PAGE,          // 格式化完成
+    FUNC_UPGRADE_PAGE,           // 系统升级
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘

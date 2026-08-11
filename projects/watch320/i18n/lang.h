@@ -73,6 +73,12 @@ enum {
     STR_SSD_READY,
     STR_FREE_SPACE,
     STR_BACK_SETUP,
+    STR_NEW_VERSION_FOUND,
+    STR_UPDATE_VERIFIED,
+    STR_CUR_VERSION,
+    STR_NEW_VERSION,
+    STR_UPDATE_FILE,
+    STR_START_UPGRADE,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
