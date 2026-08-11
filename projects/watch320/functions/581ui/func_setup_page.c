@@ -280,9 +280,11 @@ static void func_setup_page_message(size_msg_t msg)
             func_cb.sta = FUNC_HOME_PAGE;
             break;
         }
-        /* 列表项：子页面待接 */
+        /* 列表项 */
         idx = setup_hit_row(pt);
-        if (idx != 0xFF) {
+        if (idx == 0) {
+            func_cb.sta = FUNC_LANGUAGE_PAGE;
+        } else if (idx != 0xFF) {
             TRACE("setup item %u\n", idx);
         }
         break;
@@ -305,7 +307,9 @@ void func_setup_page_enter(void)
 
 void func_setup_page_exit(void)
 {
-    func_cb.last = FUNC_HOME_PAGE;
+    if (func_cb.sta != FUNC_LANGUAGE_PAGE) {
+        func_cb.last = FUNC_HOME_PAGE;
+    }
 }
 
 void func_setup_page(void)
