@@ -77,6 +77,9 @@ const char * const i18n_zh[] = {
     [STR_NEW_VERSION]                   = "新版本",
     [STR_UPDATE_FILE]                   = "升级文件",
     [STR_START_UPGRADE]                 = "开始升级",
+    [STR_UPGRADEING]                    = "正在升级",
+    [STR_INSTALLING]                    = "正在安装",
+    [STR_KEEP_POWER_ON]                 = "请保持设备供电",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

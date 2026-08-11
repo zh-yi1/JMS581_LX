@@ -79,6 +79,9 @@ enum {
     STR_NEW_VERSION,
     STR_UPDATE_FILE,
     STR_START_UPGRADE,
+    STR_UPGRADEING,
+    STR_INSTALLING,
+    STR_KEEP_POWER_ON,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
