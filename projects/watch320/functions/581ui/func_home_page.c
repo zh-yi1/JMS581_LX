@@ -382,6 +382,11 @@ static void func_home_page_message(size_msg_t msg)
     case MSG_CTP_CLICK:
         pt = ctp_get_sxy();
         home_clear_press(h);
+        /* 右上角设置图标 */
+        if (pt.y < 48 && pt.x > (HOME_SET_X - 24)) {
+            func_cb.sta = FUNC_SETUP_PAGE;
+            break;
+        }
         /* 底部按钮：点击进入对应功能 */
         idx = home_hit_btn(pt);
         if (idx != 0xFF) {

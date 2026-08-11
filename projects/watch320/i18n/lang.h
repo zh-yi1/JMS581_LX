@@ -51,6 +51,15 @@ enum {
     STR_AVAIL,
     STR_NEED,
     STR_FREE_SPACE_RETRY,
+    STR_LANGUAGE,
+    STR_LANGUAGE_TIP,
+    STR_LANG_ZH_CN,
+    STR_FORMAT_SSD,
+    STR_FORMAT_SSD_TIP,
+    STR_SYS_UPGRADE,
+    STR_SYS_UPGRADE_TIP,
+    STR_DEVICE_INFO,
+    STR_DEVICE_INFO_TIP,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
