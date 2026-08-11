@@ -1238,6 +1238,9 @@
 		<Unit filename="functions/581ui/func_upgradeing_page.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="functions/581ui/func_upgraded_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="functions/common/func_bt_update.c">
 			<Option compilerVar="CC" />
 		</Unit>

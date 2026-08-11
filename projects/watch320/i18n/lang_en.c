@@ -80,6 +80,8 @@ const char * const i18n_en[] = {
     [STR_UPGRADEING]                    = "Upgrading",
     [STR_INSTALLING]                    = "Installing",
     [STR_KEEP_POWER_ON]                 = "Keep the device powered",
+    [STR_UPGRADE_DONE]                  = "Upgrade Complete",
+    [STR_DEVICE_READY]                  = "Device is ready",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

@@ -80,6 +80,8 @@ const char * const i18n_zh[] = {
     [STR_UPGRADEING]                    = "正在升级",
     [STR_INSTALLING]                    = "正在安装",
     [STR_KEEP_POWER_ON]                 = "请保持设备供电",
+    [STR_UPGRADE_DONE]                  = "升级完成",
+    [STR_DEVICE_READY]                  = "设备已准备就绪",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

@@ -82,6 +82,8 @@ enum {
     STR_UPGRADEING,
     STR_INSTALLING,
     STR_KEEP_POWER_ON,
+    STR_UPGRADE_DONE,
+    STR_DEVICE_READY,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
