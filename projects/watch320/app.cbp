@@ -1229,6 +1229,9 @@
 		<Unit filename="functions/581ui/func_formating_page.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="functions/581ui/func_formated_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="functions/common/func_bt_update.c">
 			<Option compilerVar="CC" />
 		</Unit>
