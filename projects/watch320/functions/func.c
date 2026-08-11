@@ -52,8 +52,19 @@ void func_process(void)
 {
     WDT_CLR();
 
-#if BSP_UART1_EN
-    bsp_uart1_process();
+#if JMS581_EN
+    jms581_frame_process();     //JMS581串口协议接收处理
+#if JMS581_TEST_EN
+    {                           //串口模拟联调: 开机跑一次注入自测+注册printf回调表, 之后每3s发0x8000
+        static u8 jms_test_done = 0;
+        if (!jms_test_done)
+        {
+            jms_test_done = 1;
+            jms581_test_run();
+        }
+        jms581_test_poll();
+    }
+#endif
 #endif
 
 #if CPU_USAGE_MONITOT_EN

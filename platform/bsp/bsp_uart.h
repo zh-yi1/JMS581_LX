@@ -2,12 +2,13 @@
 #define _BSP_UART_H
 
 // 是否打开串口1收发管理器 (通信串口, TX: PB8, RX: PB9)
-#define BSP_UART1_EN    1
-#define BSP_UART_EN     (BSP_UART1_EN)
+#define BSP_UART1_EN 1
+#define BSP_UART_EN (BSP_UART1_EN)
 
-typedef struct {
-    volatile u8 w_cnt;
-    volatile u8 r_cnt;
+typedef struct
+{
+    volatile u16 w_cnt;
+    volatile u16 r_cnt;
     u32 ticks;
     u8 *rxbuf;
     u16 rxbuf_len;
@@ -57,17 +58,19 @@ void bsp_uart1_putchar(char ch);
 void bsp_uart1_str_tx(char *str);
 
 /**
+ * @brief UART1发送二进制数据块
+ * @param[in] buf: 数据
+ * @param[in] len: 字节数
+ **/
+Err_Uart bsp_uart1_bufs_tx(u8 *buf, u16 len);
+
+/**
  * @brief 初始化UART1
  * @param[in] uart: 初始化结构体
  * @param[in] rxbuf: 接收数据缓冲区, 若有则使用默认的接收管理器
  * @param[in] rxbuf_len: 接收数据缓冲区长度
  **/
 Err_Uart bsp_uart1_init(uart_t *uart, u8 *rxbuf, u16 rxbuf_len);
-
-/**
- * @brief UART1接收处理, 在主循环中轮询调用
- **/
-void bsp_uart1_process(void);
 
 void bsp_uart_init(void);
 #endif

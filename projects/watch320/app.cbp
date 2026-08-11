@@ -1239,6 +1239,14 @@
 		<Unit filename="functions/func_ui_stubs.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="functions/jms581/jms581_frame.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/jms581/jms581_frame.h" />
+		<Unit filename="functions/jms581/jms581_proto.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/jms581/jms581_proto.h" />
 		<Unit filename="i18n/lang.c">
 			<Option compilerVar="CC" />
 		</Unit>
