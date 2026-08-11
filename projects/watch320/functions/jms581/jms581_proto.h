@@ -7,7 +7,7 @@
 
 // 是否打开协议层注入测试代码 (jms581_test_run)
 #ifndef JMS581_TEST_EN
-#define JMS581_TEST_EN              1       //串口模拟联调中, 出货/联调结束改回0
+#define JMS581_TEST_EN              0       //联调需要时改1: 开机注入自测+printf回调表+3s轮询发0x8000
 #endif
 
 ///命令组
