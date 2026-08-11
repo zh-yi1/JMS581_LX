@@ -272,8 +272,7 @@ static void func_format_page_message(size_msg_t msg)
         if (pt.y > (FORMAT_BTN_Y - 30)) {
             f->btn_press = 0;
             format_update_display();
-            /* 确认格式化：后续接业务 */
-            TRACE("confirm format\n");
+            func_cb.sta = FUNC_FORMATING_PAGE;
         }
         break;
 
@@ -303,7 +302,9 @@ void func_format_page_enter(void)
 
 void func_format_page_exit(void)
 {
-    func_cb.last = FUNC_SETUP_PAGE;
+    if (func_cb.sta != FUNC_FORMATING_PAGE) {
+        func_cb.last = FUNC_SETUP_PAGE;
+    }
 }
 
 void func_format_page(void)

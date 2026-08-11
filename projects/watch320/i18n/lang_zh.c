@@ -64,6 +64,9 @@ const char * const i18n_zh[] = {
     [STR_SSD_CAPACITY]                  = "SSD 容量",
     [STR_CUR_AVAIL]                     = "当前可用",
     [STR_CONFIRM_FORMAT]                = "确认格式化",
+    [STR_FORMATING_SSD]                 = "正在格式化 SSD",
+    [STR_REBUILD_STORAGE]               = "正在重建存储空间",
+    [STR_DO_NOT_POWER_OFF_SSD]          = "请勿关机或断开 SSD",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

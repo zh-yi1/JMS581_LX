@@ -64,6 +64,9 @@ const char * const i18n_en[] = {
     [STR_SSD_CAPACITY]                  = "SSD Capacity",
     [STR_CUR_AVAIL]                     = "Available",
     [STR_CONFIRM_FORMAT]                = "Confirm Format",
+    [STR_FORMATING_SSD]                 = "Formatting SSD",
+    [STR_REBUILD_STORAGE]               = "Rebuilding storage",
+    [STR_DO_NOT_POWER_OFF_SSD]          = "Do not power off or unplug SSD",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

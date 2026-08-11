@@ -66,6 +66,9 @@ enum {
     STR_SSD_CAPACITY,
     STR_CUR_AVAIL,
     STR_CONFIRM_FORMAT,
+    STR_FORMATING_SSD,
+    STR_REBUILD_STORAGE,
+    STR_DO_NOT_POWER_OFF_SSD,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
