@@ -82,6 +82,10 @@ const char * const i18n_en[] = {
     [STR_KEEP_POWER_ON]                 = "Keep the device powered",
     [STR_UPGRADE_DONE]                  = "Upgrade Complete",
     [STR_DEVICE_READY]                  = "Device is ready",
+    [STR_PRODUCT_MODEL]                 = "Model",
+    [STR_FW_VERSION]                    = "Firmware",
+    [STR_SERIAL_NUM]                    = "Serial",
+    [STR_UI_LANGUAGE]                   = "Language",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

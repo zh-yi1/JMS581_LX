@@ -288,6 +288,8 @@ static void func_setup_page_message(size_msg_t msg)
             func_cb.sta = FUNC_FORMAT_PAGE;
         } else if (idx == 2) {
             func_cb.sta = FUNC_UPGRADE_PAGE;
+        } else if (idx == 3) {
+            func_cb.sta = FUNC_VERINFO_PAGE;
         } else if (idx != 0xFF) {
             TRACE("setup item %u\n", idx);
         }
@@ -313,7 +315,8 @@ void func_setup_page_exit(void)
 {
     if (func_cb.sta != FUNC_LANGUAGE_PAGE &&
         func_cb.sta != FUNC_FORMAT_PAGE &&
-        func_cb.sta != FUNC_UPGRADE_PAGE) {
+        func_cb.sta != FUNC_UPGRADE_PAGE &&
+        func_cb.sta != FUNC_VERINFO_PAGE) {
         func_cb.last = FUNC_HOME_PAGE;
     }
 }

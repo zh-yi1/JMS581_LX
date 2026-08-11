@@ -82,6 +82,10 @@ const char * const i18n_zh[] = {
     [STR_KEEP_POWER_ON]                 = "请保持设备供电",
     [STR_UPGRADE_DONE]                  = "升级完成",
     [STR_DEVICE_READY]                  = "设备已准备就绪",
+    [STR_PRODUCT_MODEL]                 = "产品型号",
+    [STR_FW_VERSION]                    = "固件版本",
+    [STR_SERIAL_NUM]                    = "序列号",
+    [STR_UI_LANGUAGE]                   = "界面语言",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

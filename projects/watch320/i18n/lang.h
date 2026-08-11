@@ -84,6 +84,10 @@ enum {
     STR_KEEP_POWER_ON,
     STR_UPGRADE_DONE,
     STR_DEVICE_READY,
+    STR_PRODUCT_MODEL,
+    STR_FW_VERSION,
+    STR_SERIAL_NUM,
+    STR_UI_LANGUAGE,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
