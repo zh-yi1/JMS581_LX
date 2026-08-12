@@ -17,9 +17,9 @@
  *****************************************************************************/
 #define MAX_FUNC_SORT_CNT               20  //最大支持左右快捷切换任务的个数
 
-#define FUNC_BT_EN                      1   //是否打开蓝牙功能
+#define FUNC_BT_EN                      0   //是否打开蓝牙功能 (581流程不用, 关闭)
 #define FUNC_BT_DUT_EN                  0   //是否打开蓝牙的独立DUT测试模式
-#define FUNC_MUSIC_EN                   1   //是否打开MUSIC功能
+#define FUNC_MUSIC_EN                   0   //是否打开MUSIC功能 (581流程不用, 关闭)
 #define FUNC_FMRX_EN                    0   //是否打开FM收音功能
 #define FUNC_RECORDER_EN                0   //是否打开录音机功能
 #define FUNC_USBDEV_EN                  0   //是否打开USB DEVICE功能
@@ -189,7 +189,7 @@
 #define GUI_USE_SCREENSHOOT             1*CHIP_PACKAGE_SUPPORT_PSRAM //是否使用截图转场, 需要使用psram
 #define GUI_USE_BLUR                    1*CHIP_PACKAGE_SUPPORT_PSRAM //是否使用高斯模糊, 需要使用psram,开启后下拉界面使用高斯模糊效果
 #define GUI_SPU_PSRAM                   0                       //使用PSRAM推屏
-#define DEFAULE_START_FUNC              FUNC_HOME_PAGE           //默认开始任务
+#define DEFAULE_START_FUNC              FUNC_PWRBLACK            //默认开始任务(JMS581流程: 上电进关机模式黑屏)
 
 /*****************************************************************************
  * Module    : UI场景相关配置
@@ -269,7 +269,7 @@
 /*****************************************************************************
  * Module    : BLE功能配置
  *****************************************************************************/
-#define LE_EN                           1   //是否打开BLE功能
+#define LE_EN                           0   //是否打开BLE功能 (581流程不用, 关闭)
 #define LE_PAIR_EN                      1   //是否使能BLE的加密配对
 #define LE_SM_SC_EN                     1   //是否使能BLE的加密连接，需同时打开LE_PAIR_EN。一键双联需要打开此配置。
 #define LE_ADV_POWERON_EN               1   //是否上电默认打开BLE广播
@@ -375,7 +375,7 @@
  * Module    : SD/UDISK音乐功能配置
  *****************************************************************************/
 #define MUSIC_UDISK_EN                  0   //是否支持播放UDISK
-#define MUSIC_SDCARD_EN                 1   //是否支持播放SDCARD
+#define MUSIC_SDCARD_EN                 0   //是否支持播放SDCARD (581流程不用, 关闭)
 #define USB_SD_UPDATE_EN                0   //是否支持UDISK/SD的离线升级
 
 #define MUSIC_WAV_SUPPORT               1   //是否支持WAV格式解码
@@ -417,7 +417,7 @@
 #define FUNC_REC_SPR                    SPR_8000            //录音的波特率
 #define FUNC_REC_BITRATE                16000               //录音的码率
 #define FUNC_REC_NCH                    MIC_DEFAULT_NCH     //录音的通道数, 硬件自行决定
-#define FUNC_REC_TO_SD                  1                   //录音到文件系统
+#define FUNC_REC_TO_SD                  0                   //录音到文件系统 (581流程不用, 关闭)
 #define FUNC_REC_OPUS_BT_MUSIC_EN       0                   //录音OPUS压缩同时支持后台音乐播放, 只支持OPUS压缩时可以使用后台音乐sbc传输播放, 开了之后只能录opus了
 #undef  BT_A2DP_AAC_AUDIO_EN
 #define BT_A2DP_AAC_AUDIO_EN            (!FUNC_REC_OPUS_BT_MUSIC_EN)
@@ -514,7 +514,7 @@
 /*****************************************************************************
  * Module    : 电量检测及低电
  *****************************************************************************/
-#define VBAT_DETECT_EN                  1           //电池电量检测功能
+#define VBAT_DETECT_EN                  0           //电池电量检测功能 (电量走外接电量计, 关闭)
 #define VUSB_DETECT_EN                  0           //充电电压检测功能
 #define VBAT2_ADCCH                     ADCCH_VBAT  //ADCCH_VBAT为内部1/2电压通路，带升压应用需要外部ADC通路检测1/2电池电压
 #define VBAT_FILTER_USE_PEAK            0           //电池检测滤波选则://0 取平均值.//1 取峰值(适用于播放音乐时,电池波动比较大的音箱方案).
@@ -528,7 +528,7 @@
 /*****************************************************************************
  * Module    : 充电功能选择
  *****************************************************************************/
-#define CHARGE_EN                       1                               //是否打开充电功能
+#define CHARGE_EN                       0                               //是否打开充电功能 (充电由PE0外部电路控制, 关闭)
 #define CHARGE_TRICK_EN                 xcfg_cb.charge_trick_en         //是否打开涓流充电功能
 #define CHARGE_DC_RESET                 xcfg_cb.charge_dc_reset         //是否打开DC插入复位功能
 #define CHARGE_DC_NOT_PWRON             xcfg_cb.charge_dc_not_pwron     //DC插入，是否软开机。 1: DC IN时不能开机
@@ -605,7 +605,7 @@
 /*****************************************************************************
  * Module    : Loudspeaker mute检测配置
  *****************************************************************************/
-#define LOUDSPEAKER_MUTE_EN             1           //是否使能功放MUTE
+#define LOUDSPEAKER_MUTE_EN             0           //是否使能功放MUTE (本板PE0挪用为充电控制脚, 见jms581_mode, 功放MUTE关闭)
 #define LOUDSPEAKER_MUTE_INIT()         loudspeaker_mute_init()
 #define LOUDSPEAKER_MUTE_DIS()          loudspeaker_disable()
 #define LOUDSPEAKER_MUTE()              loudspeaker_mute()
@@ -750,16 +750,16 @@
 /*****************************************************************************
  * Module    : AVI视频播放功能
  *****************************************************************************/
-#define AVI_DIALPLATE_EN                    1*CHIP_PACKAGE_SUPPORT_PSRAM  //使用视频表盘功能
+#define AVI_DIALPLATE_EN                    0  //使用视频表盘功能 (581流程不用, 关闭)
 #define VIDEO_CLK_SEL                       SYS_192M                    //AVI选择的系统时钟
-#define VIDEO_PLAY_EN                       1                           //AVI视频播放功能
+#define VIDEO_PLAY_EN                       0                           //AVI视频播放功能 (581流程不用, 关闭)
 #define AVI_USE_SD                          (1)*VIDEO_PLAY_EN           //AVI是否使用SD卡
 #define AVI_USE_PSRAM                       (1)*VIDEO_PLAY_EN*CHIP_PACKAGE_SUPPORT_PSRAM           //是否使用PSRAM
 
 /*****************************************************************************
  * Module    : JPEG显示解码功能
  *****************************************************************************/
-#define PHOTO_VIEW_EN                       1                           //jpeg照片解码显示功能
+#define PHOTO_VIEW_EN                       0                           //jpeg照片解码显示功能 (581流程不用, 关闭)
 #define PHOTO_CLK_SEL                       SYS_192M                    //JPEG选择的系统时钟
 #define PHOTO_USE_SD                        (1)*PHOTO_VIEW_EN           //JPEG显示是否使用SD卡
 #define PHOTO_USE_PSRAM                     (1)*PHOTO_VIEW_EN*CHIP_PACKAGE_SUPPORT_PSRAM           //是否使用PSRAM
