@@ -86,6 +86,9 @@ const char * const i18n_zh[] = {
     [STR_FW_VERSION]                    = "固件版本",
     [STR_SERIAL_NUM]                    = "序列号",
     [STR_UI_LANGUAGE]                   = "界面语言",
+    [STR_COMPUTER_MODE]                 = "电脑模式",
+    [STR_COMPUTER_CARD_TIP]             = "整卡备份文件",
+    [STR_COMPUTER_RECENT_TIP]           = "前 N 日备份文件",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

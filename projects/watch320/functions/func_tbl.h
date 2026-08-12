@@ -39,6 +39,7 @@ compo_form_t *func_upgrade_page_form_create(void);
 compo_form_t *func_upgradeing_page_form_create(void);
 compo_form_t *func_upgraded_page_form_create(void);
 compo_form_t *func_verinfo_page_form_create(void);
+compo_form_t *func_computer_page_form_create(void);
 
 const func_t tbl_func_create[] = {
     {FUNC_MENU,                         func_menu_form_create},
@@ -69,6 +70,7 @@ const func_t tbl_func_create[] = {
     {FUNC_UPGRADEING_PAGE,              func_upgradeing_page_form_create},
     {FUNC_UPGRADED_PAGE,                func_upgraded_page_form_create},
     {FUNC_VERINFO_PAGE,                 func_verinfo_page_form_create},
+    {FUNC_COMPUTER_PAGE,                func_computer_page_form_create},
 };
 
 extern void func_menu(void);
@@ -99,6 +101,7 @@ extern void func_upgrade_page(void);
 extern void func_upgradeing_page(void);
 extern void func_upgraded_page(void);
 extern void func_verinfo_page(void);
+extern void func_computer_page(void);
 
 extern void func_idle(void);
 extern void func_ota_ui(void);
@@ -132,6 +135,7 @@ const func_t tbl_func_entry[] = {
     {FUNC_UPGRADEING_PAGE,              func_upgradeing_page},
     {FUNC_UPGRADED_PAGE,                func_upgraded_page},
     {FUNC_VERINFO_PAGE,                 func_verinfo_page},
+    {FUNC_COMPUTER_PAGE,                func_computer_page},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle},
 #endif
@@ -168,6 +172,7 @@ void func_upgrade_page_enter(void);
 void func_upgradeing_page_enter(void);
 void func_upgraded_page_enter(void);
 void func_verinfo_page_enter(void);
+void func_computer_page_enter(void);
 #if FUNC_IDLE_EN
 void func_idle_enter(void);
 #endif
@@ -204,6 +209,7 @@ const func_t tbl_func_enter[] = {
     {FUNC_UPGRADEING_PAGE,              func_upgradeing_page_enter},
     {FUNC_UPGRADED_PAGE,                func_upgraded_page_enter},
     {FUNC_VERINFO_PAGE,                 func_verinfo_page_enter},
+    {FUNC_COMPUTER_PAGE,                func_computer_page_enter},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle_enter},
 #endif
@@ -241,6 +247,7 @@ void func_upgrade_page_exit(void);
 void func_upgradeing_page_exit(void);
 void func_upgraded_page_exit(void);
 void func_verinfo_page_exit(void);
+void func_computer_page_exit(void);
 #if FUNC_IDLE_EN
 void func_idle_exit(void);
 #endif
@@ -277,6 +284,7 @@ const func_t tbl_func_exit[] = {
     {FUNC_UPGRADEING_PAGE,              func_upgradeing_page_exit},
     {FUNC_UPGRADED_PAGE,                func_upgraded_page_exit},
     {FUNC_VERINFO_PAGE,                 func_verinfo_page_exit},
+    {FUNC_COMPUTER_PAGE,                func_computer_page_exit},
 #if FUNC_IDLE_EN
     {FUNC_IDLE,                         func_idle_exit},
 #endif

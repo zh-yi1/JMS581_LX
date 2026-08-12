@@ -51,6 +51,7 @@ enum
     FUNC_UPGRADEING_PAGE,        // 正在升级
     FUNC_UPGRADED_PAGE,          // 升级完成
     FUNC_VERINFO_PAGE,           // 设备信息
+    FUNC_COMPUTER_PAGE,          // 电脑模式
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘

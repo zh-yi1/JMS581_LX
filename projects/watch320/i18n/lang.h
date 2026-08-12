@@ -88,6 +88,9 @@ enum {
     STR_FW_VERSION,
     STR_SERIAL_NUM,
     STR_UI_LANGUAGE,
+    STR_COMPUTER_MODE,
+    STR_COMPUTER_CARD_TIP,
+    STR_COMPUTER_RECENT_TIP,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,

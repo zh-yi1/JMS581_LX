@@ -86,6 +86,9 @@ const char * const i18n_en[] = {
     [STR_FW_VERSION]                    = "Firmware",
     [STR_SERIAL_NUM]                    = "Serial",
     [STR_UI_LANGUAGE]                   = "Language",
+    [STR_COMPUTER_MODE]                 = "Computer Mode",
+    [STR_COMPUTER_CARD_TIP]             = "Full card backups",
+    [STR_COMPUTER_RECENT_TIP]           = "Recent N-day backups",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",
