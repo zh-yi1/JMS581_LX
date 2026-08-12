@@ -89,6 +89,9 @@ const char * const i18n_zh[] = {
     [STR_COMPUTER_MODE]                 = "电脑模式",
     [STR_COMPUTER_CARD_TIP]             = "整卡备份文件",
     [STR_COMPUTER_RECENT_TIP]           = "前 N 日备份文件",
+    [STR_PREPARE_BACKUP]                = "准备备份",
+    [STR_INSERT_CARD]                   = "插入存储卡",
+    [STR_SUPPORT_CARD_TYPE]             = "支持 SD、CFA 和 CFB",
 
     [STR_CLOCK]                         = "时钟",
     [STR_SPORTS]                        = "运动",

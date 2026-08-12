@@ -89,6 +89,9 @@ const char * const i18n_en[] = {
     [STR_COMPUTER_MODE]                 = "Computer Mode",
     [STR_COMPUTER_CARD_TIP]             = "Full card backups",
     [STR_COMPUTER_RECENT_TIP]           = "Recent N-day backups",
+    [STR_PREPARE_BACKUP]                = "Prepare Backup",
+    [STR_INSERT_CARD]                   = "Insert Card",
+    [STR_SUPPORT_CARD_TYPE]             = "Supports SD, CFA and CFB",
 
     [STR_CLOCK]                         = "Clock",
     [STR_SPORTS]                        = "Sport",

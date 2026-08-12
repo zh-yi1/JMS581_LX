@@ -91,6 +91,9 @@ enum {
     STR_COMPUTER_MODE,
     STR_COMPUTER_CARD_TIP,
     STR_COMPUTER_RECENT_TIP,
+    STR_PREPARE_BACKUP,
+    STR_INSERT_CARD,
+    STR_SUPPORT_CARD_TYPE,
 
     /* 保留任务 / 侧栏 / 组件 / 表盘短语 */
     STR_CLOCK,
