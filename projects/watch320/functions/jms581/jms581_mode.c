@@ -44,11 +44,7 @@ typedef struct {
     u8  mode;                   //当前模式 JMS581_MODE_x
     u8  vbus_sta;               //vbus电平记录
 
-    //判模式序列: 插入USB后判581用途的非阻塞流程(PE4拉高->等稳定->581上电->
-    //等启动->1秒一次查0x8000), 拆成SEQ_x子状态由jms581_seq_process()每圈推进一步,
-    //等待期间不阻塞主循环; 无超时: 581必回复一个状态, 答PC进PC模式, 非PC进充电模式,
-    //"判定中"继续查, 中途拔USB由关机case中止序列
-    u8  seq_sta;                //序列走到哪一步 SEQ_x, SEQ_IDLE=未在判
+    u8  seq_sta;                //序列走到哪一步 SEQ_x, SEQ_IDLE=未在判,即关机插入时581模式判断的状态机
     u8  sta_flag;               //收到0x8000应答标志
     u8  sta_val;                //0x8000应答status
     u32 seq_tick;               //序列本状态计时(轮询周期共用)
