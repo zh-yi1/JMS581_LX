@@ -62,5 +62,12 @@ const char * const i18n_zh[] = {
     [STR_MIC_RECORD]                    = "录音",
 #endif
 
+    [STR_JMS_PC_MODE]                   = "PC模式",
+    [STR_JMS_CHARGE_MODE]               = "充电模式",
+    [STR_JMS_OFFLINE]                   = "脱机",
+    [STR_JMS_CHG_NONE]                  = "未充电",
+    [STR_JMS_CHG_ING]                   = "充电中",
+    [STR_JMS_CHG_FULL]                  = "已充满",
+
     [STR_NULL]                          = " ",
 };

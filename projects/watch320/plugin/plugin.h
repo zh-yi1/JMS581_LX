@@ -6,6 +6,8 @@
 #include "bt_call.h"
 #include "port_ctp.h"
 #include "port_sd.h"
+#include "port_key_on.h"
+#include "port_gauge.h"
 
 void plugin_init(void);
 void plugin_var_init(void);

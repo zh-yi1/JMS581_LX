@@ -86,7 +86,7 @@ static void home_update_battery(void)
         return;
     }
 
-    level = home_bat_level_from_percent(sys_cb.vbat_percent);
+    level = home_bat_level_from_percent(gauge_percent_get());
     if (level == h->bat_level) {
         return;
     }
@@ -181,7 +181,7 @@ compo_form_t *func_home_page_form_create(void)
     h->pic_set = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_SETTING_BIN);
     compo_picturebox_set_pos(h->pic_set, HOME_SET_X, HOME_ICON_Y);
   
-    h->bat_level = home_bat_level_from_percent(sys_cb.vbat_percent);
+    h->bat_level = home_bat_level_from_percent(gauge_percent_get());
     h->pic_bat = compo_picturebox_create(frm, s_bat_level_res[h->bat_level - 1]);
     compo_picturebox_set_pos(h->pic_bat, HOME_BAT_X, HOME_ICON_Y);
 

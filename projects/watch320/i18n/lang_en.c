@@ -62,5 +62,12 @@ const char * const i18n_en[] = {
     [STR_MIC_RECORD]                    = "Record",
 #endif
 
+    [STR_JMS_PC_MODE]                   = "PC Mode",
+    [STR_JMS_CHARGE_MODE]               = "Charging Mode",
+    [STR_JMS_OFFLINE]                   = "Offline",
+    [STR_JMS_CHG_NONE]                  = "Not Charging",
+    [STR_JMS_CHG_ING]                   = "Charging",
+    [STR_JMS_CHG_FULL]                  = "Full",
+
     [STR_NULL]                          = " ",
 };

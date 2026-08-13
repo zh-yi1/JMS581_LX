@@ -1232,10 +1232,22 @@
 		<Unit filename="functions/func_clock_sub_side.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="functions/func_jmscharge.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="functions/func_menu.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="functions/func_menu.h" />
+		<Unit filename="functions/func_offline.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/func_pcmode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/func_pwrblack.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="functions/func_ui_stubs.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -1243,6 +1255,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="functions/jms581/jms581_frame.h" />
+		<Unit filename="functions/jms581/jms581_mode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/jms581/jms581_mode.h" />
 		<Unit filename="functions/jms581/jms581_proto.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -1277,6 +1293,10 @@
 		<Unit filename="plugin/plugin.h" />
 		<Unit filename="plugin/user_halt.h" />
 		<Unit filename="port/port_ctp.h" />
+		<Unit filename="port/port_gauge.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="port/port_gauge.h" />
 		<Unit filename="port/port_key.c">
 			<Option compilerVar="CC" />
 		</Unit>

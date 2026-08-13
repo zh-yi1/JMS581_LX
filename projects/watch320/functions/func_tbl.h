@@ -16,6 +16,12 @@ compo_form_t *func_menu_form_create(void);
 compo_form_t *func_clock_form_create(void);
 compo_form_t *func_charge_form_create(void);
 compo_form_t *func_home_page_form_create(void);
+#if JMS581_MODE_EN
+compo_form_t *func_pwrblack_form_create(void);
+compo_form_t *func_pcmode_form_create(void);
+compo_form_t *func_jmscharge_form_create(void);
+compo_form_t *func_offline_form_create(void);
+#endif
 
 const func_t tbl_func_create[] = {
     {FUNC_MENU,                         func_menu_form_create},
@@ -23,6 +29,12 @@ const func_t tbl_func_create[] = {
     {FUNC_CLOCK,                        func_clock_form_create},
     {FUNC_CHARGE,                       func_charge_form_create},
     {FUNC_HOME_PAGE,                    func_home_page_form_create},
+#if JMS581_MODE_EN
+    {FUNC_PWRBLACK,                     func_pwrblack_form_create},
+    {FUNC_PCMODE,                       func_pcmode_form_create},
+    {FUNC_JMSCHARGE,                    func_jmscharge_form_create},
+    {FUNC_OFFLINE,                      func_offline_form_create},
+#endif
 };
 
 extern void func_menu(void);
@@ -34,6 +46,12 @@ extern void func_home_page(void);
 extern void func_idle(void);
 extern void func_ota_ui(void);
 extern void func_bt_update(void);
+#if JMS581_MODE_EN
+extern void func_pwrblack(void);
+extern void func_pcmode(void);
+extern void func_jmscharge(void);
+extern void func_offline(void);
+#endif
 
 const func_t tbl_func_entry[] = {
     {FUNC_MENU,                         func_menu},                     //已重定向到首页
@@ -47,6 +65,12 @@ const func_t tbl_func_entry[] = {
     {FUNC_OTA_UI_MODE,                  func_ota_ui},
 #endif
     {FUNC_BT_UPDATE,                    func_bt_update},
+#if JMS581_MODE_EN
+    {FUNC_PWRBLACK,                     func_pwrblack},                 //关机模式(黑屏)
+    {FUNC_PCMODE,                       func_pcmode},                   //PC模式
+    {FUNC_JMSCHARGE,                    func_jmscharge},                //充电模式
+    {FUNC_OFFLINE,                      func_offline},                  //脱机模式
+#endif
 };
 
 void func_menu_enter(void);
@@ -60,6 +84,12 @@ void func_idle_enter(void);
 void func_ota_ui_enter(void);
 #endif
 void func_bt_update_enter(void);
+#if JMS581_MODE_EN
+void func_pwrblack_enter(void);
+void func_pcmode_enter(void);
+void func_jmscharge_enter(void);
+void func_offline_enter(void);
+#endif
 
 const func_t tbl_func_enter[] = {
     {FUNC_MENU,                         func_menu_enter},
@@ -73,6 +103,12 @@ const func_t tbl_func_enter[] = {
     {FUNC_OTA_UI_MODE,                  func_ota_ui_enter},
 #endif
     {FUNC_BT_UPDATE,                    func_bt_update_enter},
+#if JMS581_MODE_EN
+    {FUNC_PWRBLACK,                     func_pwrblack_enter},
+    {FUNC_PCMODE,                       func_pcmode_enter},
+    {FUNC_JMSCHARGE,                    func_jmscharge_enter},
+    {FUNC_OFFLINE,                      func_offline_enter},
+#endif
 };
 
 
@@ -87,6 +123,12 @@ void func_idle_exit(void);
 void func_ota_ui_exit(void);
 #endif
 void func_bt_update_exit(void);
+#if JMS581_MODE_EN
+void func_pwrblack_exit(void);
+void func_pcmode_exit(void);
+void func_jmscharge_exit(void);
+void func_offline_exit(void);
+#endif
 
 const func_t tbl_func_exit[] = {
     {FUNC_MENU,                         func_menu_exit},
@@ -102,6 +144,12 @@ const func_t tbl_func_exit[] = {
     {FUNC_BT_UPDATE,                    func_bt_update_exit},
 #if FLASHDB_EN
     {FUNC_MESSAGE_REPLY,                NULL},
+#endif
+#if JMS581_MODE_EN
+    {FUNC_PWRBLACK,                     func_pwrblack_exit},
+    {FUNC_PCMODE,                       func_pcmode_exit},
+    {FUNC_JMSCHARGE,                    func_jmscharge_exit},
+    {FUNC_OFFLINE,                      func_offline_exit},
 #endif
 };
 

@@ -33,24 +33,44 @@
 #endif
 
 /*----------------------------------------------------------------------------
+ * 按键事件标志 (裸机方式, 不走消息队列)
+ * 单变量存事件码: 中断写入, 主循环key_on_event_get()取走清零, 单字节读写原子。
+ * 两次按键事件最小间隔几百ms(双击窗口400ms), 主循环ms级, 不会一圈内堆两个事件
+ *--------------------------------------------------------------------------*/
+static volatile u8 key_on_evt;
+
+///取一次按键事件, 取走即清, 无事件返回KEY_ON_EVT_NONE
+u8 key_on_event_get(void)
+{
+    u8 evt = key_on_evt;
+    if (evt != KEY_ON_EVT_NONE) {
+        key_on_evt = KEY_ON_EVT_NONE;
+    }
+    return evt;
+}
+
+/*----------------------------------------------------------------------------
  * 按键回调, 按键动作填在这里。运行在5ms定时中断上下文, 只做轻量操作。
  *--------------------------------------------------------------------------*/
 AT(.com_text.port.key)
 static void key_on_click_cb(void)                  //单击
 {
     key_on_printf("key_on: click\n");
+    key_on_evt = KEY_ON_EVT_CLICK;
 }
 
 AT(.com_text.port.key)
 static void key_on_double_cb(void)                 //双击
 {
     key_on_printf("key_on: double\n");
+    key_on_evt = KEY_ON_EVT_DOUBLE;
 }
 
 AT(.com_text.port.key)
 static void key_on_long_cb(void)                   //长按
 {
     key_on_printf("key_on: long\n");
+    key_on_evt = KEY_ON_EVT_LONG;
 }
 
 /*--------------------------------------------------------------------------*/

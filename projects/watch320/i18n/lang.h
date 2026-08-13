@@ -65,6 +65,14 @@ enum {
     STR_MIC_RECORD,
 #endif
 
+    /* JMS581四模式状态机界面 */
+    STR_JMS_PC_MODE,
+    STR_JMS_CHARGE_MODE,
+    STR_JMS_OFFLINE,
+    STR_JMS_CHG_NONE,
+    STR_JMS_CHG_ING,
+    STR_JMS_CHG_FULL,
+
     STR_NULL,
 };
 

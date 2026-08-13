@@ -22,6 +22,7 @@
 #endif
 #include "jms581/jms581_frame.h"
 #include "jms581/jms581_proto.h"
+#include "jms581/jms581_mode.h"
 
 #define TICK_IGNORE_KEY            700      //忽略700ms内的部分消息
 
@@ -152,6 +153,13 @@ enum
 
 #if LE_AB_FOT_EN
     FUNC_OTA_UI_MODE,
+#endif
+
+#if JMS581_MODE_EN
+    FUNC_PWRBLACK,               // 关机模式(黑屏, JMS581流程)
+    FUNC_PCMODE,                 // PC模式(JMS581流程)
+    FUNC_JMSCHARGE,              // 充电模式(JMS581流程)
+    FUNC_OFFLINE,                // 脱机模式(JMS581流程)
 #endif
     FUNC_MAX_NUM, // 用于计数
 

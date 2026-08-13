@@ -54,6 +54,9 @@ void func_process(void)
 
 #if JMS581_EN
     jms581_frame_process();     //JMS581串口协议接收处理
+#if JMS581_MODE_EN
+    jms581_mode_process();      //JMS581主状态机周期任务(vbus消抖/判模式序列/空闲计时), 任意界面都跑
+#endif
 #if JMS581_TEST_EN
     {                           //串口模拟联调: 开机跑一次注入自测+注册printf回调表, 之后每3s发0x8000
         static u8 jms_test_done = 0;
@@ -888,6 +891,9 @@ void func_run(void)
 
     void (*func_entry)(void) = NULL;
     printf("%s\n", __func__);
+#if JMS581_MODE_EN
+    jms581_mode_init();         //JMS581四模式状态机: GPIO配置+回调注册+初始vbus采样
+#endif
     memset(func_cb.tbl_sort, 0, sizeof(func_cb.tbl_sort));
     func_cb.tbl_sort[0] = FUNC_CLOCK;
     func_cb.tbl_sort[1] = FUNC_ACTIVITY;
