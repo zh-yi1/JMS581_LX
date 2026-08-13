@@ -95,13 +95,13 @@ static void jms581_io_vbus_out(u8 hi)
     TRACE("jms581: PE4(vbus_out)=%d\n", hi);
 }
 
-//PE7 VBUS_DET: 输入+内部下拉
+//PE7 VBUS_DET: 浮空输入, 电平靠板上外部下拉/USB插入拉高
 static void jms581_io_vbus_det_init(void)
 {
     GPIOEDE  |= BIT(7);                 //数字功能使能
     GPIOEDIR |= BIT(7);                 //方向=输入(1=输入)
     GPIOEPU  &= ~BIT(7);                //关内部上拉
-    GPIOEPD  |= BIT(7);                 //开内部下拉(拔出时确保读到低)
+    GPIOEPD  &= ~BIT(7);                //关内部下拉: 板上有外部下拉, 内部并联会拉低高电平
 }
 
 //读PE7原始电平(未消抖): 1=USB在位, 0=不在; GPIOE每位对应一个引脚实时电平
@@ -476,7 +476,8 @@ void jms581_mode_init(void)
     jms581_proto_cb_reg(&jms581_mode_cbs);
 
     mode_cb.mode = JMS581_MODE_SHUTDOWN;            //与DEFAULE_START_FUNC=FUNC_PWRBLACK对应
-    extab_user_isr_set(IO_PE7, RISE_EDGE, IOUD_SEL_PD, jms581_vbus_rise_isr);
+    extab_user_isr_set(IO_PE7, RISE_EDGE, IOUD_SEL_NULL, jms581_vbus_rise_isr);   //板上有外部下拉, 不开内部
+
     if (jms581_io_vbus_raw()) {
         vbus_irq = 1;                               //首次上电USB在位: 补发一次插入沿
     }
