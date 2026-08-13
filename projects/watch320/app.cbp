@@ -790,6 +790,9 @@
 		<Unit filename="../../platform/gui/ctp/ctp_chsc6x.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../../platform/gui/ctp/ctp_cst7x.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../platform/gui/ctp/ctp_cst8x.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -1170,6 +1173,84 @@
 		</Unit>
 		<Unit filename="config.h" />
 		<Unit filename="functions/581ui/func_home_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_confirm_the_whole_card_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_contents_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_latest_n_day_backup_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_loading_1_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_backing_up_1_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_check_out_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_whole_card_done_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_loading_2_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_backing_up_2_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_latest_n_day_done_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_whole_card_no_new_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_latest_n_day_no_new_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_whole_card_not_enough_space_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_latest_n_day_not_enough_space_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_setup_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_language_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_format_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_formating_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_formated_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_upgrade_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_upgradeing_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_upgraded_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_verinfo_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_computer_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_turn_on_page.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/581ui/func_insert_card_page.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="functions/common/func_bt_update.c">

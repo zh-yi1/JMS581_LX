@@ -31,8 +31,10 @@
 #define HOME_SET_X                  (GUI_SCREEN_WIDTH - 20)
 #define HOME_BAT_X                  (GUI_SCREEN_WIDTH - 52)
 
-// 卡槽就绪状态（演示：SD/CFA 已就绪，CFB 未插卡）
+// 卡槽插卡状态（演示：SD/CFA 已就绪，CFB 未插卡）
 static const u8 s_card_ready[HOME_CARD_CNT] = {1, 1, 0};
+// 已插卡勾选初始状态
+static const u8 s_card_checked_init[HOME_CARD_CNT] = {1, 1, 0};
 static const char *s_card_name[HOME_CARD_CNT] = {
     "SD", "CFA", "CFB"
 };
@@ -48,8 +50,10 @@ static const u32 s_bat_level_res[] = {
 // 首页私有状态
 typedef struct {
     u8 selection;   // 0~2 卡槽选中
-    u8 btn_sel;     // 0=整卡, 1=最新7日
     u8 bat_level;   // 1~5
+    u8 press_idx;   // 0~2 按下中的卡槽，0xFF=无
+    u8 btn_press;   // 0~1 按下中的底部按钮，0xFF=无
+    u8 checked[HOME_CARD_CNT];
     compo_picturebox_t *pic_set;
     compo_picturebox_t *pic_bat;
     compo_picturebox_t *pic_row[HOME_CARD_CNT];
@@ -59,6 +63,57 @@ typedef struct {
     compo_picturebox_t *pic_btn[HOME_BTN_CNT];
     compo_textbox_t *txt_btn[HOME_BTN_CNT];
 } f_home_t;
+
+static u8 home_hit_card(point_t pt)
+{
+    u8 i;
+
+    for (i = 0; i < HOME_CARD_CNT; i++) {
+        s16 y = HOME_ROW0_Y + i * (HOME_ROW_H + HOME_ROW_GAP);
+        if (pt.y > (y - HOME_ROW_H / 2) && pt.y < (y + HOME_ROW_H / 2)) {
+            return i;
+        }
+    }
+    return 0xFF;
+}
+
+static u8 home_hit_btn(point_t pt)
+{
+    if (pt.y <= (HOME_BTN_Y - 30)) {
+        return 0xFF;
+    }
+    return (pt.x < GUI_SCREEN_CENTER_X) ? 0 : 1;
+}
+
+static void home_set_row_press(f_home_t *h, u8 idx)
+{
+    if (h->press_idx < HOME_CARD_CNT) {
+        compo_picturebox_set(h->pic_row[h->press_idx],
+                             UI_BUF_IMAGE_BIN_DIVIDER_UNCLICK_BIN);
+    }
+    h->press_idx = idx;
+    if (idx < HOME_CARD_CNT) {
+        compo_picturebox_set(h->pic_row[idx], UI_BUF_IMAGE_BIN_CLICK_BJ_BIN);
+    }
+}
+
+static void home_set_btn_press(f_home_t *h, u8 idx)
+{
+    if (h->btn_press < HOME_BTN_CNT) {
+        compo_picturebox_set(h->pic_btn[h->btn_press],
+                             UI_BUF_IMAGE_BIN_BOTTON_UNCLICK_BIN);
+    }
+    h->btn_press = idx;
+    if (idx < HOME_BTN_CNT) {
+        compo_picturebox_set(h->pic_btn[idx], UI_BUF_IMAGE_BIN_BOTTON_CLICK_BIN);
+    }
+}
+
+static void home_clear_press(f_home_t *h)
+{
+    home_set_row_press(h, 0xFF);
+    home_set_btn_press(h, 0xFF);
+}
 
 static u8 home_bat_level_from_percent(u8 percent)
 {
@@ -100,19 +155,20 @@ static void home_update_display(void)
     u8 i;
 
     for (i = 0; i < HOME_CARD_CNT; i++) {
-        bool selected = (h->selection == i);
         bool ready = s_card_ready[i];
+        bool checked = ready && h->checked[i];
 
-        // 行背景：选中 / 未选中
-        compo_picturebox_set(h->pic_row[i], selected
+        // 行背景：按下高亮，松开恢复
+        compo_picturebox_set(h->pic_row[i], (h->press_idx == i)
             ? UI_BUF_IMAGE_BIN_CLICK_BJ_BIN
             : UI_BUF_IMAGE_BIN_DIVIDER_UNCLICK_BIN);
 
-        // 勾选框：已就绪 / 未插卡
-        compo_picturebox_set(h->pic_check[i], ready
+        // 勾选框：仅已插卡可切换；未插卡固定未勾选
+        compo_picturebox_set(h->pic_check[i], checked
             ? UI_BUF_IMAGE_BIN_CLICK_BIN
             : UI_BUF_IMAGE_BIN_UNCLICK_BIN);
 
+        // 已就绪 / 未插卡：跟插卡状态，不随点击变化
         if (ready) {
             compo_textbox_set_forecolor(h->txt_name[i], COLOR_WHITE);
             compo_textbox_set_forecolor(h->txt_sta[i], HOME_COLOR_STA);
@@ -124,10 +180,9 @@ static void home_update_display(void)
         }
     }
 
-    // 底部按钮：选中态 vs 未选中态
+    // 底部按钮：按下高亮，松开恢复
     for (i = 0; i < HOME_BTN_CNT; i++) {
-        bool selected = (h->btn_sel == i);
-        compo_picturebox_set(h->pic_btn[i], selected
+        compo_picturebox_set(h->pic_btn[i], (h->btn_press == i)
             ? UI_BUF_IMAGE_BIN_BOTTON_CLICK_BIN
             : UI_BUF_IMAGE_BIN_BOTTON_UNCLICK_BIN);
     }
@@ -218,7 +273,7 @@ compo_form_t *func_home_page_form_create(void)
     for (i = 0; i < HOME_BTN_CNT; i++) {
         s16 x = GUI_SCREEN_CENTER_X + (i == 0 ? -HOME_BTN_X_OFS : HOME_BTN_X_OFS);
 
-        h->pic_btn[i] = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_BOTTON_CLICK_BIN);
+        h->pic_btn[i] = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_BOTTON_UNCLICK_BIN);
         compo_picturebox_set_pos(h->pic_btn[i], x, HOME_BTN_Y);
 
         h->txt_btn[i] = compo_textbox_create(frm, 16);
@@ -226,12 +281,34 @@ compo_form_t *func_home_page_form_create(void)
         compo_textbox_set_autosize(h->txt_btn[i], true);
         compo_textbox_set_align_center(h->txt_btn[i], true);
         compo_textbox_set_font(h->txt_btn[i], UI_BUF_FONT_BIN_FONT_SIZE_15_BIN);
-        compo_textbox_set(h->txt_btn[i],
-                          i18n[i == 0 ? STR_FULL_CARD : STR_LATEST_7D]);
+        if (i == 0) {
+            compo_textbox_set(h->txt_btn[i], i18n[STR_FULL_CARD]);
+        } else if (backup_param.latest_days != 0) {
+            /* 显示上次在最新N日页选择的天数，如「最新6日」 */
+            char buf[24];
+            sprintf(buf, "%s%u%s", i18n[STR_LATEST], backup_param.latest_days, i18n[STR_DAY]);
+            compo_textbox_set(h->txt_btn[i], buf);
+        } else {
+            compo_textbox_set(h->txt_btn[i], i18n[STR_LATEST_7D]);
+        }
     }
 
     h->selection = 0;
-    h->btn_sel = 0;
+    h->press_idx = 0xFF;
+    h->btn_press = 0xFF;
+    if (backup_param.card_checked_set) {
+        /* 跨页面返回：恢复上次的勾选状态 */
+        for (i = 0; i < HOME_CARD_CNT; i++) {
+            h->checked[i] = backup_param.card_checked[i];
+        }
+    } else {
+        /* 首次进入：使用默认勾选，并保存到共享结构体 */
+        for (i = 0; i < HOME_CARD_CNT; i++) {
+            h->checked[i] = s_card_checked_init[i];
+            backup_param.card_checked[i] = s_card_checked_init[i];
+        }
+        backup_param.card_checked_set = 1;
+    }
     home_update_display();
 
     return frm;
@@ -239,6 +316,12 @@ compo_form_t *func_home_page_form_create(void)
 
 static void func_home_page_process(void)
 {
+    f_home_t *h = (f_home_t *)func_cb.f_cb;
+
+    /* 滑动移开或抬起时，恢复按下态 */
+    if ((h->press_idx != 0xFF || h->btn_press != 0xFF) && !ctp_is_touch()) {
+        home_clear_press(h);
+    }
     home_update_battery();
     func_process();
 }
@@ -252,7 +335,6 @@ static void home_select_next(f_home_t *h, s8 dir)
         next = (next + dir + HOME_CARD_CNT) % HOME_CARD_CNT;
         if (s_card_ready[next]) {
             h->selection = next;
-            home_update_display();
             return;
         }
     }
@@ -261,29 +343,90 @@ static void home_select_next(f_home_t *h, s8 dir)
 static void func_home_page_message(size_msg_t msg)
 {
     f_home_t *h = (f_home_t *)func_cb.f_cb;
+    point_t pt;
+    u8 idx;
 
     switch (msg)
     {
     case MSG_QDEC_FORWARD:
-    case MSG_CTP_SHORT_DOWN:
         home_select_next(h, 1);
         break;
 
     case MSG_QDEC_BACKWARD:
-    case MSG_CTP_SHORT_UP:
         home_select_next(h, -1);
         break;
 
-    case MSG_CTP_SHORT_LEFT:
-        if (h->btn_sel != 0) {
-            h->btn_sel = 0;
-            home_update_display();
+    case MSG_CTP_TOUCH:
+        pt = ctp_get_sxy();
+        idx = home_hit_btn(pt);
+        if (idx != 0xFF) {
+            home_set_row_press(h, 0xFF);
+            home_set_btn_press(h, idx);
+            break;
+        }
+        home_set_btn_press(h, 0xFF);
+        idx = home_hit_card(pt);
+        if (idx != 0xFF && s_card_ready[idx]) {
+            home_set_row_press(h, idx);
         }
         break;
 
+    case MSG_CTP_SHORT_LEFT:
     case MSG_CTP_SHORT_RIGHT:
-        if (h->btn_sel != 1) {
-            h->btn_sel = 1;
+    case MSG_CTP_SHORT_UP:
+    case MSG_CTP_SHORT_DOWN:
+    case MSG_CTP_LONG_LIFT:
+        home_clear_press(h);
+        break;
+
+    case MSG_CTP_CLICK:
+        pt = ctp_get_sxy();
+        home_clear_press(h);
+        /* 右上角设置图标 */
+        if (pt.y < 48 && pt.x > (HOME_SET_X - 24)) {
+            func_cb.sta = FUNC_SETUP_PAGE;
+            break;
+        }
+        /* 底部按钮：点击进入对应功能 */
+        idx = home_hit_btn(pt);
+        if (idx != 0xFF) {
+            /* 拼接勾选的卡槽名称传给目标页面 */
+            char *p = backup_param.card_sel;
+            u8 i;
+
+            p[0] = 0;
+            /* 一个都没勾选时，默认选中 SD 卡槽 */
+            for (i = 0; i < HOME_CARD_CNT; i++) {
+                if (h->checked[i]) {
+                    break;
+                }
+            }
+            if (i == HOME_CARD_CNT) {
+                h->checked[0] = 1;
+                h->selection = 0;
+                backup_param.card_checked[0] = 1;
+                home_update_display();
+            }
+
+            for (i = 0; i < HOME_CARD_CNT; i++) {
+                if (h->checked[i]) {
+                    p += sprintf(p, " %s", s_card_name[i]);
+                }
+            }
+            if (p == backup_param.card_sel) {
+                p += sprintf(p, " %s", s_card_name[h->selection]);
+            }
+
+            func_cb.sta = (idx == 0) ? FUNC_CONFIRM_WHOLE_CARD
+                                     : FUNC_LATEST_N_DAY_BACKUP;
+            break;
+        }
+        /* 卡槽：仅已插卡可点，每点一下切换勾选；未插卡不可点 */
+        idx = home_hit_card(pt);
+        if (idx != 0xFF && s_card_ready[idx]) {
+            h->checked[idx] = !h->checked[idx];
+            backup_param.card_checked[idx] = h->checked[idx];
+            h->selection = idx;
             home_update_display();
         }
         break;

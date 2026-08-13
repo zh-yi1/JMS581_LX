@@ -52,6 +52,7 @@
 #define CTP_CHSC6X                      2
 #define CTP_AXS5106                     3
 #define CTP_AXS152x                     4
+#define CTP_CST7X                       5                                       //CST726/CST826/CST836U
 
 /*****************************************************************************
  * Module    : FLASH大小定义

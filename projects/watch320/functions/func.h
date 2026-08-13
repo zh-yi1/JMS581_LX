@@ -31,6 +31,34 @@ enum
 {
     FUNC_NULL = 0,
     FUNC_HOME_PAGE,              // 首页
+    FUNC_CONFIRM_WHOLE_CARD,     // 整卡备份确认
+    FUNC_CONTENTS_PAGE,          // SSD 目标目录选择
+    FUNC_LATEST_N_DAY_BACKUP,    // 最新N日备份
+    FUNC_LOADING_1_PAGE,         // 整卡备份挂载 loading
+    FUNC_BACKING_UP_1_PAGE,      // 整卡备份进度
+    FUNC_CHECK_OUT_PAGE,         // 整卡备份完成/卸载
+    FUNC_WHOLE_CARD_DONE_PAGE,   // 整卡备份全部完成
+    FUNC_LOADING_2_PAGE,         // 最新N日备份 loading
+    FUNC_BACKING_UP_2_PAGE,      // 最新N日备份进度
+    FUNC_LATEST_N_DAY_DONE_PAGE, // 最新N日备份全部完成
+    FUNC_WHOLE_CARD_NO_NEW_PAGE, // 整卡备份无新内容
+    FUNC_LATEST_N_DAY_NO_NEW_PAGE, // 最新N日备份无新内容
+    FUNC_WHOLE_CARD_NOT_ENOUGH_SPACE_PAGE, // 整卡备份SSD空间不足
+    FUNC_LATEST_N_DAY_NOT_ENOUGH_SPACE_PAGE, // 最新N日备份SSD空间不足
+    FUNC_SETUP_PAGE,             // 设置页
+    FUNC_LANGUAGE_PAGE,          // 语言选择
+    FUNC_FORMAT_PAGE,            // 格式化 SSD
+    FUNC_FORMATING_PAGE,         // 正在格式化 SSD
+    FUNC_FORMATED_PAGE,          // 格式化完成
+    FUNC_UPGRADE_PAGE,           // 系统升级
+    FUNC_UPGRADEING_PAGE,        // 正在升级
+    FUNC_UPGRADED_PAGE,          // 升级完成
+    FUNC_VERINFO_PAGE,           // 设备信息
+    FUNC_COMPUTER_PAGE,          // 电脑模式
+    FUNC_TURN_ON_PAGE,           // 开机页
+    FUNC_INSERT_CARD_PAGE,       // 插入存储卡
+
+    
     FUNC_MENU,                   // 主菜单
     FUNC_MENUSTYLE,              // 主菜单样式选择
     FUNC_CLOCK,                  // 时钟表盘
@@ -185,6 +213,18 @@ typedef struct {
     void (*mp3_res_play)(u32 addr, u32 len);        //各任务的语音播报函数接口
     void (*set_vol_callback)(u8 dir);               //设置音量的回调函数，用于各任务的音量事件处理。
 } func_cb_t;
+
+// 备份业务跨页面共享参数（首页勾选卡槽 -> 整卡/最新N日确认页）
+#define BACKUP_CARD_CNT     3       //卡槽数量，与首页 HOME_CARD_CNT 一致
+typedef struct {
+    char card_sel[16];                              //首页勾选的卡槽名称，如 " SD" / " SD CFA"
+    u8 latest_days;                                 //最新N日备份页选择的天数，0=未设置
+    u8 card_checked[BACKUP_CARD_CNT];               //首页卡槽勾选状态，跨页面保持
+    u8 card_checked_set;                            //勾选状态是否已设置（区分首次进入）
+    char dir_sel[16];                               //目录页选中的目标目录名，如 "CARD_011"
+} backup_param_t;
+
+extern backup_param_t backup_param;
 
 
 extern func_cb_t func_cb;

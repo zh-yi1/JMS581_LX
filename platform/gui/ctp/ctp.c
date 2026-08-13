@@ -61,6 +61,8 @@ void ctp_int_isr(void)
         WKUPCPND = BIT(16+PORT_CTP_INT_VECTOR);
 #if (CTP_SELECT == CTP_CST8X)
         ctp_cst8x_readkick();
+#elif (CTP_SELECT == CTP_CST7X)
+        ctp_cst7x_readkick();
 #elif (CTP_SELECT == CTP_CHSC6X)
         ctp_chsc6x_readkick();
 #elif (CTP_SELECT == CTP_AXS5106)
@@ -235,6 +237,8 @@ void ctp_isr(void)
         s32 last_y = ctp_cb.y;
 #if (CTP_SELECT == CTP_CST8X)
         press = ctp_cst8x_get_point(&ctp_cb.x, &ctp_cb.y);
+#elif (CTP_SELECT == CTP_CST7X)
+        press = ctp_cst7x_get_point(&ctp_cb.x, &ctp_cb.y);
 #elif (CTP_SELECT == CTP_CHSC6X)
         press = ctp_chsc6x_get_point(&ctp_cb.x, &ctp_cb.y);
 #elif (CTP_SELECT == CTP_AXS5106)
@@ -392,6 +396,8 @@ void ctp_init(void)
     ctp_reset();
 #if (CTP_SELECT == CTP_CST8X)
     res = ctp_cst8x_init();
+#elif (CTP_SELECT == CTP_CST7X)
+    res = ctp_cst7x_init();
 #elif (CTP_SELECT == CTP_CHSC6X)
     res = ctp_chsc6x_init();
 #elif (CTP_SELECT == CTP_AXS5106)
