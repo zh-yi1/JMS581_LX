@@ -298,7 +298,7 @@ static const u8 tbl_mode_func[] = {
     [JMS581_MODE_SHUTDOWN] = FUNC_PWRBLACK,
     [JMS581_MODE_PC]       = FUNC_PCMODE,
     [JMS581_MODE_CHARGE]   = FUNC_JMSCHARGE,
-    [JMS581_MODE_OFFLINE]  = FUNC_OFFLINE,
+    [JMS581_MODE_OFFLINE]  = FUNC_HOME_PAGE,
 };
 
 static void jms581_fsm_goto(u8 mode)
