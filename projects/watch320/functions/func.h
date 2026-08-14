@@ -22,6 +22,7 @@
 #endif
 #include "jms581/jms581_frame.h"
 #include "jms581/jms581_proto.h"
+#include "jms581/jms581_model.h"
 #include "jms581/jms581_mode.h"
 
 #define TICK_IGNORE_KEY            700      //忽略700ms内的部分消息

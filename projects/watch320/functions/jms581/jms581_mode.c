@@ -45,14 +45,11 @@ typedef struct {
     u8  vbus_sta;               //vbus电平记录
 
     u8  seq_sta;                //序列走到哪一步 SEQ_x, SEQ_IDLE=未在判,即关机插入时581模式判断的状态机
-    u8  sta_flag;               //收到0x8000应答标志
-    u8  sta_val;                //0x8000应答status
+    u32 seq_ver;                //发0x8000时记下的model版本号, 变了=来了新应答
     u32 seq_tick;               //序列本状态计时(轮询周期共用)
 
     //PC模式空闲检测: 每5秒发0x8004问581"多久没读写了", 用于10分钟无读写关机
-    //和长按转充电的忙判断
-    u8  idle_valid;             //1=拿到过581的有效回答(err=0), 0=还没有或581说自己非PC
-    u16 idle_sec;               //581回答的"已经多少秒没读写", 每次应答刷新
+    //和长按转充电的忙判断; 应答值由jms581_model缓存, 本处只管发和取
     u32 idle_poll_tick;         //上次发0x8004的时刻, 用来控制5秒一问
 
     u32 offline_tick;           //脱机无操作计时
@@ -190,37 +187,20 @@ u8 jms581_vbus_in(void)
 }
 
 /*----------------------------------------------------------------------------
- * 协议回调 (主循环上下文, 由jms581_frame_process分发)
- *--------------------------------------------------------------------------*/
-static void jms581_mode_dev_status_cb(const jms581_dev_status_t *sta)
-{
-    TRACE("jms581: dev_status err=%d sta=%d dev=0x%x\n", sta->err_code, sta->status, sta->dev_list);
-    if (sta->err_code == JMS581_ERR_NONE) {
-        mode_cb.sta_val  = sta->status;
-        mode_cb.sta_flag = 1;
-    }
-}
-
-static void jms581_mode_pc_idle_cb(const jms581_pc_idle_t *idle)
-{
-    if (idle->err_code == JMS581_ERR_NONE) {
-        mode_cb.idle_valid = 1;
-        mode_cb.idle_sec   = idle->idle_sec;
-    } else {
-        mode_cb.idle_valid = 0;                     //err=1: 581称非PC模式
-        TRACE("jms581: pc_idle err=%d\n", idle->err_code);
-    }
-}
-
-static const jms581_cb_t jms581_mode_cbs = {
-    .dev_status = jms581_mode_dev_status_cb,
-    .pc_idle    = jms581_mode_pc_idle_cb,
-};
-
-/*----------------------------------------------------------------------------
  * 判模式序列引擎: PE4拉高 -> >=30ms -> PB11上电 -> 等启动 -> 1秒一次查0x8000
  * 无超时(581必回复一个状态): 答PC进PC模式, 非PC进充电模式, "判定中"继续查
+ *
+ * 0x8000应答由jms581_model接收缓存(协议回调表归它独占), 本模块发请求时记下它的
+ * 状态版本号, 版本号变了即"来了新应答", 再从model取值。
  *--------------------------------------------------------------------------*/
+//发一次0x8000并记下当前版本号, 之后靠版本号变化判断应答到达
+static void jms581_seq_status_req(void)
+{
+    mode_cb.seq_ver  = jms581_model_ver(JMS581_VER_STATUS);
+    mode_cb.seq_tick = tick_get();
+    jms581_dev_status_req();
+}
+
 static void jms581_seq_start(void)
 {
     TRACE("jms581: seq start\n");
@@ -228,7 +208,6 @@ static void jms581_seq_start(void)
     JMS581_581_PWR_OFF();
     JMS581_PC_MODE_ON();                            //PE4先行, 确保581上电前电平已稳定
     mode_cb.seq_sta  = SEQ_PE4_SETTLE;
-    mode_cb.sta_flag = 0;
     mode_cb.seq_tick = tick_get();
 }
 
@@ -262,27 +241,27 @@ static void jms581_seq_process(void)
 
     case SEQ_581_BOOT:
         if (tick_check_expire(mode_cb.seq_tick, JMS581_BOOT_WAIT_MS)) {
-            mode_cb.sta_flag = 0;
-            jms581_dev_status_req();                //首次查询
-            mode_cb.seq_sta  = SEQ_STATUS_POLL;
-            mode_cb.seq_tick = tick_get();
+            jms581_seq_status_req();                //首次查询
+            mode_cb.seq_sta = SEQ_STATUS_POLL;
         }
         break;
 
     case SEQ_STATUS_POLL:
-        if (mode_cb.sta_flag) {                     //收到0x8000应答
-            mode_cb.sta_flag = 0;
-            if (mode_cb.sta_val == JMS581_STA_PC) {
+        if (jms581_model_ver(JMS581_VER_STATUS) != mode_cb.seq_ver) {   //收到0x8000应答
+            jms581_dev_status_t st;
+
+            mode_cb.seq_ver = jms581_model_ver(JMS581_VER_STATUS);
+            jms581_model_dev_status(&st);           //版本号变了必有有效值
+            if (st.status == JMS581_STA_PC) {
                 TRACE("jms581: seq result = PC\n");
                 mode_cb.seq_sta = SEQ_IDLE;
                 jms581_fsm_goto(JMS581_MODE_PC);
-            } else if (mode_cb.sta_val == JMS581_STA_NOT_PC) {
+            } else if (st.status == JMS581_STA_NOT_PC) {
                 jms581_seq_to_charge();
             }
             //判定中/其他值: 留在本状态继续查
         } else if (tick_check_expire(mode_cb.seq_tick, JMS581_STATUS_POLL_MS)) {
-            jms581_dev_status_req();                //1秒一次, 无超时: 581必回复
-            mode_cb.seq_tick = tick_get();
+            jms581_seq_status_req();                //1秒一次, 无超时: 581必回复
         }
         break;
 
@@ -294,18 +273,19 @@ static void jms581_seq_process(void)
 /*----------------------------------------------------------------------------
  * 模式切换唯一出口: 引脚在切换当下收敛, 不等任务enter; UI只是被指派的显示
  *--------------------------------------------------------------------------*/
+///脱机指派开机页而非home: home首屏要的0x8000+0x8006由jms581_model预取, 拉齐后
+///在OFFLINE分支里才切FUNC_HOME_PAGE, 保证home首帧就是真值, 不出现占位符
 static const u8 tbl_mode_func[] = {
     [JMS581_MODE_SHUTDOWN] = FUNC_PWRBLACK,
     [JMS581_MODE_PC]       = FUNC_COMPUTER_PAGE,
     [JMS581_MODE_CHARGE]   = FUNC_JMSCHARGE,
-    [JMS581_MODE_OFFLINE]  = FUNC_HOME_PAGE,
+    [JMS581_MODE_OFFLINE]  = FUNC_TURN_ON_PAGE,
 };
 
 static void jms581_fsm_goto(u8 mode)
 {
     TRACE("jms581: fsm goto mode %d -> %d\n", mode_cb.mode, mode);
     mode_cb.mode = mode;
-    mode_cb.idle_valid     = 0;
     mode_cb.idle_poll_tick = tick_get();
     mode_cb.offline_tick   = tick_get();
     mode_cb.bat_show_req   = 0;
@@ -314,19 +294,22 @@ static void jms581_fsm_goto(u8 mode)
     case JMS581_MODE_SHUTDOWN:
         jms581_seq_abort();
         jms581_pin_all_off();
+        jms581_model_prefetch_abort();              //581断电: 缓存全部作废
         jms581_io_charge(mode_cb.vbus_sta);         //USB仍在位则后台继续充电(581已断电, 不涉及USB通信)
         break;
-    case JMS581_MODE_PC:
+    case JMS581_MODE_PC:                            //PC界面不用581数据, 不启预取
         JMS581_PC_MODE_ON();
         JMS581_581_PWR_ON();
         BAT_CHARGE_OFF();                           //PC模式不充电, 不影响USB通信
         break;
     case JMS581_MODE_CHARGE:
         jms581_pin_all_off();                       //充电模式不开581, 长按进脱机才上电
+        jms581_model_prefetch_abort();              //581断电: 缓存全部作废
         BAT_CHARGE_ON();                            //确认非PC才开充电
         break;
     case JMS581_MODE_OFFLINE:
         jms581_pin_offline();
+        jms581_model_prefetch_start();              //581刚上电, 开始拉home要的数据
         jms581_io_charge(mode_cb.vbus_sta);         //跟随USB在位与否
         break;
     default:
@@ -344,14 +327,14 @@ static void jms581_fsm_goto(u8 mode)
  *   [关机] --vbus_in-----------------> 挂开机页+启判模式序列 --581答PC--> [PC]
  *                                                          --非PC------> [充电]
  *                                      (判定中拔出USB: 开机页退回关机黑屏)
- *   [关机] --长按--------------------> [脱机] (待改: 也应先过开机页, 后续处理)
+ *   [关机] --长按--------------------> [脱机] 挂开机页+启数据预取 --数据到齐--> home界面
  *   [关机] --短按--------------------> 显示电量3s (不跳转)
  *
  *   [PC]   --vbus_out / 空闲>=10min--> [关机]
  *   [PC]   --空闲时长按--------------> [充电]
  *
  *   [充电] --vbus_out----------------> [关机]
- *   [充电] --长按--------------------> [脱机]
+ *   [充电] --长按--------------------> [脱机] 同样挂开机页+预取
  *
  *   [脱机] --长按 / 无操作>=10min----> [关机]
  *   [脱机] --插拔USB不切模式 (PE4保持低, 仅控PE0充电)
@@ -359,12 +342,15 @@ static void jms581_fsm_goto(u8 mode)
  *   注: 插入是沿事件不是电平, 超时关机后USB仍在位不会重启判模式, 拔出重插才再判;
  *       首次上电USB在位由init补发一次vbus_in事件;
  *       581供电(PB11)仅PC/脱机开: 充电模式不开581, 长按进脱机才上电;
- *       进关机时USB仍在位则PE0保持充电(后台充), 拔出才关
+ *       进关机时USB仍在位则PE0保持充电(后台充), 拔出才关;
+ *       进脱机停在开机页期间mode已是[脱机], 长按关机和10分钟超时照常生效,
+ *       所以581一直不应答也按得出去、耗不干电池
  *--------------------------------------------------------------------------*/
 void jms581_mode_process(void)
 {
     u8 key, vbus;
 
+    jms581_model_process();                         //推进数据层预取状态机
     vbus = jms581_vbus_evt_take();                  //入口只采集事件, 各模式case自行消化
     key  = key_on_event_get();
 
@@ -394,9 +380,12 @@ void jms581_mode_process(void)
         break;
 
     /*======================================================================*/
-    case JMS581_MODE_PC:
+    case JMS581_MODE_PC: {
+        u16 idle_sec;
+        u8  idle_valid = jms581_model_pc_idle(&idle_sec);   //0x8004应答由model缓存
+
         if (key == KEY_ON_EVT_LONG) {               //无读写时长按: 581断电转充电
-            if (mode_cb.idle_valid && mode_cb.idle_sec >= JMS581_PC_BUSY_THRESH_S) {
+            if (idle_valid && idle_sec >= JMS581_PC_BUSY_THRESH_S) {
                 jms581_fsm_goto(JMS581_MODE_CHARGE);
                 break;
             }
@@ -412,11 +401,12 @@ void jms581_mode_process(void)
             mode_cb.idle_poll_tick = tick_get();    //0x8004空闲轮询
             jms581_pc_idle_req();
         }
-        if (mode_cb.idle_valid && mode_cb.idle_sec >= JMS581_PC_IDLE_OFF_S) {
-            TRACE("jms581: pc idle %ds, timeout\n", mode_cb.idle_sec);
+        if (idle_valid && idle_sec >= JMS581_PC_IDLE_OFF_S) {
+            TRACE("jms581: pc idle %ds, timeout\n", idle_sec);
             jms581_fsm_goto(JMS581_MODE_SHUTDOWN);  //无读写超10分钟: 关机
         }
         break;
+    }
 
     /*======================================================================*/
     case JMS581_MODE_CHARGE:
@@ -440,6 +430,13 @@ void jms581_mode_process(void)
         }
 
         jms581_io_charge(mode_cb.vbus_sta);         //插拔USB不切模式, 仅跟随开关充电
+
+        //开机页门闸: home首屏要的数据到齐才放行。条件带FUNC_TURN_ON_PAGE, 所以
+        //用户后来进设置页等界面时(sta已变)不会被误切回home
+        if (func_cb.sta == FUNC_TURN_ON_PAGE && jms581_model_gate_ready()) {
+            TRACE("jms581: offline data ready, enter home\n");
+            func_cb.sta = FUNC_HOME_PAGE;
+        }
 
         if (tick_check_expire(mode_cb.offline_tick, JMS581_OFFLINE_IDLE_OFF_MS)) {
             TRACE("jms581: offline idle timeout\n");
@@ -478,7 +475,7 @@ void jms581_mode_init(void)
     jms581_pin_all_off();
     mode_cb.chg_on = 0xFF;                          //非法值, 强制首次写生效
     BAT_CHARGE_OFF();
-    jms581_proto_cb_reg(&jms581_mode_cbs);
+    jms581_model_init();                            //数据层独占协议回调表, 本模块读它的快照
 
     mode_cb.mode = JMS581_MODE_SHUTDOWN;            //与DEFAULE_START_FUNC=FUNC_PWRBLACK对应
     extab_user_isr_set(IO_PE7, RISE_EDGE, IOUD_SEL_NULL, jms581_vbus_rise_isr);   //板上有外部下拉, 不开内部

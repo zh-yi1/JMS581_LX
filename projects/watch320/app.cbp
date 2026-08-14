@@ -1340,6 +1340,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="functions/jms581/jms581_mode.h" />
+		<Unit filename="functions/jms581/jms581_model.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="functions/jms581/jms581_model.h" />
 		<Unit filename="functions/jms581/jms581_proto.c">
 			<Option compilerVar="CC" />
 		</Unit>

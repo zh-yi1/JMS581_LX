@@ -26,6 +26,7 @@
 #define JMS581_PE4_SETTLE_MS        30          //PE4拉高到581上电的稳定时间(需求>=30ms, 留余量)
 #define JMS581_BOOT_WAIT_MS         200         //581上电到首次查询0x8000的等待时间
 #define JMS581_STATUS_POLL_MS       1000        //0x8000查询周期, 无超时(581必回复一个状态)
+#define JMS581_PREFETCH_RETRY_MS    500         //jms581_model预取每步的重发间隔, 无限重试
 #define JMS581_PC_IDLE_POLL_MS      5000        //PC模式0x8004空闲查询周期
 #define JMS581_PC_IDLE_OFF_S        600         //PC空闲关机阈值(秒), 10分钟
 #define JMS581_PC_BUSY_THRESH_S     60           //PC空闲小于此值视为读写中, 长按切充电被忽略
@@ -42,13 +43,15 @@ enum {
 #if JMS581_MODE_EN
 
 /**
- * @brief 模块初始化: 拉PB12锁存+GPIO配置+注册协议回调表+初始vbus采样, func_run()开头调用一次
+ * @brief 模块初始化: 拉PB12锁存+GPIO配置+初始化数据层(jms581_model, 它独占协议回调表)
+ *        +初始vbus采样, func_run()开头调用一次
  **/
 void jms581_mode_init(void);
 
 /**
- * @brief 大switch主状态机唯一入口: 采集事件(按键标志位/vbus插入中断+拔出电平)并按
- *        模式分支处理, 再推进本模式周期任务; func_process()每圈调用, 与当前界面无关
+ * @brief 大switch主状态机唯一入口: 先推进数据层预取, 再采集事件(按键标志位/vbus插入
+ *        中断+拔出电平)并按模式分支处理, 最后推进本模式周期任务;
+ *        func_process()每圈调用, 与当前界面无关
  **/
 void jms581_mode_process(void);
 
