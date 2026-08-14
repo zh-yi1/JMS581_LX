@@ -68,6 +68,45 @@ static jms581_model_cb_t model_cb;
 
 static void model_pf_goto(u8 sta);
 
+/*----------------------------------------------------------------------------
+ * 调试打印: 收数据的关键点全打, 联调时靠这些日志就能还原581说了什么、状态怎么走的
+ *--------------------------------------------------------------------------*/
+#if TRACE_EN
+static const char *const bk_sta_name[] = {
+    "IDLE", "STARTING", "RUNNING", "CANCELING", "DONE", "FAILED", "CANCELLED"
+};
+static const char *const fmt_sta_name[] = {
+    "IDLE", "STARTING", "RUNNING", "DONE", "FAILED"
+};
+static const char *const size_unit_name[] = {"B", "KB", "MB", "GB"};
+static const char *const speed_unit_name[] = {"B/s", "KB/s", "MB/s", "GB/s"};
+
+//协议里单位字段固定4档(0=B 1=K 2=M 3=G), 越界一律打"?"
+#define UNIT_STR(tbl, u)        ((u) < 4 ? (tbl)[u] : "?")
+
+//流程状态变化才打, 没变不刷屏
+static void model_bk_trace(u8 old)
+{
+    if (old != model_cb.bk.sta) {
+        TRACE("jms581 model: backup %s -> %s (err=0x%02x sub=0x%02x)\n",
+              bk_sta_name[old], bk_sta_name[model_cb.bk.sta],
+              model_cb.bk.err_code, model_cb.bk.sub_err);
+    }
+}
+
+static void model_fmt_trace(u8 old)
+{
+    if (old != model_cb.fmt.sta) {
+        TRACE("jms581 model: format %s -> %s (err=0x%02x dev=%d)\n",
+              fmt_sta_name[old], fmt_sta_name[model_cb.fmt.sta],
+              model_cb.fmt.err_code, model_cb.fmt.dev_id);
+    }
+}
+#else
+#define model_bk_trace(old)     (void)(old)
+#define model_fmt_trace(old)    (void)(old)
+#endif
+
 ///流程状态是否"在飞行中": 只有在飞时才允许581的上报推进到终态,
 ///避免IDLE态收到一帧陈旧应答就凭空变成DONE
 static u8 model_bk_inflight(void)
@@ -112,6 +151,21 @@ static void model_capacity_cb(const jms581_capacity_t *cap)
     if (cap->err_code != JMS581_ERR_NONE || cap->slot_num == 0) {
         return;                                 //短ACK: 槽数组全0, 存下来就是"容量全0"的假数据
     }
+#if TRACE_EN
+    //槽序固定 M.2/CFA/CFB/SD; total/used协议规定单位KB, raw为原始值低32位, 用来
+    //核对581给的到底是不是KB (显示数字对不上时先看这一行)
+    for (u8 i = 0; i < 4; i++) {
+        const jms581_slot_cap_t *s = &cap->slot[i];
+
+        if (!s->present) {
+            continue;
+        }
+        TRACE("jms581 model:   slot%d err=%d unit=%d total=%uMB used=%uMB uvalid=%d "
+              "rawtot=%u rawuse=%u\n", i, s->err_code, s->total_unit,
+              (u32)(s->total_size >> 10), (u32)(s->used_size >> 10), s->used_valid,
+              (u32)s->total_size, (u32)s->used_size);
+    }
+#endif
     model_cb.cap       = *cap;
     model_cb.cap_valid = 1;
     model_cb.ver[JMS581_VER_CAP]++;
@@ -131,12 +185,12 @@ static void model_fw_ver_cb(const jms581_fw_ver_t *ver)
 
 static void model_pc_idle_cb(const jms581_pc_idle_t *idle)
 {
+    TRACE("jms581 model: pc_idle err=%d idle=%ds\n", idle->err_code, idle->idle_sec);
     if (idle->err_code == JMS581_ERR_NONE) {
         model_cb.idle_sec   = idle->idle_sec;
         model_cb.idle_valid = 1;
     } else {
         model_cb.idle_valid = 0;                //err=1: 581称自己非PC模式
-        TRACE("jms581 model: pc_idle err=%d\n", idle->err_code);
     }
 }
 
@@ -144,8 +198,11 @@ static void model_pc_idle_cb(const jms581_pc_idle_t *idle)
 //0x8001 启动ACK: 0=接受 1=未就绪 5=参数错
 static void model_backup_ack_cb(u8 err_code)
 {
-    TRACE("jms581 model: backup_ack err=%d\n", err_code);
-    if (model_cb.bk.sta != JMS581_BK_STARTING) {
+    u8 old = model_cb.bk.sta;
+
+    TRACE("jms581 model: backup_ack err=%d (0=接受 1=未就绪 5=参数错)\n", err_code);
+    if (old != JMS581_BK_STARTING) {
+        TRACE("jms581 model: backup_ack dropped, sta=%d\n", old);
         return;                                 //没在等ACK, 陈旧应答, 丢弃
     }
     if (err_code == JMS581_ERR_NONE) {
@@ -154,6 +211,7 @@ static void model_backup_ack_cb(u8 err_code)
         model_cb.bk.sta      = JMS581_BK_FAILED;
         model_cb.bk.err_code = err_code;        //启动被拒
     }
+    model_bk_trace(old);
     model_cb.ver[JMS581_VER_BACKUP]++;
 }
 
@@ -161,9 +219,15 @@ static void model_backup_ack_cb(u8 err_code)
 static void model_backup_report_cb(const jms581_backup_report_t *rpt)
 {
     u8 terminal;
+    u8 old = model_cb.bk.sta;
 
-    TRACE("jms581 model: backup_report err=%d ext=%d phase=%d prog=%d\n",
-          rpt->err_code, rpt->is_ext, rpt->phase, rpt->progress);
+    TRACE("jms581 model: backup_report err=0x%02x sub=0x%02x ext=%d phase=%d prog=%d%%\n",
+          rpt->err_code, rpt->sub_err, rpt->is_ext, rpt->phase, rpt->progress);
+    TRACE("jms581 model:   file=%u folder=%u total=%u%s speed=%u%s time=%us dev %d->%d\n",
+          rpt->file_done_cnt, rpt->folder_done_cnt,
+          rpt->total_size, UNIT_STR(size_unit_name, rpt->total_unit),
+          rpt->speed_val, UNIT_STR(speed_unit_name, rpt->speed_unit),
+          rpt->time_sec, rpt->src_dev, rpt->dst_dev);
 
     //数据字段无条件更新: 报告内容本身总是有用的, 与状态机是否采纳无关
     model_cb.bk.err_code        = rpt->err_code;
@@ -191,6 +255,8 @@ static void model_backup_report_cb(const jms581_backup_report_t *rpt)
         }
         jms581_utf16le_to_ascii(rpt->l3_name, (u8)nlen,
                                 model_cb.bk.l3_name, JMS581_DIR_NAME_MAX);
+        TRACE("jms581 model:   l3_name(%dB) = \"%s\"\n",
+              rpt->l3_name_len, model_cb.bk.l3_name);
     }
 
     //--- 状态机推进 ---
@@ -218,19 +284,24 @@ static void model_backup_report_cb(const jms581_backup_report_t *rpt)
         model_cb.bk.sta = JMS581_BK_RUNNING;        //防御: 581自称在跑, 采纳
     }
 
+    model_bk_trace(old);
     model_cb.ver[JMS581_VER_BACKUP]++;
 }
 
 //0x8005 取消ACK: 0=已接受 1=无可取消 0x0C=收尾阶段拒绝
 static void model_cancel_ack_cb(u8 err_code)
 {
-    TRACE("jms581 model: cancel_ack err=%d\n", err_code);
+    u8 old = model_cb.bk.sta;
+
+    TRACE("jms581 model: cancel_ack err=0x%02x (0=已接受 1=无可取消 0x0C=收尾拒绝)\n",
+          err_code);
     model_cb.bk.err_code = err_code;
     //ACK=0只代表"取消请求被接受", 不代表已停止: 真终态要等0x8002推err=0x0B。
     //ACK=1/0x0C不改状态, 只把码留在err_code里, 界面据此弹提示。
     if (err_code == JMS581_ERR_NONE && model_cb.bk.sta == JMS581_BK_RUNNING) {
         model_cb.bk.sta = JMS581_BK_CANCELING;
     }
+    model_bk_trace(old);
     model_cb.ver[JMS581_VER_BACKUP]++;
 }
 
@@ -238,8 +309,11 @@ static void model_cancel_ack_cb(u8 err_code)
 //0x8003 11B启动ACK
 static void model_format_ack_cb(u8 err_code)
 {
-    TRACE("jms581 model: format_ack err=%d\n", err_code);
-    if (model_cb.fmt.sta != JMS581_FMT_STARTING) {
+    u8 old = model_cb.fmt.sta;
+
+    TRACE("jms581 model: format_ack err=0x%02x\n", err_code);
+    if (old != JMS581_FMT_STARTING) {
+        TRACE("jms581 model: format_ack dropped, sta=%d\n", old);
         return;
     }
     if (err_code == JMS581_ERR_NONE) {
@@ -248,13 +322,17 @@ static void model_format_ack_cb(u8 err_code)
         model_cb.fmt.sta      = JMS581_FMT_FAILED;
         model_cb.fmt.err_code = err_code;
     }
+    model_fmt_trace(old);
     model_cb.ver[JMS581_VER_FORMAT]++;
 }
 
 //0x8003 15B进度/终态 (多为主动上报): phase 0=终态 1=进行中; result 0=成功 1=失败
 static void model_format_status_cb(const jms581_format_status_t *sta)
 {
-    TRACE("jms581 model: format_status err=%d phase=%d prog=%d result=%d dev=%d\n",
+    u8 old = model_cb.fmt.sta;
+
+    TRACE("jms581 model: format_status err=0x%02x phase=%d(0=终态 1=进行中) prog=%d%% "
+          "result=%d(0=成功) dev=%d\n",
           sta->err_code, sta->phase, sta->progress, sta->result, sta->dev_id);
 
     model_cb.fmt.dev_id = sta->dev_id;
@@ -276,6 +354,7 @@ static void model_format_status_cb(const jms581_format_status_t *sta)
             model_cb.fmt.sta = JMS581_FMT_FAILED;
         }
     }
+    model_fmt_trace(old);
     model_cb.ver[JMS581_VER_FORMAT]++;
 }
 
@@ -285,8 +364,8 @@ static void model_dir_list_cb(const jms581_dir_list_t *info,
 {
     u8 i, n;
 
-    TRACE("jms581 model: dir_list err=%d cnt=%d has_more=%d\n",
-          info->err_code, cnt, info->has_more);
+    TRACE("jms581 model: dir_list err=0x%02x return_cnt=%d parsed=%d has_more=%d\n",
+          info->err_code, info->return_count, cnt, info->has_more);
 
     model_cb.dir_err = info->err_code;
     if (info->err_code != JMS581_ERR_NONE) {
@@ -305,8 +384,14 @@ static void model_dir_list_cb(const jms581_dir_list_t *info,
         }
         jms581_utf16le_to_ascii(entries[i].name, (u8)nlen,
                                 model_cb.dir[i], JMS581_DIR_NAME_MAX);
+        TRACE("jms581 model:   dir[%d] type=%d nlen=%dB \"%s\"\n",
+              i, entries[i].file_type, entries[i].name_len, model_cb.dir[i]);
     }
     model_cb.dir_cnt = n;
+    if (cnt > n) {
+        TRACE("jms581 model:   %d entries dropped (cache=%d)\n",
+              cnt - n, JMS581_DIR_CACHE_CNT);
+    }
     //581说还有后续, 或它给的条数超出本层缓存, 对界面都是"还有更多没显示"
     //TODO: 要做SEQ模式cursor续页时, 在此保存info->next_cursor并加_dir_more()接口
     model_cb.dir_has_more = (info->has_more || cnt > n) ? 1 : 0;
@@ -453,7 +538,12 @@ u8 jms581_model_backup_cancel(void)
         TRACE("jms581 model: cancel ignored, sta=%d\n", model_cb.bk.sta);
         return 0;                               //没在跑/已在取消/已终态, 没什么可取消
     }
-    return jms581_backup_cancel_req();          //状态由0x8005 ACK推进, 这里不预判
+    {
+        u8 ok = jms581_backup_cancel_req();     //状态由0x8005 ACK推进, 这里不预判
+
+        TRACE("jms581 model: backup_cancel req ok=%d\n", ok);
+        return ok;
+    }
 }
 
 u8 jms581_model_format_start(u8 dev_id)
@@ -479,8 +569,12 @@ u8 jms581_model_dir_req(u8 root_type)
 {
     //Top-N: 581按编号从大到小排, 直接给最新的一批, 正好对上界面"从新到旧"的展示;
     //一次拉满缓存就不需要翻页 —— SEQ模式的cursor只能往前, 翻回去没数据
-    return jms581_dir_list_req(root_type, JMS581_DIR_CACHE_CNT,
-                               JMS581_LIST_MODE_TOPN, NULL);
+    u8 ok = jms581_dir_list_req(root_type, JMS581_DIR_CACHE_CNT,
+                                JMS581_LIST_MODE_TOPN, NULL);
+
+    TRACE("jms581 model: dir_req root=%d count=%d ok=%d\n",
+          root_type, JMS581_DIR_CACHE_CNT, ok);
+    return ok;
 }
 
 /*----------------------------------------------------------------------------
@@ -523,6 +617,8 @@ static void model_pf_goto(u8 sta)
 //581断电或刚上电: 所有缓存作废。流程状态一并清掉 —— 581没电, 备份/格式化必然中断
 static void model_cache_drop(void)
 {
+    TRACE("jms581 model: cache drop (bk=%d fmt=%d dir=%d)\n",
+          model_cb.bk.sta, model_cb.fmt.sta, model_cb.dir_cnt);
     model_cb.sta_valid  = 0;
     model_cb.cap_valid  = 0;
     model_cb.fw_valid   = 0;
