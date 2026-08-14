@@ -66,7 +66,11 @@
 
 #define JMS581_NAME_LEN_MAX         64      //目录名UTF-16LE最大字节数 (0x8001/l3_name共用上限)
 #define JMS581_CURSOR_LEN           6       //0x8008 cursor字节数
-#define JMS581_DIR_ENTRY_MAX        16      //0x8008 单页解析条目上限 (请求count自动钳制)
+#define JMS581_DIR_ENTRY_MAX        32      //0x8008 单帧解析条目上限 (Top-N允许8~32, 请求count自动钳制)
+
+///0x8008 列出方式 (V1.17起, 请求Byte13)
+#define JMS581_LIST_MODE_SEQ        0       //顺序分页: 目录流遍历序, cursor续读, 不排序
+#define JMS581_LIST_MODE_TOPN       1       //Top-N: 581按编号从大到小排名, 返回前count条 (进页首屏用)
 
 ///0x8000 设备状态 (13B应答/主动上报; 11B短ACK时status/dev_list为0)
 typedef struct {
@@ -142,10 +146,10 @@ typedef struct {
 
 ///0x8008 目录列表页信息
 typedef struct {
-    u8 err_code;                //0=成功; 0x05=参数/cursor失效需从首页重拉; 0x07=根目录不存在
-    u8 return_count;            //本页实际解析出的条目数
-    u8 has_more;                //1=还有下一页
-    u8 next_cursor[JMS581_CURSOR_LEN];  //下一页令牌, 581生成, 续页时原样回传
+    u8 err_code;                //0=成功; 0x05=参数/cursor失效/模式不匹配, 从当前list_mode首页重拉; 0x07=根目录不存在
+    u8 return_count;            //本帧实际解析出的条目数 (<count属正常, 不是错误, 勿当失败重发)
+    u8 has_more;                //1=本会话还有后续, 用next_cursor续
+    u8 next_cursor[JMS581_CURSOR_LEN];  //下一帧令牌, 581生成, 续页时原样回传; 仅对同一list_mode有效, 禁止跨模式
 } jms581_dir_list_t;
 
 ///0x8008 单条目录项
@@ -198,8 +202,10 @@ u8 jms581_pc_idle_req(void);                                    //0x8004 查询P
 u8 jms581_backup_cancel_req(void);                              //0x8005 取消备份
 u8 jms581_capacity_req(void);                                   //0x8006 查询容量
 u8 jms581_fw_ver_req(void);                                     //0x8007 查询581固件版本
-u8 jms581_dir_list_req(u8 root_type, u8 count, const u8 *cursor);   //0x8008: cursor传NULL=首页;
-                                                                //续页原样回传上页next_cursor; count钳到JMS581_DIR_ENTRY_MAX
+u8 jms581_dir_list_req(u8 root_type, u8 count, u8 list_mode,
+        const u8 *cursor);                                      //0x8008: list_mode见JMS581_LIST_MODE_x;
+                                                                //cursor传NULL=首页, 续页原样回传上页next_cursor(不跨模式);
+                                                                //count为上限, 自动钳到JMS581_DIR_ENTRY_MAX
 
 ///UTF-16LE辅助 (目录名编解码, 供上层复用)
 /**

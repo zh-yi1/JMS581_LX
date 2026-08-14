@@ -8,8 +8,8 @@
 #define JMS581_EN               (BSP_UART1_EN)
 
 #define JMS581_HEADER_LEN       10      //帧头长度: "I4S0"+data_len(LE16)+direction+cmd+subCmd+sum_crc
-#define JMS581_FRAME_MAX        271     //协议单帧上限 (检查清单§19.1)
-#define JMS581_RX_BUF_SIZE      272     //帧组装缓冲大小 (>=JMS581_FRAME_MAX)
+#define JMS581_FRAME_MAX        2048    //协议单帧上限 (V1.17起0x8008应答缓冲约2048字节, §13.3)
+#define JMS581_RX_BUF_SIZE      2048    //帧组装缓冲大小 (>=JMS581_FRAME_MAX)
 #define JMS581_TX_BUF_SIZE      80      //发送缓冲大小, 当前最长请求为0x8001长帧79字节
 
 #define JMS581_DIR_MCU2DEV      0x01    //方向: 显示MCU→581

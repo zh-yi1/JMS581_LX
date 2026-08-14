@@ -4,7 +4,7 @@
 
 #if BSP_UART1_EN
 #define UART1_BAUD 115200
-#define UART1_RXBUF_SIZE 512 // 接收环形缓冲区大小 (w_cnt/r_cnt已为u16, 需覆盖协议最大271字节单帧+粘包余量)
+#define UART1_RXBUF_SIZE 1024 // 接收环形缓冲区大小 (w_cnt/r_cnt已为u16; 协议单帧可达2048, 1024约容115200下89ms满速数据, 主循环及时搬运即可)
 
 static u8 uart1_rxbuf[UART1_RXBUF_SIZE];
 bsp_uart_t bsp_uart1;

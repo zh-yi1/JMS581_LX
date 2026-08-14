@@ -148,23 +148,23 @@ u8 jms581_fw_ver_req(void)
     return jms581_frame_tx(JMS581_CMD_STORAGE, JMS581_SUB_FW_VER, NULL, 0);
 }
 
-// 0x8008 列出备份目录列表 (20B请求, cursor续读分页, 应答变长)
-u8 jms581_dir_list_req(u8 root_type, u8 count, const u8 *cursor)
+// 0x8008 列出备份目录列表 (20B请求, 应答变长; V1.17起list_mode: 0=顺序cursor分页, 1=Top-N)
+u8 jms581_dir_list_req(u8 root_type, u8 count, u8 list_mode, const u8 *cursor)
 {
     u8 pl[4 + JMS581_CURSOR_LEN];
 
-    if (root_type > JMS581_ROOT_RECENT_BACKUP || count == 0)
+    if (root_type > JMS581_ROOT_RECENT_BACKUP || count == 0 || list_mode > JMS581_LIST_MODE_TOPN)
     {
         return 0;
     }
     if (count > JMS581_DIR_ENTRY_MAX)
     {
-        count = JMS581_DIR_ENTRY_MAX; // 钳到单页解析上限, 防条目静默丢弃
+        count = JMS581_DIR_ENTRY_MAX; // 钳到单帧解析上限32(=581 Top-N上限), 防条目静默丢弃
     }
     pl[0] = root_type;
-    pl[1] = count;
+    pl[1] = count;                // 上限, 581可返回更少(return_count为准)
     pl[2] = cursor ? 0x01 : 0x00; // flags.bit0: 0=首页 1=续页
-    pl[3] = 0;                    // reserved
+    pl[3] = list_mode;            // 0=顺序分页 1=Top-N; cursor不得跨模式使用
     if (cursor)
     {
         memcpy(&pl[4], cursor, JMS581_CURSOR_LEN);
@@ -695,11 +695,11 @@ void jms581_test_run(void)
     flen = test_frame_build(test_fbuf, JMS581_DIR_MCU2DEV, 0x80, 0x00, pl_sta, 3);
     test_inject(test_fbuf, flen);
 
-    // 7. data_len=300非法+紧跟合法帧 (长度界限)
-    printf("[t]--7 bad data_len=300 + good frame (expect only 1 frame)\n");
+    // 7. data_len=3000超帧上限(2048)+紧跟合法帧 (长度界限)
+    printf("[t]--7 bad data_len=3000 + good frame (expect only 1 frame)\n");
     flen = test_frame_build(test_fbuf, JMS581_DIR_DEV2MCU, 0x80, 0x00, pl_sta, 3);
-    test_fbuf[4] = (u8)300;
-    test_fbuf[5] = (u8)(300 >> 8); // 改长度不重算校验和, 长度检查在校验和之前
+    test_fbuf[4] = (u8)3000;
+    test_fbuf[5] = (u8)(3000 >> 8); // 改长度不重算校验和, 长度检查在校验和之前
     flen += test_frame_build(&test_fbuf[flen], JMS581_DIR_DEV2MCU, 0x80, 0x00, pl_sta, 3);
     test_inject(test_fbuf, flen);
 
