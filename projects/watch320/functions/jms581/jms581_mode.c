@@ -296,7 +296,7 @@ static void jms581_seq_process(void)
  *--------------------------------------------------------------------------*/
 static const u8 tbl_mode_func[] = {
     [JMS581_MODE_SHUTDOWN] = FUNC_PWRBLACK,
-    [JMS581_MODE_PC]       = FUNC_PCMODE,
+    [JMS581_MODE_PC]       = FUNC_COMPUTER_PAGE,
     [JMS581_MODE_CHARGE]   = FUNC_JMSCHARGE,
     [JMS581_MODE_OFFLINE]  = FUNC_HOME_PAGE,
 };
@@ -341,9 +341,10 @@ static void jms581_fsm_goto(u8 mode)
  *
  * 状态跳转总览 (跳转只出现在jms581_fsm_goto调用处, 搜"fsm_goto"即全部):
  *
- *   [关机] --vbus_in-----------------> 启判模式序列 --581答PC----> [PC]
- *                                                  --非PC/超时---> [充电]
- *   [关机] --长按--------------------> [脱机]
+ *   [关机] --vbus_in-----------------> 挂开机页+启判模式序列 --581答PC--> [PC]
+ *                                                          --非PC------> [充电]
+ *                                      (判定中拔出USB: 开机页退回关机黑屏)
+ *   [关机] --长按--------------------> [脱机] (待改: 也应先过开机页, 后续处理)
  *   [关机] --短按--------------------> 显示电量3s (不跳转)
  *
  *   [PC]   --vbus_out / 空闲>=10min--> [关机]
@@ -378,12 +379,16 @@ void jms581_mode_process(void)
             break;
         }
 
-        if (vbus == VBUS_EVT_IN) {                  //插入: 启判模式序列
+        if (vbus == VBUS_EVT_IN) {                  //插入: 挂开机页等待, 启判模式序列
+            func_cb.sta = FUNC_TURN_ON_PAGE;
             jms581_seq_start();
         } else if (vbus == VBUS_EVT_OUT) {          //拔出: 中止序列回全关, 停后台充电
             jms581_seq_abort();
             jms581_pin_all_off();
             BAT_CHARGE_OFF();
+            if (func_cb.sta == FUNC_TURN_ON_PAGE) {
+                func_cb.sta = FUNC_PWRBLACK;        //判定中拔出: 开机页退回关机黑屏
+            }
         }
         jms581_seq_process();
         break;

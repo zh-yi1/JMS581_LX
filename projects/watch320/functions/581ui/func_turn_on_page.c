@@ -7,11 +7,8 @@
 #define TRACE(...)
 #endif
 
-/* 开机页展示时长后进入首页 */
-#define TURN_ON_SHOW_MS             2000
 
 typedef struct {
-    u32 show_tick;
     compo_picturebox_t *pic_logo;
 } f_turn_on_t;
 
@@ -36,36 +33,12 @@ compo_form_t *func_turn_on_page_form_create(void)
 
 static void func_turn_on_page_process(void)
 {
-    f_turn_on_t *f = (f_turn_on_t *)func_cb.f_cb;
-
-    if (f != NULL && tick_check_expire(f->show_tick, TURN_ON_SHOW_MS)) {
-        func_cb.sta = FUNC_HOME_PAGE;
-    }
-    func_process();
-}
-
-static void func_turn_on_page_message(size_msg_t msg)
-{
-    switch (msg)
-    {
-    case MSG_CTP_CLICK:
-    case KU_BACK:
-        func_cb.sta = FUNC_HOME_PAGE;
-        break;
-
-    default:
-        func_message(msg);
-        break;
-    }
+    func_process();     //判模式序列在func_process内的jms581_mode_process推进, 结果切换func_cb.sta
 }
 
 void func_turn_on_page_enter(void)
 {
-    f_turn_on_t *f;
-
     func_cb.f_cb = func_zalloc(sizeof(f_turn_on_t));
-    f = (f_turn_on_t *)func_cb.f_cb;
-    f->show_tick = tick_get();
     func_cb.frm_main = func_turn_on_page_form_create();
 }
 
@@ -81,7 +54,7 @@ void func_turn_on_page(void)
     while (func_cb.sta == FUNC_TURN_ON_PAGE)
     {
         func_turn_on_page_process();
-        func_turn_on_page_message(msg_dequeue());
+        msg_dequeue();
     }
     func_turn_on_page_exit();
 }
