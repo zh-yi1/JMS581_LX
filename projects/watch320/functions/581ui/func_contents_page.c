@@ -29,7 +29,7 @@
 
 #define CONTENTS_COLOR_ADD          make_color(0x00, 0x7A, 0xFF)
 
-/* 演示目录列表（从新到旧） */
+/* 「最新 N 日」路径暂未接目录数据，仍走这份演示列表 */
 static const char *s_dir_name[CONTENTS_ITEM_CNT] = {
     "CARD_011",
     "CARD_010",
@@ -42,9 +42,14 @@ static const char *s_dir_name[CONTENTS_ITEM_CNT] = {
 };
 
 typedef struct {
-    u8 top_idx;     // 列表窗口起始下标
-    u8 selection;   // 当前选中（相对全表）
-    u8 press_idx;   // 按下中的行（相对全表），0xFF=无
+    u8 real_data;   // 1=整卡路径，用 jms581_model 真数据；0=最新N日，用演示数据
+    u16 total;      // 列表总条数
+    u16 top_idx;    // 列表窗口起始下标
+    u16 selection;  // 当前选中（相对全表）
+    u16 press_idx;  // 按下中的行（相对全表），0xFFFF=无
+    u32 ver_dir;    // jms581_model 目录更新计数
+    char pinned[JMS581_DIR_NAME_MAX];   // 置顶的上次备份目录，空=没有
+    u16 pin_pos;    // 置顶项在 581 序列里的位置，0xFFFF=不在最新 30 条内
     compo_picturebox_t *pic_divider;
     compo_picturebox_t *pic_back;
     compo_picturebox_t *pic_up;
@@ -56,6 +61,71 @@ typedef struct {
     compo_textbox_t *txt_add;
 } f_contents_t;
 
+/* 取列表第 idx 行的目录名。
+   列表 = [上次备份目录(若有)] + [最新, 次新, ...]，后半段跳过置顶项那一条。
+   返回 NULL 表示数据还没拉回来，该行先留空，下一圈再问 */
+static const char *contents_name_at(u16 idx)
+{
+    f_contents_t *f = (f_contents_t *)func_cb.f_cb;
+    u16 pos;
+
+    if (!f->real_data) {
+        return (idx < CONTENTS_ITEM_CNT) ? s_dir_name[idx] : NULL;
+    }
+
+    if (!f->pinned[0]) {
+        pos = idx;
+    } else if (idx == 0) {
+        return f->pinned;                       /* 置顶：上次备份的那个目录 */
+    } else if (f->pin_pos != 0xFFFF && (u16)(idx - 1) >= f->pin_pos) {
+        pos = idx;                              /* 已越过置顶项，偏移归零 */
+    } else {
+        pos = idx - 1;
+    }
+    return jms581_model_dir_at(pos);
+}
+
+/* 列表总条数：置顶项在序列里找到了就是原地提前，总数不变；
+   没找到（说明它比最新 30 条更旧）才多算一条 */
+static u16 contents_total(void)
+{
+    f_contents_t *f = (f_contents_t *)func_cb.f_cb;
+
+    if (!f->real_data) {
+        return CONTENTS_ITEM_CNT;
+    }
+    if (f->pinned[0] && f->pin_pos == 0xFFFF) {
+        return jms581_model_dir_total() + 1;
+    }
+    return jms581_model_dir_total();
+}
+
+/* 在最新 30 条里找置顶项的位置。进页面时缓冲装的正是 Top-N 那批，
+   这段查询全部命中缓冲，不会触发串口拉取 */
+static void contents_locate_pin(f_contents_t *f)
+{
+    u16 p;
+    u16 n = jms581_model_dir_total();
+
+    f->pin_pos = 0xFFFF;
+    if (!f->pinned[0]) {
+        return;
+    }
+    if (n > JMS581_DIR_TOPN_CNT) {
+        n = JMS581_DIR_TOPN_CNT;
+    }
+    for (p = 0; p < n; p++) {
+        const char *name = jms581_model_dir_at(p);
+
+        if (name && strcmp(name, f->pinned) == 0) {
+            f->pin_pos = p;
+            return;
+        }
+    }
+    TRACE("contents: pinned \"%s\" not in newest %d, listed twice possible\n",
+          f->pinned, JMS581_DIR_TOPN_CNT);
+}
+
 static void contents_update_display(void)
 {
     f_contents_t *f = (f_contents_t *)func_cb.f_cb;
@@ -66,15 +136,16 @@ static void contents_update_display(void)
     }
 
     for (i = 0; i < CONTENTS_VISIBLE; i++) {
-        u8 idx = f->top_idx + i;
+        u16 idx = f->top_idx + i;
         bool selected = (idx == f->selection);
         bool pressed  = (idx == f->press_idx);
+        const char *name = (idx < f->total) ? contents_name_at(idx) : NULL;
 
-        if (idx < CONTENTS_ITEM_CNT) {
+        if (name) {
             compo_picturebox_set(f->pic_row[i], (selected || pressed)
                 ? UI_BUF_IMAGE_BIN_CONTENTS_CLICK_BIN
                 : UI_BUF_IMAGE_BIN_DIVIDER_UNCLICK_BIN);
-            compo_textbox_set(f->txt_name[i], s_dir_name[idx]);
+            compo_textbox_set(f->txt_name[i], name);
             compo_picturebox_set_visible(f->pic_row[i], true);
             compo_textbox_set_visible(f->txt_name[i], true);
             compo_picturebox_set_visible(f->pic_check[i], selected);
@@ -86,17 +157,17 @@ static void contents_update_display(void)
         }
     }
 
-    /* 上下箭头：可滚时高亮 */
-    compo_picturebox_set(f->pic_up, (f->top_idx > 0)
+    /* 上下箭头：还能移动选中项时高亮 */
+    compo_picturebox_set(f->pic_up, (f->selection > 0)
         ? UI_BUF_IMAGE_BIN_UP_CLICK_BIN
         : UI_BUF_IMAGE_BIN_UP_BIN);
     compo_picturebox_set(f->pic_down,
-        (f->top_idx + CONTENTS_VISIBLE < CONTENTS_ITEM_CNT)
+        ((u16)(f->selection + 1) < f->total)
         ? UI_BUF_IMAGE_BIN_DOWN_CLICK_BIN
         : UI_BUF_IMAGE_BIN_DOWN_BIN);
 }
 
-static u8 contents_hit_row(point_t pt)
+static u16 contents_hit_row(point_t pt)
 {
     f_contents_t *f = (f_contents_t *)func_cb.f_cb;
     u8 i;
@@ -104,30 +175,37 @@ static u8 contents_hit_row(point_t pt)
     for (i = 0; i < CONTENTS_VISIBLE; i++) {
         s16 y = CONTENTS_ROW0_Y + i * (CONTENTS_ROW_H + CONTENTS_ROW_GAP);
         if (pt.y > (y - CONTENTS_ROW_H / 2) && pt.y < (y + CONTENTS_ROW_H / 2)) {
-            u8 idx = f->top_idx + i;
-            return (idx < CONTENTS_ITEM_CNT) ? idx : 0xFF;
+            u16 idx = f->top_idx + i;
+            return (idx < f->total) ? idx : 0xFFFF;
         }
     }
-    return 0xFF;
+    return 0xFFFF;
 }
 
+/* ▲▼ 一次移动一条选中项；只有选中项移出可视窗口时才带动窗口滚一行。
+   全程不发 0x8008——数据由 jms581_model 按需拉，界面只管挪位置 */
 static void contents_scroll(s8 dir)
 {
     f_contents_t *f = (f_contents_t *)func_cb.f_cb;
-    s16 next_top = (s16)f->top_idx + dir * CONTENTS_VISIBLE;
 
-    if (next_top < 0) {
-        next_top = 0;
-    } else if (next_top >= CONTENTS_ITEM_CNT) {
-        return;     /* 已到最后一页，不可再向下翻 */
+    if (dir < 0) {
+        if (f->selection == 0) {
+            return;                             /* 已在第一条 */
+        }
+        f->selection--;
+        if (f->selection < f->top_idx) {
+            f->top_idx = f->selection;
+        }
+    } else {
+        if ((u16)(f->selection + 1) >= f->total) {
+            return;                             /* 已在最后一条 */
+        }
+        f->selection++;
+        if (f->selection >= (u16)(f->top_idx + CONTENTS_VISIBLE)) {
+            f->top_idx = f->selection - CONTENTS_VISIBLE + 1;
+        }
     }
-    if ((s16)f->top_idx == next_top) {
-        return;     /* 已是第一页，不可再向上翻 */
-    }
-
-    f->top_idx = (u8)next_top;
-    f->selection = f->top_idx;
-    f->press_idx = 0xFF;
+    f->press_idx = 0xFFFF;
     contents_update_display();
 }
 
@@ -224,26 +302,14 @@ compo_form_t *func_contents_page_form_create(void)
     f->pic_down = compo_picturebox_create(frm, UI_BUF_IMAGE_BIN_DOWN_BIN);
     compo_picturebox_set_pos(f->pic_down, CONTENTS_DOWN_X, CONTENTS_FOOTER_Y + 5);
 
-    f->top_idx = 0;
+    /* 第一条永远是选中项：有上次备份目录就是它，否则是最新那个 */
+    contents_locate_pin(f);
+    f->top_idx   = 0;
     f->selection = 0;
-    f->press_idx = 0xFF;
-
-    /* 再次进入：恢复上次选中的目录 */
-    if (backup_param.dir_sel[0]) {
-        for (i = 0; i < CONTENTS_ITEM_CNT; i++) {
-            if (strcmp(s_dir_name[i], backup_param.dir_sel) == 0) {
-                f->selection = i;
-                break;
-            }
-        }
-    }
-    /* 让选中项出现在可视窗口内 */
-    if (f->selection < f->top_idx) {
-        f->top_idx = f->selection;
-    } else if (f->selection >= f->top_idx + CONTENTS_VISIBLE) {
-        f->top_idx = f->selection - CONTENTS_VISIBLE + 1;
-    }
+    f->press_idx = 0xFFFF;
+    f->total     = contents_total();
     contents_update_display();
+    f->ver_dir = jms581_model_ver(JMS581_VER_DIR);
 
     return frm;
 }
@@ -253,8 +319,15 @@ static void func_contents_page_process(void)
     f_contents_t *f = (f_contents_t *)func_cb.f_cb;
 
     /* 触摸抬起或滑动移开时，恢复行按下状态 */
-    if (f->press_idx != 0xFF && !ctp_is_touch()) {
-        f->press_idx = 0xFF;
+    if (f->press_idx != 0xFFFF && !ctp_is_touch()) {
+        f->press_idx = 0xFFFF;
+        contents_update_display();
+    }
+
+    /* 后台扫描完成、或按需拉的那一页到了，都会让计数变；此时总数和空行要补上 */
+    if (f->real_data && f->ver_dir != jms581_model_ver(JMS581_VER_DIR)) {
+        f->ver_dir = jms581_model_ver(JMS581_VER_DIR);
+        f->total   = contents_total();
         contents_update_display();
     }
     func_process();
@@ -264,7 +337,7 @@ static void func_contents_page_message(size_msg_t msg)
 {
     f_contents_t *f = (f_contents_t *)func_cb.f_cb;
     point_t pt;
-    u8 idx;
+    u16 idx;
 
     switch (msg)
     {
@@ -283,7 +356,7 @@ static void func_contents_page_message(size_msg_t msg)
     case MSG_CTP_TOUCH:
         pt = ctp_get_sxy();
         idx = contents_hit_row(pt);
-        if (idx != 0xFF) {
+        if (idx != 0xFFFF) {
             f->press_idx = idx;
             contents_update_display();
         }
@@ -292,8 +365,8 @@ static void func_contents_page_message(size_msg_t msg)
     case MSG_CTP_SHORT_LEFT:
     case MSG_CTP_SHORT_RIGHT:
     case MSG_CTP_LONG_LIFT:
-        if (f->press_idx != 0xFF) {
-            f->press_idx = 0xFF;
+        if (f->press_idx != 0xFFFF) {
+            f->press_idx = 0xFFFF;
             contents_update_display();
         }
         break;
@@ -308,12 +381,12 @@ static void func_contents_page_message(size_msg_t msg)
             }
             break;
         }
-        /* 点击上箭头：向前翻一页 */
+        /* 点击上箭头：选中项上移一条 */
         if (pt.y < 48 && pt.x > (GUI_SCREEN_WIDTH - 48)) {
             contents_scroll(-1);
             break;
         }
-        /* 点击下箭头：向后翻一页 */
+        /* 点击下箭头：选中项下移一条 */
         if (pt.y > (CONTENTS_FOOTER_Y - 24) && pt.x > (GUI_SCREEN_WIDTH - 48)) {
             contents_scroll(1);
             break;
@@ -323,11 +396,16 @@ static void func_contents_page_message(size_msg_t msg)
             break;
         }
         idx = contents_hit_row(pt);
-        if (idx != 0xFF) {
+        if (idx != 0xFFFF) {
+            const char *name = contents_name_at(idx);
+
+            if (name == NULL) {
+                break;                          /* 该行数据还没拉到，忽略这次点击 */
+            }
             f->selection = idx;
-            f->press_idx = 0xFF;
-            /* 保存选中的目录名，返回后目标路径卡片显示 */
-            strcpy(backup_param.dir_sel, s_dir_name[idx]);
+            f->press_idx = 0xFFFF;
+            /* 记下选中的目录名：既给确认页显示，也就是下次的"上次备份目录" */
+            strcpy(backup_param.dir_sel, name);
             contents_update_display();
             /* 选中目录后返回来源页 */
             if (func_cb.last == FUNC_LATEST_N_DAY_BACKUP) {
@@ -354,7 +432,18 @@ static void func_contents_page_message(size_msg_t msg)
 
 void func_contents_page_enter(void)
 {
+    f_contents_t *f;
+
     func_cb.f_cb = func_zalloc(sizeof(f_contents_t));
+    f = (f_contents_t *)func_cb.f_cb;
+
+    /* 整卡路径才接真数据；「最新 N 日」暂未接，仍走演示列表 */
+    f->real_data = (func_cb.last != FUNC_LATEST_N_DAY_BACKUP);
+    if (f->real_data && backup_param.dir_sel[0]) {
+        /* 上次备份目录置顶并选中（协议§13.1：last_backup 由 MCU 自己记） */
+        strcpy(f->pinned, backup_param.dir_sel);
+    }
+
     func_cb.frm_main = func_contents_page_form_create();
 }
 

@@ -161,7 +161,13 @@ compo_form_t *func_confirm_the_whole_card_page_form_create(void)
     compo_textbox_set_autosize(txt, true);
     compo_textbox_set_align_center(txt, false);
     compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_15_BIN);
-    compo_textbox_set(txt, backup_param.dir_sel[0] ? backup_param.dir_sel : "CARD_011");
+    /* 有上次备份目录就显示它，没有就显示 581 给的最新那个（Top-N 第一条）。
+       目录首帧由首页等到了才跳进来，这里必然有值 */
+    {
+        const char *dir = backup_param.dir_sel[0] ? backup_param.dir_sel
+                                                  : jms581_model_dir_at(0);
+        compo_textbox_set(txt, dir ? dir : "");
+    }
 
     /* 特性说明 */
     for (i = 0; i < CONFIRM_TIP_CNT; i++) {

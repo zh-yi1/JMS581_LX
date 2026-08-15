@@ -38,9 +38,11 @@
 ///目录名缓存规格: 协议给UTF-16LE最长64字节=32字符, 本层转ASCII存 (RAM减半,
 ///且compo_textbox_set()本来就吃char*, 省掉每次显示再转)
 #define JMS581_DIR_NAME_MAX         33      //32字符 + 结尾'\0'
-///目录缓存条数: contents页一屏4行、demo共8条, 16条留足余量又不到1KB。
-///协议Top-N上限32, 想加大只改这一个数 (每条33字节)
-#define JMS581_DIR_CACHE_CNT        16
+#define JMS581_DIR_TOPN_CNT         30      //Top-N请求条数 (协议允许8~32)
+#define JMS581_DIR_SEQ_CNT          10      //SEQ模式每帧条数
+///cursor索引上限(帧数): 每帧6字节, 100帧覆盖1000个目录。目录再多就翻不到更早的,
+///想加大只改这一个数
+#define JMS581_DIR_IDX_MAX          100
 
 /*----------------------------------------------------------------------------
  * 备份流程状态 (0x8001启动ACK / 0x8002报告 / 0x8005取消ACK 三条合成一个状态)
@@ -126,11 +128,38 @@ u8 jms581_model_backup_sta(jms581_backup_sta_t *out);
 u8 jms581_model_format_sta(jms581_format_sta_t *out);
 
 /*----------------------------------------------------------------------------
- * 0x8008 目录列表: cursor与请求细节全关在本层内, 界面只管"拉一次"和"读第几条"
+ * 0x8008 目录列表: 对界面呈现为"一条按编号从大到小的完整序列", pos=0是最新的。
+ * cursor、分页、两种list_mode全关在本层内, 界面只管 open 一次然后按位置取名字。
+ *
+ * 内部分两段:
+ *   进页 Top-N(list_mode=1, count=30) 一帧拿到最新30条, 立刻能显示;
+ *   若拿满30条说明可能还有更早的, 后台另开 list_mode=0 会话每帧10条扫到 has_more=0,
+ *   沿途只记每帧的起始cursor(不存名字)。之后翻到哪一段就按对应cursor现拉哪一段。
+ *
+ * 名字缓冲只有一块(30条): Top-N阶段装那30条, 扫描完成后改装当前SEQ页。
  *--------------------------------------------------------------------------*/
-u8 jms581_model_dir_count(void);            //当前缓存条数
-const char *jms581_model_dir_name(u8 idx);  //第idx条目录名(ASCII), 越界返回NULL
-u8 jms581_model_dir_has_more(void);         //1=581还有更多, 超出缓存没取回来
+/**
+ * @brief 开一个目录会话: 复位状态并发出Top-N首帧。root_type见JMS581_ROOT_x
+ **/
+u8 jms581_model_dir_open(u8 root_type);
+
+/**
+ * @brief Top-N首帧是否已回。界面据此决定能不能跳页显示, 保证首帧即真值
+ **/
+u8 jms581_model_dir_ready(void);
+
+/**
+ * @brief 已知总条数。后台扫描未完成时返回Top-N拿到的条数(界面先只能翻这么多)
+ **/
+u16 jms581_model_dir_total(void);
+
+/**
+ * @brief 取逻辑第pos条目录名(pos=0是最新的)
+ * @return 命中缓冲返回名字; 未命中返回NULL并在内部发起拉取, 界面下一圈再问
+ *         (纯轮询, 本层不向界面回调)
+ **/
+const char *jms581_model_dir_at(u16 pos);
+
 u8 jms581_model_dir_err(void);              //最近一次0x8008的err_code, 0=正常
 
 /**
@@ -153,8 +182,6 @@ u8 jms581_model_backup_start(u8 src_dev, u8 dst_dev, u8 mode,
                              const char *name, u8 days);
 u8 jms581_model_backup_cancel(void);        //取消备份, 仅RUNNING态允许
 u8 jms581_model_format_start(u8 dev_id);    //开始格式化
-///拉目录列表首屏: root_type见JMS581_ROOT_x, 用Top-N(编号从大到小)覆盖式填满缓存
-u8 jms581_model_dir_req(u8 root_type);
 
 /*---- 预取控制 (jms581_fsm_goto内调用, 其他地方勿调) ----*/
 void jms581_model_prefetch_start(void);     //581上电进脱机: 清缓存并启动预取

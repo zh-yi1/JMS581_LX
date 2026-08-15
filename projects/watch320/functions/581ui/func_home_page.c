@@ -60,6 +60,8 @@ typedef struct {
     // jms581_model 的更新计数：建表时用真值画完并记下，之后每圈比对，变了才重画
     u32 ver_sta;    // 卡槽在位（0x8000）
     u32 ver_cap;    // SSD 容量（0x8006）
+    // 点了整卡备份后在本页等目录首帧，拿到才跳，让确认页首帧就是真目录名
+    u8 goto_sta;    // 数据到齐后要切的界面，0=没在等
     compo_textbox_t *txt_cap;
     compo_picturebox_t *pic_set;
     compo_picturebox_t *pic_bat;
@@ -430,6 +432,12 @@ static void func_home_page_process(void)
     }
     home_update_battery();
     home_update_581(h);
+
+    /* 等目录首帧：拿到才跳，跳过去首帧就是真目录名，不出现占位符 */
+    if (h->goto_sta && jms581_model_dir_ready()) {
+        func_cb.sta = h->goto_sta;
+        h->goto_sta = 0;
+    }
     func_process();
 }
 
@@ -521,8 +529,14 @@ static void func_home_page_message(size_msg_t msg)
                 p += sprintf(p, " %s", s_card_name[first]);
             }
 
-            func_cb.sta = (idx == 0) ? FUNC_CONFIRM_WHOLE_CARD
-                                     : FUNC_LATEST_N_DAY_BACKUP;
+            if (idx == 0) {
+                /* 整卡：先取目录列表，等首帧回来再跳，确认页首帧就是真目录名。
+                   最新 N 日那条路暂未接目录，保持原样直接跳 */
+                jms581_model_dir_open(JMS581_ROOT_CARD_BACKUP);
+                h->goto_sta = FUNC_CONFIRM_WHOLE_CARD;
+            } else {
+                func_cb.sta = FUNC_LATEST_N_DAY_BACKUP;
+            }
             break;
         }
         /* 卡槽：仅已插卡可点，每点一下切换勾选；未插卡不可点 */
