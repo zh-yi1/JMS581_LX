@@ -60,10 +60,11 @@ typedef struct {
     jms581_format_sta_t fmt;
 
     //---- 0x8008 目录列表 (存ASCII, cursor不外泄) ----
-    //名字缓冲只有这一块: Top-N阶段装那30条, 扫描完成后改装当前SEQ页(10条)
-    char dir_buf[JMS581_DIR_TOPN_CNT][JMS581_DIR_NAME_MAX];
-    u8   dir_buf_cnt;                       //缓冲里现有条数
-    u16  dir_buf_base;                      //缓冲第0条对应的逻辑位置(pos, 0=最新)
+    //名字缓冲是40条滑动窗口: dir_buf[i] = pos (dir_buf_base+i), 连续无洞;
+    //窗口比一帧(30条)大, 上下翻页留10条余量; 翻出边界按需拉一页并入, 丢弃远端
+    char dir_buf[JMS581_DIR_WIN_CNT][JMS581_DIR_NAME_MAX];
+    u8   dir_buf_cnt;                       //窗口内现有条数
+    u16  dir_buf_base;                      //窗口第0条对应的逻辑位置(pos, 0=最新)
 
     char dir_topn_last[JMS581_DIR_NAME_MAX];//Top-N最后一条(编号最小)的名字, 扫描认边界用
     u8   dir_topn_cnt;                      //Top-N拿到几条
@@ -71,8 +72,10 @@ typedef struct {
     u8   dir_err;                           //最近一次0x8008的err_code
 
     //cursor索引: 第i项 = SEQ第i帧(绝对第 i*JMS581_DIR_SEQ_CNT 条起)的起始cursor
-    u8   dir_idx[JMS581_DIR_IDX_MAX][JMS581_CURSOR_LEN];
+    //动态分配: 初始JMS581_DIR_IDX_INIT帧, 建满每次扩JMS581_DIR_IDX_GROW帧
+    u8   (*dir_idx)[JMS581_CURSOR_LEN];
     u16  dir_idx_cnt;                       //已建立的索引帧数
+    u16  dir_idx_cap;                       //当前分配容量(帧数)
     u16  dir_total;                         //扫描完成后的总条数
     u16  dir_topn_pos;                      //Top-N边界在SEQ序列里的绝对位置
     u16  dir_scan_cnt;                      //扫描累计条数
@@ -90,6 +93,9 @@ typedef struct {
 } jms581_model_cb_t;
 
 static jms581_model_cb_t model_cb;
+
+//按需拉回的一页(SEQ一帧, 30条)先解析到这, 再并入dir_buf滑动窗口
+static char dir_page[JMS581_DIR_SEQ_CNT][JMS581_DIR_NAME_MAX];
 
 static void model_pf_goto(u8 sta);
 
@@ -387,23 +393,24 @@ static void model_format_status_cb(const jms581_format_status_t *sta)
 //把一帧entries转ASCII装进名字缓冲, 返回实际装入条数
 //reverse=1: 倒序装入。SEQ是按编号递增给的, 而逻辑位置pos是编号递减(pos=0最新),
 //倒着装之后 dir_buf[i] 恒等于 pos = dir_buf_base + i, 取名字处不用再分两种情况
-static u8 model_dir_fill_buf(const jms581_dir_entry_t *entries, u8 cnt, u8 reverse)
+static u8 model_dir_fill_buf(char (*dst)[JMS581_DIR_NAME_MAX], u8 cap,
+                             const jms581_dir_entry_t *entries, u8 cnt, u8 reverse)
 {
     u8 i;
-    u8 n = (cnt > JMS581_DIR_TOPN_CNT) ? JMS581_DIR_TOPN_CNT : cnt;
+    u8 n = (cnt > cap) ? cap : cnt;
 
     for (i = 0; i < n; i++) {
         u16 nlen = entries[i].name_len;         //指向帧缓冲, 必须在本函数内拷走
-        char *dst = model_cb.dir_buf[reverse ? (n - 1 - i) : i];
+        char *out = dst[reverse ? (n - 1 - i) : i];
 
         if (nlen > JMS581_DIR_NAME_U16_MAX) {
             nlen = JMS581_DIR_NAME_U16_MAX;     //钳到缓存容量, 顺便保证u8转换安全
         }
-        jms581_utf16le_to_ascii(entries[i].name, (u8)nlen, dst, JMS581_DIR_NAME_MAX);
-        TRACE("jms581 model:   dir[%d] \"%s\"\n", i, dst);
+        jms581_utf16le_to_ascii(entries[i].name, (u8)nlen, out, JMS581_DIR_NAME_MAX);
+        TRACE("jms581 model:   dir[%d] \"%s\"\n", i, out);
     }
     if (cnt > n) {
-        TRACE("jms581 model: dir dropped %d (buf=%d)\n", cnt - n, JMS581_DIR_TOPN_CNT);
+        TRACE("jms581 model: dir dropped %d (buf=%d)\n", cnt - n, cap);
     }
     return n;
 }
@@ -411,7 +418,8 @@ static u8 model_dir_fill_buf(const jms581_dir_entry_t *entries, u8 cnt, u8 rever
 //Top-N首帧: 装缓冲, 记边界名; 拿满30条说明可能还有更早的, 开SEQ扫描
 static void model_dir_on_topn(const jms581_dir_entry_t *entries, u8 cnt)
 {
-    model_cb.dir_buf_cnt  = model_dir_fill_buf(entries, cnt, 0);
+    model_cb.dir_buf_cnt  = model_dir_fill_buf(model_cb.dir_buf, JMS581_DIR_WIN_CNT,
+                                               entries, cnt, 0);
     model_cb.dir_buf_base = 0;                  //Top-N本就是从大到小, 第0条即pos=0
     model_cb.dir_topn_cnt = model_cb.dir_buf_cnt;
 
@@ -438,6 +446,37 @@ static void model_dir_on_topn(const jms581_dir_entry_t *entries, u8 cnt)
     TRACE("jms581 model: dir topn full, start seq scan\n");
 }
 
+//把当前扫描帧的起始cursor记进索引; 容量满了按JMS581_DIR_IDX_GROW扩容。
+//返回0=记不下(到软上限或realloc失败), 更早的目录翻不到
+static u8 model_dir_idx_push(void)
+{
+    if (model_cb.dir_idx_cnt >= JMS581_DIR_IDX_MAX) {
+        TRACE("jms581 model: dir idx full (%d frames), older dirs unreachable\n",
+              model_cb.dir_idx_cnt);
+        return 0;
+    }
+    if (model_cb.dir_idx_cnt >= model_cb.dir_idx_cap) {
+        u16 new_cap = model_cb.dir_idx_cap + JMS581_DIR_IDX_GROW;
+        u8 (*p)[JMS581_CURSOR_LEN];
+
+        if (new_cap > JMS581_DIR_IDX_MAX) {
+            new_cap = JMS581_DIR_IDX_MAX;
+        }
+        p = (u8 (*)[JMS581_CURSOR_LEN])ab_realloc(model_cb.dir_idx,
+                                                  (size_t)new_cap * JMS581_CURSOR_LEN);
+        if (!p) {
+            TRACE("jms581 model: dir idx realloc %d->%d failed, older dirs unreachable\n",
+                  model_cb.dir_idx_cap, new_cap);
+            return 0;
+        }
+        model_cb.dir_idx     = p;
+        model_cb.dir_idx_cap = new_cap;
+    }
+    memcpy(model_cb.dir_idx[model_cb.dir_idx_cnt], model_cb.dir_scan_cur, JMS581_CURSOR_LEN);
+    model_cb.dir_idx_cnt++;
+    return 1;
+}
+
 //SEQ扫描一帧: 记本帧起始cursor, 认边界, 累加总数; has_more=0时扫描结束
 static void model_dir_on_scan(const jms581_dir_list_t *info,
                               const jms581_dir_entry_t *entries, u8 cnt)
@@ -445,14 +484,7 @@ static void model_dir_on_scan(const jms581_dir_list_t *info,
     u8 i;
 
     //本帧起始cursor = 发本帧请求时用的那个, 先入索引再推进
-    if (model_cb.dir_idx_cnt < JMS581_DIR_IDX_MAX) {
-        memcpy(model_cb.dir_idx[model_cb.dir_idx_cnt], model_cb.dir_scan_cur,
-               JMS581_CURSOR_LEN);
-        model_cb.dir_idx_cnt++;
-    } else {
-        TRACE("jms581 model: dir idx full (%d frames), older dirs unreachable\n",
-              JMS581_DIR_IDX_MAX);
-    }
+    model_dir_idx_push();
 
     //认边界: Top-N最后一条在SEQ序列里的绝对位置
     for (i = 0; i < cnt && model_cb.dir_topn_pos == 0xFFFF; i++) {
@@ -483,19 +515,83 @@ static void model_dir_on_scan(const jms581_dir_list_t *info,
           model_cb.dir_total, model_cb.dir_idx_cnt, model_cb.dir_topn_pos);
 }
 
-//按cursor现拉的一页到了: 倒序装缓冲并记下它对应的逻辑位置起点
+//把刚拉回的一页(已按pos递增解析到dir_page[0..n))并入dir_buf滑动窗口。
+//窗口覆盖连续pos区间, 最多30条; 合并后丢弃远离dir_want的那端, 保证可视区始终命中。
+static void model_dir_merge_page(u8 n)
+{
+    u16 seq      = (u16)(model_cb.dir_total - 1 - model_cb.dir_want);
+    u16 seq_base = (u16)(seq / JMS581_DIR_SEQ_CNT) * JMS581_DIR_SEQ_CNT;
+    u16 pb       = (u16)(model_cb.dir_total - seq_base - n);   //新页第0条的pos
+    u16 base     = model_cb.dir_buf_base;
+    u16 cnt      = model_cb.dir_buf_cnt;
+    u16 lo, hi;
+
+    if (n == 0) {                                   //空页: 窗口不动
+        model_cb.dir_sta = DIR_DONE;
+        return;
+    }
+
+    //空窗口 / 新页与旧窗口完全不相交(快速跳页兜底): 直接以新页为窗口。
+    //注意相邻(恰好接上)不算不相交, 必须合并, 否则跨页边界处会来回覆盖闪屏
+    if (cnt == 0 || (u16)(pb + n) < base || pb > (u16)(base + cnt)) {
+        for (u8 i = 0; i < n; i++) {
+            memcpy(model_cb.dir_buf[i], dir_page[i], JMS581_DIR_NAME_MAX);
+        }
+        model_cb.dir_buf_base = pb;
+        model_cb.dir_buf_cnt  = n;
+        return;
+    }
+
+    lo = (pb < base) ? pb : base;
+    hi = ((base + cnt) > (pb + n)) ? (u16)(base + cnt) : (u16)(pb + n);
+
+    if ((u16)(hi - lo) > JMS581_DIR_WIN_CNT) {      //并起来超窗口容量: 丢远离want的那端
+        u16 dist_new = (u16)(model_cb.dir_want - lo);
+        u16 dist_old = (u16)((hi - 1) - model_cb.dir_want);
+
+        if (dist_new > dist_old) {
+            lo = (u16)(hi - JMS581_DIR_WIN_CNT);    //丢最新端
+        } else {
+            hi = (u16)(lo + JMS581_DIR_WIN_CNT);    //丢最旧端
+        }
+    }
+
+    {
+        s16 delta = (s16)(lo - base);
+
+        if (delta > 0) {                            //窗口向旧端移: 前移, 丢最新delta条
+            memmove(&model_cb.dir_buf[0], &model_cb.dir_buf[delta],
+                    (cnt - delta) * JMS581_DIR_NAME_MAX);
+        } else if (delta < 0) {                     //窗口向新端移: 后移, 丢最旧|delta|条
+            memmove(&model_cb.dir_buf[-delta], &model_cb.dir_buf[0],
+                    (cnt + delta) * JMS581_DIR_NAME_MAX);
+        }
+    }
+
+    {
+        u8 off = (u8)(pb - lo);                     //新页在窗口里的偏移, 落位
+        for (u8 i = 0; i < n; i++) {
+            memcpy(model_cb.dir_buf[off + i], dir_page[i], JMS581_DIR_NAME_MAX);
+        }
+    }
+
+    model_cb.dir_buf_base = lo;
+    model_cb.dir_buf_cnt  = (u8)(hi - lo);
+}
+
+//按cursor现拉的一页到了: 解析进dir_page并并入滑动窗口
 static void model_dir_on_fetch(const jms581_dir_entry_t *entries, u8 cnt)
 {
-    u16 seq = model_cb.dir_total - 1 - model_cb.dir_want;    //想要的pos对应的SEQ绝对位置
-    u16 seq_base = (u16)(seq / JMS581_DIR_SEQ_CNT) * JMS581_DIR_SEQ_CNT;
+    u8 n = model_dir_fill_buf(dir_page, JMS581_DIR_SEQ_CNT, entries, cnt, 1);
 
-    model_cb.dir_buf_cnt = model_dir_fill_buf(entries, cnt, 1);
-    //本帧覆盖SEQ [seq_base, seq_base+n); 倒序装入后缓冲第0条是该段编号最大的那条,
-    //其pos = dir_total-1-seq_base 的对面 —— 即该段里最小的pos
-    model_cb.dir_buf_base = (u16)(model_cb.dir_total - seq_base - model_cb.dir_buf_cnt);
-    model_cb.dir_sta      = DIR_DONE;
-    TRACE("jms581 model: dir fetched seq[%d..%d) -> pos_base=%d cnt=%d\n",
-          seq_base, seq_base + model_cb.dir_buf_cnt,
+    model_cb.dir_sta = DIR_DONE;
+    if (n == 0) {
+        TRACE("jms581 model: dir fetch empty page\n");
+        return;                                     //空页: 窗口不动, 下一圈再问
+    }
+
+    model_dir_merge_page(n);
+    TRACE("jms581 model: dir fetched -> base=%d cnt=%d\n",
           model_cb.dir_buf_base, model_cb.dir_buf_cnt);
 }
 
@@ -626,6 +722,43 @@ u16 jms581_model_dir_total(void)
     return model_cb.dir_total ? model_cb.dir_total : model_cb.dir_topn_cnt;
 }
 
+//pos所在SEQ帧是否已被cursor索引覆盖(能按cursor现拉)。索引有上限, 翻出去就拉不到
+static u8 model_dir_frame_ok(u16 pos)
+{
+    u16 seq   = (u16)(model_cb.dir_total - 1 - pos);
+    u16 frame = seq / JMS581_DIR_SEQ_CNT;
+
+    return (frame < model_cb.dir_idx_cnt);
+}
+
+//边界预取: UI滚动后调用, 访问位置接近窗口两端时提前拉相邻页, 翻页边界处零等待不闪屏
+void jms581_model_dir_prefetch(u16 pos)
+{
+    u16 total    = jms581_model_dir_total();
+    u16 edge_old = (u16)(model_cb.dir_buf_base + model_cb.dir_buf_cnt);
+    u16 want;
+
+    if (model_cb.dir_sta != DIR_DONE) {
+        return;                                 //已有请求在途, 不重发
+    }
+
+    if (edge_old < total && pos + JMS581_DIR_PREFETCH_AHEAD >= edge_old) {
+        want = edge_old;                        //向下预取: 拉窗口旧端之后那条
+    } else if (model_cb.dir_buf_base > 0
+               && pos < (u16)(model_cb.dir_buf_base + JMS581_DIR_PREFETCH_AHEAD)) {
+        want = (u16)(model_cb.dir_buf_base - 1);   //向上预取
+    } else {
+        return;
+    }
+
+    if (!model_dir_frame_ok(want)) {
+        return;                                 //索引没覆盖, 预取也拉不到
+    }
+
+    model_cb.dir_want = want;
+    model_cb.dir_sta  = DIR_FETCH;
+}
+
 const char *jms581_model_dir_at(u16 pos)
 {
     if (pos >= jms581_model_dir_total()) {
@@ -636,8 +769,9 @@ const char *jms581_model_dir_at(u16 pos)
         && pos < (u16)(model_cb.dir_buf_base + model_cb.dir_buf_cnt)) {
         return model_cb.dir_buf[pos - model_cb.dir_buf_base];
     }
-    //没命中: 记下想要的位置, 交给process()按cursor索引现拉。界面下一圈再问
-    if (model_cb.dir_sta == DIR_DONE) {
+    //没命中: 记下想要的位置, 交给process()按cursor索引现拉。界面下一圈再问。
+    //索引没覆盖的位置不触发拉取, 直接返回NULL, 避免beyond idx空转刷屏死循环
+    if (model_cb.dir_sta == DIR_DONE && model_dir_frame_ok(pos)) {
         model_cb.dir_want = pos;
         model_cb.dir_sta  = DIR_FETCH;
     }
@@ -660,6 +794,16 @@ u8 jms581_model_dir_open(u8 root_type)
     model_cb.dir_topn_pos = 0xFFFF;
     model_cb.dir_total    = 0;
     model_cb.dir_idx_cnt  = 0;
+    model_cb.dir_idx_cap  = 0;
+    if (model_cb.dir_idx) {                     //重复open先释放上一会话的索引
+        ab_free(model_cb.dir_idx);
+        model_cb.dir_idx = NULL;
+    }
+    model_cb.dir_idx = (u8 (*)[JMS581_CURSOR_LEN])ab_malloc(
+        (size_t)JMS581_DIR_IDX_INIT * JMS581_CURSOR_LEN);
+    if (model_cb.dir_idx) {
+        model_cb.dir_idx_cap = JMS581_DIR_IDX_INIT;
+    }
     model_cb.dir_scan_cnt = 0;
     model_cb.dir_err      = 0;
     model_cb.dir_root     = root_type;
@@ -701,7 +845,7 @@ static void model_dir_process(void)
         u16 seq   = model_cb.dir_total - 1 - model_cb.dir_want;
         u16 frame = seq / JMS581_DIR_SEQ_CNT;
 
-        if (frame >= model_cb.dir_idx_cnt) {    //索引没建到那么远, 拉不到
+        if (frame >= model_cb.dir_idx_cnt) {    //索引没建到那么远, 拉不到(防御, 正常已被dir_at/prefetch拦住)
             TRACE("jms581 model: dir frame %d beyond idx %d\n",
                   frame, model_cb.dir_idx_cnt);
             model_cb.dir_sta = DIR_DONE;
@@ -848,6 +992,11 @@ static void model_cache_drop(void)
     model_cb.dir_topn_cnt = 0;
     model_cb.dir_total    = 0;
     model_cb.dir_idx_cnt  = 0;
+    model_cb.dir_idx_cap  = 0;
+    if (model_cb.dir_idx) {                     //581断电: 释放cursor索引
+        ab_free(model_cb.dir_idx);
+        model_cb.dir_idx = NULL;
+    }
     model_cb.dir_err      = 0;
 
     //版本号一律递增: 界面比对时才知道"数据没了", 否则会拿着上一轮的旧值不刷

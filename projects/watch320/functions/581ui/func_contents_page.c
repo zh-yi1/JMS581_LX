@@ -207,6 +207,9 @@ static void contents_scroll(s8 dir)
     }
     f->press_idx = 0xFFFF;
     contents_update_display();
+    if (f->real_data) {
+        jms581_model_dir_prefetch(f->selection);   //靠近窗口边界时提前拉相邻页, 翻页不闪
+    }
 }
 
 compo_form_t *func_contents_page_form_create(void)
