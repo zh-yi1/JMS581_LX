@@ -46,7 +46,7 @@ typedef struct {
     u8 card_idx;        // 当前第几张，从 1 开始
     u8 card_total;
     char card_name[8];
-    char path_dir[32];
+    char path_dir[48];
     char path_vol[24];
     compo_picturebox_t *pic_bat;
     compo_picturebox_t *pic_divider;
@@ -56,6 +56,17 @@ typedef struct {
     compo_textbox_t *txt_card;
     compo_textbox_t *txt_sta;
 } f_loading1_t;
+
+/* 协议设备 ID → 卡名，用于显示当前备份到哪张卡 */
+static const char *loading1_card_name(u8 dev_id)
+{
+    switch (dev_id) {
+    case JMS581_DEV_SD:  return "SD";
+    case JMS581_DEV_CFA: return "CFA";
+    case JMS581_DEV_CFB: return "CFB";
+    default:             return "";
+    }
+}
 
 static u8 loading1_bat_level_from_percent(u8 percent)
 {
@@ -234,7 +245,19 @@ compo_form_t *func_loading_1_page_form_create(void)
 
 static void func_loading_1_page_process(void)
 {
+    jms581_backup_sta_t bk;
+
     loading1_update_battery();
+
+    jms581_model_backup_sta(&bk);
+    if (bk.sta == JMS581_BK_FAILED || bk.sta == JMS581_BK_CANCELLED) {
+        func_cb.sta = FUNC_HOME_PAGE;               /* 备份失败/取消，回首页 */
+        return;
+    }
+    if (bk.phase >= 2) {
+        func_cb.sta = FUNC_LOADING_2_PAGE;          /* 挂载完成，进入检测 */
+        return;
+    }
     func_process();
 }
 
@@ -259,25 +282,13 @@ void func_loading_1_page_enter(void)
     func_cb.f_cb = func_zalloc(sizeof(f_loading1_t));
     f = (f_loading1_t *)func_cb.f_cb;
 
-    f->card_idx = 1;
-    f->card_total = 2;
-    strcpy(f->card_name, "SD");
-    strcpy(f->path_dir, "CARD_BACKUP/CARD_014");
-    strcpy(f->path_vol, "SD_128G_A1B2");
+    f->card_idx = backup_param.bk_card_idx + 1;
+    f->card_total = backup_param.bk_card_cnt;
+    strcpy(f->card_name, loading1_card_name(
+               backup_param.bk_card_dev[backup_param.bk_card_idx]));
+    strcpy(f->path_dir, "CARD_BACKUP/");
+    strcpy(f->path_vol, "");                        /* L3 卡身份目录 phase=3 才返回 */
 
-    if (backup_param.card_sel[0]) {
-        /* card_sel 形如 " SD" / " SD CFA"，取第一个卡名 */
-        const char *p = backup_param.card_sel;
-        u8 i = 0;
-
-        while (*p == ' ') {
-            p++;
-        }
-        while (*p && *p != ' ' && i < sizeof(f->card_name) - 1) {
-            f->card_name[i++] = *p++;
-        }
-        f->card_name[i] = '\0';
-    }
     if (backup_param.dir_sel[0]) {
         sprintf(f->path_dir, "CARD_BACKUP/%s", backup_param.dir_sel);
     }

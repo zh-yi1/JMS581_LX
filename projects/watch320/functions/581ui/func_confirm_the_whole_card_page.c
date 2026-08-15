@@ -41,6 +41,14 @@ static const u32 s_tip_str[CONFIRM_TIP_CNT] = {
     STR_NO_MODIFY_SRC,
 };
 
+/* 与首页 s_card_name 顺序一致(SD/CFA/CFB)，映射到 0x8001 设备 ID 和 0x8000 在位 bit */
+static const u8 s_card_devid[BACKUP_CARD_CNT] = {
+    JMS581_DEV_SD, JMS581_DEV_CFA, JMS581_DEV_CFB
+};
+static const u8 s_card_devbit[BACKUP_CARD_CNT] = {
+    JMS581_DEVBIT_SD, JMS581_DEVBIT_CFA, JMS581_DEVBIT_CFB
+};
+
 typedef struct {
     u8 bat_level;
     u8 btn_press;
@@ -232,6 +240,45 @@ static void func_confirm_the_whole_card_page_process(void)
     func_process();
 }
 
+/* 整卡备份：解析首页勾选且在位的卡，逐个发 0x8001 备份到同一目标目录。
+   返回 1=已发起第一张卡，0=无可用卡/目录/发送失败（留在本页） */
+static u8 confirm_start_backup(void)
+{
+    jms581_dev_status_t sta;
+    const char *dir;
+    u8 cnt = 0;
+    u8 i;
+
+    if (!jms581_model_dev_status(&sta)) {
+        return 0;                               /* 拿不到 dev_list，581 异常 */
+    }
+    for (i = 0; i < BACKUP_CARD_CNT; i++) {
+        if (backup_param.card_checked[i] && (sta.dev_list & s_card_devbit[i])) {
+            backup_param.bk_card_dev[cnt++] = s_card_devid[i];
+        }
+    }
+    if (cnt == 0) {
+        return 0;                               /* 一张在位且勾选的卡都没有 */
+    }
+    backup_param.bk_card_cnt  = cnt;
+    backup_param.bk_card_idx  = 0;
+    backup_param.bk_file_total = 0;
+    backup_param.bk_size_bytes = 0;
+
+    /* 目标目录：用户选的目录，没选就用最新那个（协议§6.2 长帧 L2 名必填，find-or-create） */
+    dir = backup_param.dir_sel[0] ? backup_param.dir_sel : jms581_model_dir_at(0);
+    if (!dir || !dir[0]) {
+        return 0;
+    }
+    if (!backup_param.dir_sel[0]) {
+        /* 首次备份：记下本次目标目录，作为下次的 last_backup（§13.1 MCU 自己记） */
+        strcpy(backup_param.dir_sel, dir);
+    }
+
+    return jms581_model_backup_start(backup_param.bk_card_dev[0], JMS581_DEV_PCIE,
+                                     JMS581_MODE_FULL, dir, 0);
+}
+
 static void func_confirm_the_whole_card_page_message(size_msg_t msg)
 {
     f_confirm_t *f = (f_confirm_t *)func_cb.f_cb;
@@ -271,7 +318,9 @@ static void func_confirm_the_whole_card_page_message(size_msg_t msg)
         } else if (pt.y > (CONFIRM_BTN_Y - 30)) {
             f->btn_press = 0;
             confirm_update_display();
-            func_cb.sta = FUNC_LOADING_1_PAGE;
+            if (confirm_start_backup()) {
+                func_cb.sta = FUNC_LOADING_1_PAGE;
+            }
         }
         break;
 

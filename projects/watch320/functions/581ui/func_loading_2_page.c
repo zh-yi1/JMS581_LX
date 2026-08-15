@@ -43,10 +43,11 @@ static const u32 s_bat_level_res[] = {
 typedef struct {
     u8 bat_level;
     u8 days;
+    u8 is_whole;        // 1=整卡流程 0=最新N日流程(决定标题/路径/跳转)
     u8 card_idx;        // 当前第几张，从 1 开始
     u8 card_total;
     char card_name[8];
-    char path_dir[32];
+    char path_dir[48];
     char path_vol[24];
     compo_picturebox_t *pic_bat;
     compo_picturebox_t *pic_divider;
@@ -56,6 +57,17 @@ typedef struct {
     compo_textbox_t *txt_progress;
     compo_textbox_t *txt_card;
 } f_loading2_t;
+
+/* 协议设备 ID → 卡名 */
+static const char *loading2_card_name(u8 dev_id)
+{
+    switch (dev_id) {
+    case JMS581_DEV_SD:  return "SD";
+    case JMS581_DEV_CFA: return "CFA";
+    case JMS581_DEV_CFB: return "CFB";
+    default:             return "";
+    }
+}
 
 static u8 loading2_bat_level_from_percent(u8 percent)
 {
@@ -102,8 +114,12 @@ static void loading2_update_text(void)
     }
 
     if (f->txt_title) {
-        sprintf(buf, "%s %u %s", i18n[STR_LATEST], f->days, i18n[STR_DAYS_BACKUP]);
-        compo_textbox_set(f->txt_title, buf);
+        if (f->is_whole) {
+            compo_textbox_set(f->txt_title, i18n[STR_FULL_CARD_BACKUP]);
+        } else {
+            sprintf(buf, "%s %u %s", i18n[STR_LATEST], f->days, i18n[STR_DAYS_BACKUP]);
+            compo_textbox_set(f->txt_title, buf);
+        }
     }
 
     if (f->txt_progress) {
@@ -234,7 +250,21 @@ compo_form_t *func_loading_2_page_form_create(void)
 
 static void func_loading_2_page_process(void)
 {
+    jms581_backup_sta_t bk;
+
     loading2_update_battery();
+
+    jms581_model_backup_sta(&bk);
+    if (bk.sta == JMS581_BK_FAILED || bk.sta == JMS581_BK_CANCELLED) {
+        func_cb.sta = FUNC_HOME_PAGE;               /* 备份失败/取消，回首页 */
+        return;
+    }
+    if (bk.phase >= 3) {
+        /* 扫描完成，进入拷贝：整卡 → backing_up_1，最新N日 → backing_up_2 */
+        f_loading2_t *f = (f_loading2_t *)func_cb.f_cb;
+        func_cb.sta = f->is_whole ? FUNC_BACKING_UP_1_PAGE : FUNC_BACKING_UP_2_PAGE;
+        return;
+    }
     func_process();
 }
 
@@ -243,7 +273,7 @@ static void func_loading_2_page_message(size_msg_t msg)
     switch (msg)
     {
     case KU_BACK:
-        func_cb.sta = FUNC_LATEST_N_DAY_BACKUP;
+        // 备份中禁止返回，等阶段推进或终态
         break;
 
     default:
@@ -260,26 +290,16 @@ void func_loading_2_page_enter(void)
     f = (f_loading2_t *)func_cb.f_cb;
 
     f->days = backup_param.latest_days ? backup_param.latest_days : 1;
-    f->card_idx = 1;
-    f->card_total = 2;
-    strcpy(f->card_name, "SD");
-    strcpy(f->path_dir, "RECENT_BACKUP/RECENT_003");
-    strcpy(f->path_vol, "SD_128G_A1B2");
+    f->is_whole = (func_cb.last == FUNC_CONFIRM_WHOLE_CARD);
+    f->card_idx = backup_param.bk_card_idx + 1;
+    f->card_total = backup_param.bk_card_cnt;
+    strcpy(f->card_name, loading2_card_name(
+               backup_param.bk_card_dev[backup_param.bk_card_idx]));
+    strcpy(f->path_vol, "");                        /* L3 卡身份目录 phase=3 才返回 */
 
-    if (backup_param.card_sel[0]) {
-        const char *p = backup_param.card_sel;
-        u8 i = 0;
-
-        while (*p == ' ') {
-            p++;
-        }
-        while (*p && *p != ' ' && i < sizeof(f->card_name) - 1) {
-            f->card_name[i++] = *p++;
-        }
-        f->card_name[i] = '\0';
-    }
+    strcpy(f->path_dir, f->is_whole ? "CARD_BACKUP/" : "RECENT_BACKUP/");
     if (backup_param.dir_sel[0]) {
-        sprintf(f->path_dir, "RECENT_BACKUP/%s", backup_param.dir_sel);
+        sprintf(f->path_dir, "%s%s", f->path_dir, backup_param.dir_sel);
     }
 
     func_cb.frm_main = func_loading_2_page_form_create();

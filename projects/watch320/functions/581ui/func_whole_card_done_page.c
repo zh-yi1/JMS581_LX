@@ -36,7 +36,7 @@ typedef struct {
     u8 card_total;
     u32 file_cnt;
     char size_str[16];      // 如 "32 GB"
-    char dir_name[16];      // 如 "CARD_014"
+    char dir_name[JMS581_DIR_NAME_MAX];     // 如 "CARD_014"
     compo_picturebox_t *pic_bat;
     compo_picturebox_t *pic_divider;
     compo_picturebox_t *pic_ok;
@@ -45,6 +45,23 @@ typedef struct {
     compo_textbox_t *txt_file;
     compo_textbox_t *txt_path;
 } f_done_t;
+
+/* 字节 → "1.42 TB"/"512.00 GB"/"800 MB" 字符串 */
+static void done_fmt_bytes(u64 bytes, char *buf)
+{
+    if (bytes >= ((u64)1 << 40)) {
+        sprintf(buf, "%u.%02u TB", (unsigned int)(bytes >> 40),
+                (unsigned int)(((bytes & (((u64)1 << 40) - 1)) * 100) >> 40));
+    } else if (bytes >= ((u64)1 << 30)) {
+        sprintf(buf, "%u.%02u GB", (unsigned int)(bytes >> 30),
+                (unsigned int)(((bytes & (((u64)1 << 30) - 1)) * 100) >> 30));
+    } else if (bytes >= ((u64)1 << 20)) {
+        sprintf(buf, "%u.%02u MB", (unsigned int)(bytes >> 20),
+                (unsigned int)(((bytes & (((u64)1 << 20) - 1)) * 100) >> 20));
+    } else {
+        sprintf(buf, "%u KB", (unsigned int)(bytes >> 10));
+    }
+}
 
 static u8 done_bat_level_from_percent(u8 percent)
 {
@@ -261,14 +278,10 @@ void func_whole_card_done_page_enter(void)
     func_cb.f_cb = func_zalloc(sizeof(f_done_t));
     f = (f_done_t *)func_cb.f_cb;
 
-    f->card_total = 2;
-    f->file_cnt = 1284;
-    strcpy(f->size_str, "32 GB");
-    strcpy(f->dir_name, "CARD_014");
-
-    if (backup_param.dir_sel[0]) {
-        strcpy(f->dir_name, backup_param.dir_sel);
-    }
+    f->card_total = backup_param.bk_card_cnt;
+    f->file_cnt = backup_param.bk_file_total;
+    done_fmt_bytes(backup_param.bk_size_bytes, f->size_str);
+    strcpy(f->dir_name, backup_param.dir_sel);
 
     func_cb.frm_main = func_whole_card_done_page_form_create();
 }

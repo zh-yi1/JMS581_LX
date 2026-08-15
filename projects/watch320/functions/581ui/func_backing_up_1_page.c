@@ -147,10 +147,11 @@ typedef struct {
     u8 percent;             // 0~100
     u8 card_idx;            // 当前第几张，从 1 开始
     u8 card_total;
+    u32 ver_bk;             // jms581_model 备份更新计数，变了才重画
     char card_name[8];
     char size_done[16];     // 如 "15.0 GB"
     char size_total[16];    // 如 "32 GB"
-    char path_dir[32];
+    char path_dir[48];
     char path_vol[24];
     compo_picturebox_t *pic_bat;
     compo_picturebox_t *pic_divider;
@@ -161,7 +162,43 @@ typedef struct {
     compo_textbox_t *txt_percent;
     compo_textbox_t *txt_size_done;
     compo_textbox_t *txt_size_total;
+    compo_textbox_t *txt_path_vol;
 } f_backup1_t;
+
+/* 协议设备 ID → 卡名 */
+static const char *backup1_card_name(u8 dev_id)
+{
+    switch (dev_id) {
+    case JMS581_DEV_SD:  return "SD";
+    case JMS581_DEV_CFA: return "CFA";
+    case JMS581_DEV_CFB: return "CFB";
+    default:             return "";
+    }
+}
+
+/* 协议单位(0=B 1=KB 2=MB 3=GB) + 数值 → "1.42 TB"/"512.00 GB"/"800 MB" 字符串 */
+static void backup1_fmt_size(u8 unit, u32 size, char *buf)
+{
+    u64 bytes;
+
+    if (unit > 3) {
+        unit = 3;                                   /* 协议单位固定0~3，越界按GB */
+    }
+    bytes = (u64)size << (unit * 10);
+
+    if (bytes >= ((u64)1 << 40)) {
+        sprintf(buf, "%u.%02u TB", (unsigned int)(bytes >> 40),
+                (unsigned int)(((bytes & (((u64)1 << 40) - 1)) * 100) >> 40));
+    } else if (bytes >= ((u64)1 << 30)) {
+        sprintf(buf, "%u.%02u GB", (unsigned int)(bytes >> 30),
+                (unsigned int)(((bytes & (((u64)1 << 30) - 1)) * 100) >> 30));
+    } else if (bytes >= ((u64)1 << 20)) {
+        sprintf(buf, "%u.%02u MB", (unsigned int)(bytes >> 20),
+                (unsigned int)(((bytes & (((u64)1 << 20) - 1)) * 100) >> 20));
+    } else {
+        sprintf(buf, "%u KB", (unsigned int)(bytes >> 10));
+    }
+}
 
 static u8 backup1_bat_level_from_percent(u8 percent)
 {
@@ -347,13 +384,13 @@ compo_form_t *func_backing_up_1_page_form_create(void)
         char buf[40];
 
         sprintf(buf, "└─ %s", f->path_vol);
-        txt = compo_textbox_create(frm, 32);
-        compo_textbox_set_location(txt, 20, BACKUP1_PATH_LINE1_Y, 0, 0);
-        compo_textbox_set_autosize(txt, true);
-        compo_textbox_set_align_center(txt, false);
-        compo_textbox_set_font(txt, UI_BUF_FONT_BIN_FONT_SIZE_11_BIN);
-        compo_textbox_set_forecolor(txt, BACKUP1_COLOR_VOL);
-        compo_textbox_set(txt, buf);
+        f->txt_path_vol = compo_textbox_create(frm, 32);
+        compo_textbox_set_location(f->txt_path_vol, 20, BACKUP1_PATH_LINE1_Y, 0, 0);
+        compo_textbox_set_autosize(f->txt_path_vol, true);
+        compo_textbox_set_align_center(f->txt_path_vol, false);
+        compo_textbox_set_font(f->txt_path_vol, UI_BUF_FONT_BIN_FONT_SIZE_11_BIN);
+        compo_textbox_set_forecolor(f->txt_path_vol, BACKUP1_COLOR_VOL);
+        compo_textbox_set(f->txt_path_vol, buf);
     }
 
     /* 底部提示 */
@@ -371,7 +408,58 @@ compo_form_t *func_backing_up_1_page_form_create(void)
 
 static void func_backing_up_1_page_process(void)
 {
+    f_backup1_t *f = (f_backup1_t *)func_cb.f_cb;
+    jms581_backup_sta_t bk;
+    u32 ver;
+
     backup1_update_battery();
+
+    jms581_model_backup_sta(&bk);
+
+    if (bk.sta == JMS581_BK_FAILED || bk.sta == JMS581_BK_CANCELLED) {
+        func_cb.sta = FUNC_HOME_PAGE;               /* 备份失败/取消，回首页 */
+        return;
+    }
+
+    if (bk.sta == JMS581_BK_DONE) {
+        /* 累计统计，再看还有没有下一张卡 */
+        u8 u = (bk.total_unit > 3) ? 3 : bk.total_unit;
+
+        backup_param.bk_file_total += bk.file_done_cnt;
+        backup_param.bk_size_bytes += (u64)bk.total_size << (u * 10);
+
+        if (backup_param.bk_card_idx + 1 < backup_param.bk_card_cnt) {
+            const char *dir = backup_param.dir_sel[0]
+                              ? backup_param.dir_sel : jms581_model_dir_at(0);
+
+            backup_param.bk_card_idx++;
+            jms581_model_backup_start(backup_param.bk_card_dev[backup_param.bk_card_idx],
+                                      JMS581_DEV_PCIE, JMS581_MODE_FULL, dir, 0);
+            func_cb.sta = FUNC_LOADING_1_PAGE;      /* 下一张卡，回到挂载 */
+        } else {
+            func_cb.sta = FUNC_WHOLE_CARD_DONE_PAGE; /* 全部完成 */
+        }
+        return;
+    }
+
+    /* 拷贝中：进度/大小/L3 名变化时同步界面 */
+    ver = jms581_model_ver(JMS581_VER_BACKUP);
+    if (ver != f->ver_bk) {
+        f->ver_bk = ver;
+        f->percent = bk.progress;
+        backup1_fmt_size(bk.total_unit, bk.total_size, f->size_total);
+        backup1_fmt_size(bk.total_unit,
+                         (u32)((u64)bk.total_size * bk.progress / 100), f->size_done);
+        if (bk.l3_name[0] && strcmp(bk.l3_name, f->path_vol) != 0) {
+            strcpy(f->path_vol, bk.l3_name);
+            if (f->txt_path_vol) {
+                char buf[40];
+                sprintf(buf, "└─ %s", f->path_vol);
+                compo_textbox_set(f->txt_path_vol, buf);
+            }
+        }
+        backup1_update_display();
+    }
     func_process();
 }
 
@@ -380,7 +468,7 @@ static void func_backing_up_1_page_message(size_msg_t msg)
     switch (msg)
     {
     case KU_BACK:
-        func_cb.sta = FUNC_LOADING_1_PAGE;
+        // 备份中禁止返回，等终态
         break;
 
     default:
@@ -396,27 +484,17 @@ void func_backing_up_1_page_enter(void)
     func_cb.f_cb = func_zalloc(sizeof(f_backup1_t));
     f = (f_backup1_t *)func_cb.f_cb;
 
-    f->percent = 47;
-    f->card_idx = 1;
-    f->card_total = 2;
-    strcpy(f->card_name, "SD");
-    strcpy(f->size_done, "15.0 GB");
-    strcpy(f->size_total, "32 GB");
-    strcpy(f->path_dir, "CARD_BACKUP/CARD_014");
-    strcpy(f->path_vol, "SD_128G_A1B2");
+    f->percent = 0;
+    f->card_idx = backup_param.bk_card_idx + 1;
+    f->card_total = backup_param.bk_card_cnt;
+    f->ver_bk = 0;                                  /* 进页首圈就按真值画一遍 */
+    strcpy(f->card_name, backup1_card_name(
+               backup_param.bk_card_dev[backup_param.bk_card_idx]));
+    strcpy(f->size_done, "0 MB");
+    strcpy(f->size_total, "");
+    strcpy(f->path_vol, "");                        /* L3 名 phase=3 才给 */
 
-    if (backup_param.card_sel[0]) {
-        const char *p = backup_param.card_sel;
-        u8 i = 0;
-
-        while (*p == ' ') {
-            p++;
-        }
-        while (*p && *p != ' ' && i < sizeof(f->card_name) - 1) {
-            f->card_name[i++] = *p++;
-        }
-        f->card_name[i] = '\0';
-    }
+    strcpy(f->path_dir, "CARD_BACKUP/");
     if (backup_param.dir_sel[0]) {
         sprintf(f->path_dir, "CARD_BACKUP/%s", backup_param.dir_sel);
     }

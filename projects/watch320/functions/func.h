@@ -225,6 +225,12 @@ typedef struct {
     //上次备份的目标目录名，如 "CARD_011"。协议§13.1 规定 581 不记忆 last_backup，
     //由 MCU 自己记；这里是 RAM 全局，跨页面保留、掉电清零
     char dir_sel[JMS581_DIR_NAME_MAX];
+    //整卡备份多卡编排：按首页勾选顺序逐个备份，目标目录相同。confirm 页点开始时填好
+    u8  bk_card_dev[BACKUP_CARD_CNT];               //勾选卡的协议设备ID(0x8001 src_dev)
+    u8  bk_card_cnt;                                //勾选卡数量
+    u8  bk_card_idx;                                //当前备份到第几张(0-based)
+    u32 bk_file_total;                              //累计已备份文件数
+    u64 bk_size_bytes;                              //累计已备份字节数
 } backup_param_t;
 
 extern backup_param_t backup_param;
